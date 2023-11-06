@@ -15,38 +15,39 @@ const PropertyDealerSchema = new mongoose.Schema({
         required: [true, 'Please provide property dealers name'],
         trim: true
     },
-    image: {
+    cloudinaryImageURL: {
         type: String,
-        // default:'/uploads/zlatan.jpg'
+        required: [true, 'Please provide an image of the dealer'],
     },
     about: {
         type: String,
-        required: [true, 'Please provide an about'],
         trim: true
     },
     experience: {
         type: Number,
         required: [true, 'Please add experience']
     },
-    languages: {
-        type: Array,
-        default: []
-    },
     propertyType: {
         type: Array,
         default: []
     },
-    areaOfOperation: {
-        type: String,
-        required: [true, 'Please add area of operation']
-    },
-    officeAddress: {
-        type: String,
-        required: [true, 'Please add office address']
+    addressArray: {
+        type: Array,
+        default:[]
     },
     gstNumber: {
         type: String,
         required: [true, 'Please add gst number']
+    },
+    email: {
+        type: String,
+        required: [true, 'Please provide an email'],
+        trim: true
+    },
+    contactNumber: {
+        type: String,
+        required: [true, 'Please provide a contact number'],
+        trim: true
     },
     addedByFieldAgent: {
         type: mongoose.Types.ObjectId,

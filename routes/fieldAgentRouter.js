@@ -3,7 +3,8 @@ const router = express.Router()
 const { signIn, logout, signup } = require('../controllers/field-agent/fieldAgentSignin')
 const { forgotPassword, updatePassword, confirmPasswordVerificationToken, resetPasswordVerificationToken } = require('../controllers/field-agent/forgotPassword')
 const authenticateFieldAgent = require('../middleware/authenticateFieldAgent')
-const { addPropertyDealer } = require('../controllers/field-agent/addPropertyDealer')
+const { addPropertyDealer, propertyDealerEmailExists, propertyDealerContactNumberExists, propertyDealerGstNumberExists } = require('../controllers/field-agent/addPropertyDealer')
+const { uploadImage } = require('../controllers/uploadImage')
 
 router.post('/signIn', signIn)
 router.patch('/logout', authenticateFieldAgent, logout)
@@ -12,7 +13,10 @@ router.patch('/forgotPassword', forgotPassword)
 router.patch('/updatePassword', updatePassword)
 router.post('/confirmPasswordVerificationToken', confirmPasswordVerificationToken)
 router.patch('/resetPasswordVerificationToken', resetPasswordVerificationToken)
-router.post('/addPropertyDealer')
-
+router.post('/addPropertyDealer', authenticateFieldAgent, addPropertyDealer)
+router.post('/uploadPropertyDealerImage', uploadImage)
+router.get('/propertyDealerEmailExists', propertyDealerEmailExists)
+router.get('/propertyDealerContactNumberExists', propertyDealerContactNumberExists)
+router.get('/propertyDealerGstNumberExists', propertyDealerGstNumberExists)
 
 module.exports = router

@@ -12,10 +12,12 @@ const forgotPassword = async (req, res, next) => {
         if (!email) {
             throw new CustomAPIError('No email', 204)
         }
+
         const fieldAgent = await FieldAgent.findOne({ email })
         if (!fieldAgent) {
             return res.status(StatusCodes.OK).json({ status: 'not_found', msg: 'No field agent exists' })
         }
+
         const passwordVerificationToken = crypto.randomBytes(3).toString('hex')
         const msg = `<p>Authentication token for password updation is:<h2>${passwordVerificationToken}</h2></p>`
         const emailData = {
@@ -27,10 +29,12 @@ const forgotPassword = async (req, res, next) => {
         await sendEmail(emailData)
 
         const tenMinutes = 1000 * 60 * 10
+
         const passwordVerificationTokenExpirationDate = new Date(Date.now() + tenMinutes)
         await FieldAgent.findOneAndUpdate({ email },
             { passwordVerificationToken, passwordVerificationTokenExpirationDate },
             { new: true, runValidators: true })
+
         return res.status(StatusCodes.OK).json({ status: 'ok', msg: 'A verification token has been sent to your email' })
     } catch (error) {
         next(error)
@@ -41,6 +45,7 @@ const confirmPasswordVerificationToken = async (req, res) => {
     try {
         const { email, passwordVerificationToken } = req.body
         const fieldAgent = await FieldAgent.findOne({ email })
+        
         if (!fieldAgent) {
             throw new CustomAPIError('Field agent with this email does not exist', 204)
         }

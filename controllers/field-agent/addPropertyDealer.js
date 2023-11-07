@@ -10,17 +10,23 @@ const origin = process.env.ORIGIN
 const addPropertyDealer = async (req, res, next) => {
     try {
         req.body.addedByFieldAgent = req.fieldAgent.fieldAgentId
+
         const propertyDealerGstNumberExists = await PropertyDealer.findOne({ gstNumber:req.body.gstNumber })
         const propertyDealerEmailExists = await PropertyDealer.findOne({ email: req.body.email })
         const propertyDealerContactNumberExists = await PropertyDealer.findOne({ contactNumber: req.body.contactNumber })
+
         if (propertyDealerEmailExists || propertyDealerContactNumberExists || propertyDealerGstNumberExists) {
             throw new CustomAPIError('Another property dealer with the same email or contact number already exists', 204)
         }
 
         const newPropertyDealer = await PropertyDealer.create(req.body)
+
         const fieldAgent = await FieldAgent.findOne({ _id: req.fieldAgent.fieldAgentId })
+
         const propertyDealersAddedByFieldAgent = fieldAgent && fieldAgent.propertyDealersAdded
+
         const updatePropertyDealersAddedByFieldAgent = newPropertyDealer && [...propertyDealersAddedByFieldAgent, newPropertyDealer._id]
+        
         await FieldAgent.findOneAndUpdate({ _id: req.fieldAgent.fieldAgentId },
             { propertyDealersAdded: updatePropertyDealersAddedByFieldAgent },
             { new: true, runValidators: true })

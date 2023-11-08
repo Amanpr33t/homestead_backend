@@ -26,10 +26,7 @@ const authenticateFieldAgent = async (req, res, next) => {
                 { new: true, runValidators: true })
             return res.status(StatusCodes.OK).json({ status: 'invalid_authentication' })
         }
-        req.fieldAgent = {
-            fieldAgentId: payload.fieldAgentId,
-            email: payload.email
-        }
+        req.fieldAgent = fieldAgent
         next()
     } catch (error) {
         next(error)

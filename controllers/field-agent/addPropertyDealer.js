@@ -6,27 +6,41 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const CustomAPIError = require('../../errors/custom-error')
 const origin = process.env.ORIGIN
+const emailValidator = require("email-validator");
 
 const addPropertyDealer = async (req, res, next) => {
     try {
-        req.body.addedByFieldAgent = req.fieldAgent.fieldAgentId
+        req.body.addedByFieldAgent = req.fieldAgent._id
+        const {
+            firmName,
+            propertyDealerName,
+            propertyType,
+            addressArray,
+            gstNumber,
+            about,
+            cloudinaryImageURL,
+            email,
+            contactNumber
+        } = req.body
 
-        const propertyDealerGstNumberExists = await PropertyDealer.findOne({ gstNumber:req.body.gstNumber })
+        if (!firmName.trim() || !propertyDealerName.trim() || propertyType.length === 0 || !addressArray.length || !gstNumber.trim() || !contactNumber.trim() || !email.trim() || !emailValidator.validate(email.trim()) || about.trim().split(/\s+/) > 150 || !cloudinaryImageURL) {
+            throw new CustomAPIError('Insufficient data', 204)
+        }
+
+        const propertyDealerGstNumberExists = await PropertyDealer.findOne({ gstNumber: req.body.gstNumber })
         const propertyDealerEmailExists = await PropertyDealer.findOne({ email: req.body.email })
         const propertyDealerContactNumberExists = await PropertyDealer.findOne({ contactNumber: req.body.contactNumber })
 
         if (propertyDealerEmailExists || propertyDealerContactNumberExists || propertyDealerGstNumberExists) {
-            throw new CustomAPIError('Another property dealer with the same email or contact number already exists', 204)
+            throw new CustomAPIError('Another property dealer with the same email, gst number or contact number already exists', 204)
         }
 
         const newPropertyDealer = await PropertyDealer.create(req.body)
-
-        const fieldAgent = await FieldAgent.findOne({ _id: req.fieldAgent.fieldAgentId })
-
-        const propertyDealersAddedByFieldAgent = fieldAgent && fieldAgent.propertyDealersAdded
+        
+        const propertyDealersAddedByFieldAgent =req.fieldAgent.propertyDealersAdded
 
         const updatePropertyDealersAddedByFieldAgent = newPropertyDealer && [...propertyDealersAddedByFieldAgent, newPropertyDealer._id]
-        
+
         await FieldAgent.findOneAndUpdate({ _id: req.fieldAgent.fieldAgentId },
             { propertyDealersAdded: updatePropertyDealersAddedByFieldAgent },
             { new: true, runValidators: true })

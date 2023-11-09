@@ -33,7 +33,7 @@ const PropertyDealerSchema = new mongoose.Schema({
     },
     addressArray: {
         type: Array,
-        default:[]
+        default: []
     },
     gstNumber: {
         type: String,
@@ -54,6 +54,14 @@ const PropertyDealerSchema = new mongoose.Schema({
         ref: 'FieldAgent',
         required: [true, 'Please provide a field agent id']
     },
+    otpForVerification: {
+        type: String,
+        default: null
+    },
+    otpForVerificationExpirationDate: {
+        type: Date,
+        default: null
+    }
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 
 

@@ -29,6 +29,7 @@ const authenticateFieldAgent = async (req, res, next) => {
         req.fieldAgent = fieldAgent
         next()
     } catch (error) {
+        console.log(error)
         next(error)
     }
 }

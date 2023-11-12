@@ -18,12 +18,12 @@ const addPropertyDealer = async (req, res, next) => {
             addressArray,
             gstNumber,
             about,
-            cloudinaryImageURL,
+            firmLogoUrl,
             email,
             contactNumber
         } = req.body
 
-        if (!firmName.trim() || !propertyDealerName.trim() || propertyType.length === 0 || !addressArray.length || !gstNumber.trim() || !contactNumber.trim() || !email.trim() || !emailValidator.validate(email.trim()) || about.trim().split(/\s+/) > 150 || !cloudinaryImageURL) {
+        if (!firmName.trim() || !propertyDealerName.trim() || propertyType.length === 0 || !addressArray.length || !gstNumber.trim() || !contactNumber.trim() || !email.trim() || !emailValidator.validate(email.trim()) || about.trim().split(/\s+/) > 150 || !firmLogoUrl) {
             throw new CustomAPIError('Insufficient data', 204)
         }
 
@@ -36,16 +36,18 @@ const addPropertyDealer = async (req, res, next) => {
         }
 
         const newPropertyDealer = await PropertyDealer.create(req.body)
-        
+
         const propertyDealersAddedByFieldAgent =req.fieldAgent.propertyDealersAdded
-
+        console.log(req.fieldAgent)
         const updatePropertyDealersAddedByFieldAgent = newPropertyDealer && [...propertyDealersAddedByFieldAgent, newPropertyDealer._id]
+        console.log(updatePropertyDealersAddedByFieldAgent)
 
-        await FieldAgent.findOneAndUpdate({ _id: req.fieldAgent.fieldAgentId },
+        await FieldAgent.findOneAndUpdate({ _id: req.fieldAgent._id },
             { propertyDealersAdded: updatePropertyDealersAddedByFieldAgent },
             { new: true, runValidators: true })
         return res.status(StatusCodes.OK).json({ status: 'ok', message: 'property dealer has been successfully added' })
     } catch (error) {
+        console.log(error)
         next(error)
     }
 }

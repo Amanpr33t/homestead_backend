@@ -15,7 +15,8 @@ const PropertyDealerSchema = new mongoose.Schema({
         required: [true, 'Please provide property dealers name'],
         trim: true
     },
-    cloudinaryImageURL: {
+    //cloudinaryImageURL: {
+    firmLogoUrl: {
         type: String,
         required: [true, 'Please provide an image of firm logo'],
     },

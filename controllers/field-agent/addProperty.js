@@ -1,6 +1,7 @@
 require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
 const PropertyDealer = require('../../models/propertyDealer')
+const AgriculturalProperty = require('../../models/agriculturalProperty')
 const crypto = require('crypto')
 const sendEmail = require('../../utils/sendEmail')
 const CustomAPIError = require('../../errors/custom-error')
@@ -82,6 +83,48 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
     }
 }
 
+const addProperty = async (req, res, next) => {
+    try {
+        req.body.addedByFieldAgent = req.fieldAgent._id
+        const {
+            landsize,
+            roadConnectivity,
+            waterSource,
+            suitableCrops,
+            privateReservoir,
+            legalRestrictions,
+            electricityConnections,
+            numberOfOwners,
+            numberOfTubewells,
+            propertyLocation,
+            propertyImage,
+            addedByPropertyDealer,
+            irrigationSystem
+        } = req.body
+
+        if (!waterSource.length || !suitableCrops.length || !electricityConnections || !numberOfOwners || !numberOfTubewells || privateReservoir === undefined || !propertyImage.length || !addedByPropertyDealer || !landsize || !roadConnectivity) {
+            throw new CustomAPIError('Insufficient data', 204)
+        }
+        if (!landsize.metreSquare && !landsize.acre) {
+            throw new CustomAPIError('Insufficient data', 204)
+        }
+        if (!roadConnectivity.roadType) {
+            throw new CustomAPIError('Insufficient data', 204)
+        }
+        if (legalRestrictions.isLegalRestrictions === undefined) {
+            throw new CustomAPIError('Insufficient data', 204)
+        }
+        if (!propertyLocation.state || !propertyLocation.district) {
+            throw new CustomAPIError('Insufficient data', 204)
+        }
+
+        await AgriculturalProperty.create(req.body)
+        return res.status(StatusCodes.OK).json({ status: 'ok', message: 'property has been added' })
+    } catch (error) {
+        next(error)
+    }
+}
+
 module.exports = {
-    propertyDealerExists, sendOtpToEmailForDealerVerification, confirmOtpForDealerVerification
+    propertyDealerExists, sendOtpToEmailForDealerVerification, confirmOtpForDealerVerification, addProperty
 }

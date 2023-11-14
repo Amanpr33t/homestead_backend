@@ -6,13 +6,16 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs');
 
 const LandSizeSchema = new mongoose.Schema({
-    metreSquare: {
+    size: {
         type: Number,
+        required: true
     },
-    acre: {
-        type: Number,
+    unit: {
+        type: String,
+        required: true,
+        trim: true
     },
-    remarks: {
+    details: {
         type: String,
         trim: true
     },
@@ -33,71 +36,122 @@ const LegalRestrictionsSchema = new mongoose.Schema({
         type: Boolean,
         required: true
     },
-    remarks: {
+    details: {
         type: String,
         trim: true
     },
 })
 const PropertyLocationSchema = new mongoose.Schema({
-    village: {
-        type: String,
-        trim: true
+    name: {
+        village: {
+            type: String,
+            trim: true
+        },
+        city: {
+            type: String,
+            trim: true
+        },
+        tehsil: {
+            type: String,
+            trim: true
+        },
+        district: {
+            type: String,
+            trim: true,
+            required: true
+        },
+        state: {
+            type: String,
+            trim: true,
+            required: true
+        }
+    }
+})
+const WaterSourceSchema = new mongoose.Schema({
+    canal: {
+        type: Array
     },
-    city: {
-        type: String,
-        trim: true
+    river: {
+        type: Array
     },
-    tehsil: {
-        type: String,
-        trim: true
+    tubewells: {
+        numberOfTubewells: {
+            type: Number
+        },
+        depth: {
+            type: Array
+        }
+    }
+})
+const ReservoirSchema = new mongoose.Schema({
+    isReservoir: {
+        type: Boolean,
+        required: true
     },
-    district: {
-        type: String,
-        trim: true
+    type: {
+        type: String
     },
-    state: {
-        type: String,
-        trim: true
+    capacityOfPrivateReservoir: {
+        type: Number
+    },
+    unitOfCapacityForPrivateReservoir: {
+        type: String
     }
 })
 
 const AgriculturalPropertySchema = new mongoose.Schema({
     landsize: LandSizeSchema,
+    location:PropertyLocationSchema,
     roadConnectivity: RoadConnectivitySchema,
-    waterSource: {
+    agriculturalLandImagesUrl: {
         type: Array,
         default: []
     },
+    contractImagesUrl: {
+        type: Array,
+        default: []
+    },
+    numberOfOwners: {
+        type: Number,
+        require: true
+    },
+    waterSource: WaterSourceSchema,
+    reservoir: ReservoirSchema,
     irrigationSystem: {
         type: Array,
         default: []
     },
-    suitableCrops: {
+    priceDemanded: {
+        number: {
+            type: Number,
+            reuired: true
+        },
+        words: {
+            type: String,
+            reuired: true,
+            trim: true
+        }
+    },
+    crops: {
         type: Array,
         default: []
     },
-    privateReservoir: {
-        type: Boolean,
-        required: true
+    road: {
+        type: {
+            type: String,
+            reuired: true,
+            trim: true
+        },
+        details: {
+            type: String,
+            trim: true
+        }
     },
     legalRestrictions: LegalRestrictionsSchema,
-    electricityConnections: {
-        type: Number,
-        default: 0
+    nearbyTown:{
+        type:String,
+        trim:true
     },
-    numberOfOwners: {
-        type: Number,
-        default: 1
-    },
-    numberOfTubewells: {
-        type: Number,
-        default: 0
-    },
-    propertyImage: {
-        type: [Array],
-        default: []
-    },
-    propertyLocation: PropertyLocationSchema,
     addedByFieldAgent: {
         type: mongoose.Types.ObjectId,
         ref: 'FieldAgent',

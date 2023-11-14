@@ -5,7 +5,7 @@ const { forgotPassword, updatePassword, confirmPasswordVerificationToken, resetP
 const authenticateFieldAgent = require('../middleware/authenticateFieldAgent')
 const { addPropertyDealer, propertyDealerEmailExists, propertyDealerContactNumberExists, propertyDealerGstNumberExists } = require('../controllers/field-agent/addPropertyDealer')
 const { numberOfPropertyDealersAndPropertiesAddedByFieldAgent, propertyDealersAddedByFieldAgent } = require('../controllers/field-agent/propertiesAndPropertyDealersAddedByFieldAgent')
-const { propertyDealerExists, sendOtpToEmailForDealerVerification, confirmOtpForDealerVerification, addProperty } = require('../controllers/field-agent/addProperty')
+const { propertyDealerExists, sendOtpToEmailForDealerVerification, confirmOtpForDealerVerification, addAgriculturalProperty } = require('../controllers/field-agent/addProperty')
 
 router.post('/signIn', signIn)
 router.patch('/logout', authenticateFieldAgent, logout)
@@ -22,6 +22,6 @@ router.get('/numberOfPropertyDealersAndPropertiesAddedByFieldAgent', authenticat
 router.get('/propertyDealersAddedByFieldAgent', authenticateFieldAgent, propertyDealersAddedByFieldAgent)
 router.get('/propertyDealerOtpGeneration', authenticateFieldAgent, propertyDealerExists, sendOtpToEmailForDealerVerification)
 router.get('/propertyDealerOtpVerification', authenticateFieldAgent, confirmOtpForDealerVerification)
-router.post('/addProperty', authenticateFieldAgent, addProperty)
+router.post('/addAgriculturalProperty', authenticateFieldAgent, addAgriculturalProperty)
 
 module.exports = router

@@ -89,7 +89,7 @@ const ReservoirSchema = new mongoose.Schema({
         required: true
     },
     type: {
-        type: String
+        type: Array
     },
     capacityOfPrivateReservoir: {
         type: Number

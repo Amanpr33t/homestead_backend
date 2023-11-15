@@ -25,7 +25,7 @@ const propertyDealersAddedByFieldAgent = async (req, res, next) => {
 const numberOfPropertyDealersAndPropertiesAddedByFieldAgent = async (req, res, next) => {
     try {
         const propertyDealersAddedByFieldAgent = req.fieldAgent.propertyDealersAdded.length
-        const propertiesAddedByfieldAgent = req.fieldAgent.propertiesAdded.length
+        const propertiesAddedByfieldAgent = req.fieldAgent.propertiesAdded.agricultural.length + req.fieldAgent.propertiesAdded.commercial.length + req.fieldAgent.propertiesAdded.residential.length
 
         return res.status(StatusCodes.OK).json({ status: 'ok', propertyDealersAddedByFieldAgent, propertiesAddedByfieldAgent })
     } catch (error) {

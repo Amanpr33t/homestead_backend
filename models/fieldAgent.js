@@ -23,8 +23,18 @@ const FieldAgentSchema = new mongoose.Schema({
         default: null
     },
     propertiesAdded: {
-        type: Array,
-        default: []
+        agricultural:{
+            type:Array,
+            default:[]
+        },
+        commercial:{
+            type:Array,
+            default:[]
+        },
+        residential:{
+            type:Array,
+            default:[]
+        }
     },
     propertyDealersAdded: {
         type: Array,

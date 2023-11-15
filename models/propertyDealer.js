@@ -15,6 +15,20 @@ const PropertyDealerSchema = new mongoose.Schema({
         required: [true, 'Please provide property dealers name'],
         trim: true
     },
+    propertiesAdded: {
+        agricultural:{
+            type:Array,
+            default:[]
+        },
+        commercial:{
+            type:Array,
+            default:[]
+        },
+        residential:{
+            type:Array,
+            default:[]
+        }
+    },
     //cloudinaryImageURL: {
     firmLogoUrl: {
         type: String,

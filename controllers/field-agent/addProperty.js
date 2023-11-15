@@ -2,11 +2,13 @@ require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
 const PropertyDealer = require('../../models/propertyDealer')
 const AgriculturalProperty = require('../../models/agriculturalProperty')
+const FieldAgent = require('../../models/fieldAgent')
 const crypto = require('crypto')
 const sendEmail = require('../../utils/sendEmail')
 const CustomAPIError = require('../../errors/custom-error')
 const origin = process.env.ORIGIN
 const emailValidator = require("email-validator");
+const {ObjectId} = require('mongodb')
 
 const propertyDealerExists = async (req, res, next) => {
     try {
@@ -77,7 +79,7 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
             return res.status(StatusCodes.OK).json({ status: 'token_expired', msg: 'Token expired' })
         }
 
-        return res.status(StatusCodes.OK).json({ status: 'ok', msg: 'OTP has been verified', dealer })
+        return res.status(StatusCodes.OK).json({ status: 'ok', msg: 'OTP has been verified', dealerId: dealer._id })
     } catch (error) {
         next(error)
     }
@@ -86,9 +88,33 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
 const addAgriculturalProperty = async (req, res, next) => {
     try {
         req.body.addedByFieldAgent = req.fieldAgent._id
-        await AgriculturalProperty.create(req.body)
+        const property = await AgriculturalProperty.create(req.body)
+
+        const fieldAgent = req.fieldAgent
+        const updatedAgriculturalPropertiesFieldAgent = [...fieldAgent.propertiesAdded.agricultural, property._id]
+        updatedPropertiesFieldAgent = {
+            agricultural: updatedAgriculturalPropertiesFieldAgent,
+            commercial: fieldAgent.propertiesAdded.commercial,
+            residential: fieldAgent.propertiesAdded.residential
+        }
+        await FieldAgent.findOneAndUpdate({ _id: req.fieldAgent._id },
+            { propertiesAdded: updatedPropertiesFieldAgent },
+            { new: true, runValidators: true })
+
+       
+        const propertyDealer = await PropertyDealer.findOne({ id: req.body.addedByPropertyDealer })
+        const updatedAgriculturalPropertiesPropertyDealer = [...propertyDealer.propertiesAdded.agricultural, property._id]
+        updatedPropertiesPropertyDealer = {
+            agricultural: updatedAgriculturalPropertiesPropertyDealer,
+            commercial: propertyDealer.propertiesAdded.commercial,
+            residential: propertyDealer.propertiesAdded.residential
+        }
+        await PropertyDealer.findOneAndUpdate({ _id: req.body.addedByPropertyDealer },
+            { propertiesAdded: updatedPropertiesPropertyDealer },
+            { new: true, runValidators: true })
         return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Agricultural property has been added' })
     } catch (error) {
+        console.log(error)
         next(error)
     }
 }

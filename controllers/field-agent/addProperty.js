@@ -8,7 +8,7 @@ const sendEmail = require('../../utils/sendEmail')
 const CustomAPIError = require('../../errors/custom-error')
 const origin = process.env.ORIGIN
 const emailValidator = require("email-validator");
-const {ObjectId} = require('mongodb')
+const { ObjectId } = require('mongodb')
 
 const propertyDealerExists = async (req, res, next) => {
     try {
@@ -66,7 +66,7 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
     try {
         const { email, contactNumber, otp } = req.query
 
-        const dealer = await PropertyDealer.findOne(email ? { email: email.trim() } : { contactNumber: contactNumber.trim() })
+        const dealer = await PropertyDealer.findOne(email ? { email: email.trim() } : { contactNumber: +contactNumber.trim() })
 
         if (!dealer) {
             throw new CustomAPIError('Dealer with this email or contact number does not exist', 204)
@@ -79,6 +79,12 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
             return res.status(StatusCodes.OK).json({ status: 'token_expired', msg: 'Token expired' })
         }
 
+        await PropertyDealer.findOneAndUpdate(email ? { email: email.trim() } : { contactNumber: +contactNumber.trim() },
+            {
+                otpForVerification: null, otpForVerificationExpirationDate: null
+            },
+            { new: true, runValidators: true })
+
         return res.status(StatusCodes.OK).json({ status: 'ok', msg: 'OTP has been verified', dealerId: dealer._id })
     } catch (error) {
         next(error)
@@ -88,6 +94,51 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
 const addAgriculturalProperty = async (req, res, next) => {
     try {
         req.body.addedByFieldAgent = req.fieldAgent._id
+
+        const { waterSource, reservoir, irrigationSystem, crops, road, legalRestrictions, agriculturalLandImagesUrl } = req.body
+        
+        if (!waterSource.canal.length && !waterSource.river.length && !waterSource.tubewells.numberOfTubewells) {
+            throw new CustomAPIError('Water source information not provided', 204)
+        }
+        if (reservoir.isReservoir) {
+            if (!reservoir.type.length) {
+                throw new CustomAPIError('No reservoir type provided', 204)
+            }
+            if (reservoir.type.length > 2) {
+                throw new CustomAPIError('Illegal reservoir type information', 204)
+            }
+            reservoir.type.forEach(type => {
+                if (type.trim().toLowerCase() !== 'private' && type.trim().toLowerCase() !== 'public') {
+                    throw new CustomAPIError('Incorrect type information', 204)
+                }
+            })
+            if (reservoir.type.includes('private') && (!reservoir.capacityOfPrivateReservoir || (reservoir.unitOfCapacityForPrivateReservoir !== 'cusec' && reservoir.unitOfCapacityForPrivateReservoir !== 'litre'))) {
+                throw new CustomAPIError('Incorrect inforamtion regarding capacity and ', 204)
+            }
+        }
+        irrigationSystem.forEach(system => {
+            if (system.trim() !== 'sprinkler' && system.trim() !== 'drip' && system.trim() !== 'underground pipeline') {
+                throw new CustomAPIError('Wrong irrigation sysyem information', 204)
+            }
+        })
+        if (!crops.length) {
+            throw new CustomAPIError('No crops provided', 204)
+        }
+        crops.forEach(crop => {
+            if (crop.trim() !== 'rice' && crop.trim() !== 'maize' && crop.trim() !== 'cotton' && crop.trim() !== 'wheat') {
+                throw new CustomAPIError('Wrong crop information', 204)
+            }
+        })
+        if (!road.type.length || (road.type !== 'unpaved road' && road.type !== 'village road' && road.type !== 'district road' && road.type !== 'state highway' && road.type !== 'national highway')) {
+            throw new CustomAPIError('Wrong road information', 204)
+        }
+        if (legalRestrictions.isLegalRestrictions && !legalRestrictions.details) {
+            throw new CustomAPIError('Details of legal restrictions not provided', 204)
+        }
+        if (!agriculturalLandImagesUrl.length) {
+            throw new CustomAPIError('No land images provided', 204)
+        }
+         console.log(req.body)
         const property = await AgriculturalProperty.create(req.body)
 
         const fieldAgent = req.fieldAgent
@@ -101,7 +152,7 @@ const addAgriculturalProperty = async (req, res, next) => {
             { propertiesAdded: updatedPropertiesFieldAgent },
             { new: true, runValidators: true })
 
-       
+
         const propertyDealer = await PropertyDealer.findOne({ id: req.body.addedByPropertyDealer })
         const updatedAgriculturalPropertiesPropertyDealer = [...propertyDealer.propertiesAdded.agricultural, property._id]
         updatedPropertiesPropertyDealer = {
@@ -112,6 +163,7 @@ const addAgriculturalProperty = async (req, res, next) => {
         await PropertyDealer.findOneAndUpdate({ _id: req.body.addedByPropertyDealer },
             { propertiesAdded: updatedPropertiesPropertyDealer },
             { new: true, runValidators: true })
+
         return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Agricultural property has been added' })
     } catch (error) {
         console.log(error)

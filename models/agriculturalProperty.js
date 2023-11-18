@@ -4,6 +4,7 @@ require('dotenv').config()
 const validator = require('validator')
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs');
+const Schema = mongoose.Schema;
 
 const LandSizeSchema = new mongoose.Schema({
     size: {
@@ -18,7 +19,10 @@ const LandSizeSchema = new mongoose.Schema({
     details: {
         type: String,
         trim: true
-    },
+    },_id: {
+        type: Schema.Types.ObjectId,
+        default: undefined,
+      },
 })
 const RoadConnectivitySchema = new mongoose.Schema({
     roadType: {
@@ -30,6 +34,10 @@ const RoadConnectivitySchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    _id: {
+        type: Schema.Types.ObjectId,
+        default: undefined,
+      },
 })
 const LegalRestrictionsSchema = new mongoose.Schema({
     isLegalRestrictions: {
@@ -40,6 +48,10 @@ const LegalRestrictionsSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
+    _id: {
+        type: Schema.Types.ObjectId,
+        default: undefined,
+      },
 })
 const PropertyLocationSchema = new mongoose.Schema({
     name: {
@@ -65,23 +77,34 @@ const PropertyLocationSchema = new mongoose.Schema({
             trim: true,
             required: true
         }
-    }
+    },
+    _id: {
+        type: Schema.Types.ObjectId,
+        default: undefined,
+      }
 })
 const WaterSourceSchema = new mongoose.Schema({
     canal: {
-        type: Array
+        type: Array,
+        default: []
     },
     river: {
-        type: Array
+        type: Array,
+        default: []
     },
     tubewells: {
         numberOfTubewells: {
             type: Number
         },
         depth: {
-            type: Array
+            type: Array,
+            default: []
         }
-    }
+    },
+    _id: {
+        type: Schema.Types.ObjectId,
+        default: undefined,
+      }
 })
 const ReservoirSchema = new mongoose.Schema({
     isReservoir: {
@@ -96,12 +119,16 @@ const ReservoirSchema = new mongoose.Schema({
     },
     unitOfCapacityForPrivateReservoir: {
         type: String
-    }
+    },
+    _id: {
+        type: Schema.Types.ObjectId,
+        default: undefined,
+      }
 })
 
 const AgriculturalPropertySchema = new mongoose.Schema({
     landsize: LandSizeSchema,
-    location:PropertyLocationSchema,
+    location: PropertyLocationSchema,
     roadConnectivity: RoadConnectivitySchema,
     agriculturalLandImagesUrl: {
         type: Array,
@@ -124,11 +151,11 @@ const AgriculturalPropertySchema = new mongoose.Schema({
     priceDemanded: {
         number: {
             type: Number,
-            reuired: true
+            required: true
         },
         words: {
             type: String,
-            reuired: true,
+            required: true,
             trim: true
         }
     },
@@ -139,7 +166,7 @@ const AgriculturalPropertySchema = new mongoose.Schema({
     road: {
         type: {
             type: String,
-            reuired: true,
+            required: true,
             trim: true
         },
         details: {
@@ -148,9 +175,9 @@ const AgriculturalPropertySchema = new mongoose.Schema({
         }
     },
     legalRestrictions: LegalRestrictionsSchema,
-    nearbyTown:{
-        type:String,
-        trim:true
+    nearbyTown: {
+        type: String,
+        trim: true
     },
     addedByFieldAgent: {
         type: mongoose.Types.ObjectId,

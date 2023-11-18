@@ -3,6 +3,47 @@ require('dotenv').config()
 const validator = require('validator')
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs');
+const Schema = mongoose.Schema;
+
+const AddressSchema = new mongoose.Schema({
+    flatPlotHouseNumber: {
+        type: String,
+        trim:true,
+        required: [true,'Provide flat/plot/house number']
+    },
+    areaSectorVillage: {
+        type:String,
+        trim:true,
+        required: [true,'Provide area/sector/village']
+    },
+    landmark: {
+        type: String,
+        trim:true
+    },
+    postalCode: {
+        type:Number,
+        required: [true,'Provide postal code']
+    },
+    city: {
+        type:String,
+        trim:true,
+        required: [true,'Provide city']
+    },
+    state: {
+        type:String,
+        trim:true,
+        required: [true,'Provide state']
+    },
+    district: {
+        type:String,
+        trim:true,
+        required: [true,'Provide district']
+    },
+    _id: {
+        type: Schema.Types.ObjectId,
+        default: undefined,
+      }
+})
 
 const PropertyDealerSchema = new mongoose.Schema({
     firmName: {
@@ -29,10 +70,8 @@ const PropertyDealerSchema = new mongoose.Schema({
             default:[]
         }
     },
-    //cloudinaryImageURL: {
     firmLogoUrl: {
-        type: String,
-        required: [true, 'Please provide an image of firm logo'],
+        type: String
     },
     about: {
         type: String,
@@ -42,17 +81,11 @@ const PropertyDealerSchema = new mongoose.Schema({
         type: Number,
         required: [true, 'Please add experience']
     },
-    propertyType: {
-        type: Array,
-        default: []
-    },
-    addressArray: {
-        type: Array,
-        default: []
-    },
+    addressArray: [AddressSchema],
     gstNumber: {
         type: String,
-        required: [true, 'Please add gst number']
+        required: [true, 'Please add gst number'],
+        trim:true
     },
     email: {
         type: String,

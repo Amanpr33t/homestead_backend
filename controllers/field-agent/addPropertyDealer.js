@@ -12,19 +12,20 @@ const addPropertyDealer = async (req, res, next) => {
     try {
         req.body.addedByFieldAgent = req.fieldAgent._id
         const {
-            firmName,
-            propertyDealerName,
-            propertyType,
             addressArray,
-            gstNumber,
             about,
-            firmLogoUrl,
             email,
-            contactNumber
         } = req.body
 
-        if (!firmName.trim() || !propertyDealerName.trim() || propertyType.length === 0 || !addressArray.length || !gstNumber.trim() || !contactNumber.trim() || !email.trim() || !emailValidator.validate(email.trim()) || about.trim().split(/\s+/) > 150 || !firmLogoUrl) {
-            throw new CustomAPIError('Insufficient data', 204)
+        addressArray.forEach(address => {
+            const { postalCode } = address
+            if (postalCode && postalCode.toString().length !== 6) {
+                throw new CustomAPIError('Postal code should be a 6 digit number', 204)
+            }
+        })
+
+        if (!addressArray.length || !emailValidator.validate(email.trim()) || about.trim().split(/\s+/) > 150 ) {
+            throw new CustomAPIError('Incorrect data', 204)
         }
 
         const propertyDealerGstNumberExists = await PropertyDealer.findOne({ gstNumber: req.body.gstNumber })
@@ -37,17 +38,14 @@ const addPropertyDealer = async (req, res, next) => {
 
         const newPropertyDealer = await PropertyDealer.create(req.body)
 
-        const propertyDealersAddedByFieldAgent =req.fieldAgent.propertyDealersAdded
-        console.log(req.fieldAgent)
+        const propertyDealersAddedByFieldAgent = req.fieldAgent.propertyDealersAdded
         const updatePropertyDealersAddedByFieldAgent = newPropertyDealer && [...propertyDealersAddedByFieldAgent, newPropertyDealer._id]
-        console.log(updatePropertyDealersAddedByFieldAgent)
 
         await FieldAgent.findOneAndUpdate({ _id: req.fieldAgent._id },
             { propertyDealersAdded: updatePropertyDealersAddedByFieldAgent },
             { new: true, runValidators: true })
         return res.status(StatusCodes.OK).json({ status: 'ok', message: 'property dealer has been successfully added' })
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }

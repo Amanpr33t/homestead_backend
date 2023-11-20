@@ -1,8 +1,4 @@
-const jwt = require('jsonwebtoken')
-require('dotenv').config()
-const validator = require('validator')
 const mongoose = require('mongoose')
-const bcrypt = require('bcryptjs')
 const Schema = mongoose.Schema
 
 const LandSizeSchema = new mongoose.Schema({

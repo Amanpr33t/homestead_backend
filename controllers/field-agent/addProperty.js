@@ -1,4 +1,3 @@
-require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
 const PropertyDealer = require('../../models/propertyDealer')
 const AgriculturalProperty = require('../../models/agriculturalProperty')
@@ -6,7 +5,6 @@ const FieldAgent = require('../../models/fieldAgent')
 const crypto = require('crypto')
 const sendEmail = require('../../utils/sendEmail')
 const CustomAPIError = require('../../errors/custom-error')
-const origin = process.env.ORIGIN
 const emailValidator = require("email-validator");
 const { ObjectId } = require('mongodb')
 
@@ -174,7 +172,6 @@ const addAgriculturalProperty = async (req, res, next) => {
 
         return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Agricultural property has been added' })
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }

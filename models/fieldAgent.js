@@ -1,5 +1,3 @@
-const jwt = require('jsonwebtoken')
-require('dotenv').config()
 const validator = require('validator')
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs');

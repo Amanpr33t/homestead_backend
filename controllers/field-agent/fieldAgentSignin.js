@@ -1,10 +1,6 @@
-require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
 const FieldAgent = require('../../models/fieldAgent')
-const jwt = require('jsonwebtoken')
-const bcrypt = require('bcryptjs')
 const CustomAPIError = require('../../errors/custom-error')
-const origin = process.env.ORIGIN
 
 const signIn = async (req, res, next) => {
     try {

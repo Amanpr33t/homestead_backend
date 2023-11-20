@@ -71,12 +71,11 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
         if (!dealer) {
             throw new CustomAPIError('Dealer with this email or contact number does not exist', 204)
         }
-        if (dealer.otpForVerification !== otp) {
-            return res.status(StatusCodes.OK).json({ status: 'incorrect_token', msg: 'Access denied' })
-        }
-
         if (dealer.otpForVerificationExpirationDate.getTime() <= Date.now()) {
             return res.status(StatusCodes.OK).json({ status: 'token_expired', msg: 'Token expired' })
+        }
+        if (dealer.otpForVerification !== otp) {
+            return res.status(StatusCodes.OK).json({ status: 'incorrect_token', msg: 'Access denied' })
         }
 
         await PropertyDealer.findOneAndUpdate(email ? { email: email.trim() } : { contactNumber: +contactNumber.trim() },
@@ -85,18 +84,27 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
             },
             { new: true, runValidators: true })
 
-        return res.status(StatusCodes.OK).json({ status: 'ok', msg: 'OTP has been verified', dealerId: dealer._id })
+        return res.status(StatusCodes.OK).json({
+            status: 'ok', msg: 'OTP has been verified', dealer: {
+                dealerId: dealer._id,
+                firmName: dealer.firmName,
+                firmLogoUrl: dealer.firmLogoUrl
+            }
+        })
     } catch (error) {
         next(error)
     }
 }
 
+
+
 const addAgriculturalProperty = async (req, res, next) => {
     try {
+        console.log(req.body)
         req.body.addedByFieldAgent = req.fieldAgent._id
 
         const { waterSource, reservoir, irrigationSystem, crops, road, legalRestrictions, agriculturalLandImagesUrl } = req.body
-        
+
         if (!waterSource.canal.length && !waterSource.river.length && !waterSource.tubewells.numberOfTubewells) {
             throw new CustomAPIError('Water source information not provided', 204)
         }
@@ -138,7 +146,7 @@ const addAgriculturalProperty = async (req, res, next) => {
         if (!agriculturalLandImagesUrl.length) {
             throw new CustomAPIError('No land images provided', 204)
         }
-         console.log(req.body)
+        console.log(req.body)
         const property = await AgriculturalProperty.create(req.body)
 
         const fieldAgent = req.fieldAgent

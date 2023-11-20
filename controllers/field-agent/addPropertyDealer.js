@@ -10,6 +10,7 @@ const emailValidator = require("email-validator");
 
 const addPropertyDealer = async (req, res, next) => {
     try {
+        console.log(req.body)
         req.body.addedByFieldAgent = req.fieldAgent._id
         const {
             addressArray,
@@ -46,6 +47,7 @@ const addPropertyDealer = async (req, res, next) => {
             { new: true, runValidators: true })
         return res.status(StatusCodes.OK).json({ status: 'ok', message: 'property dealer has been successfully added' })
     } catch (error) {
+        console.log(error)
         next(error)
     }
 }

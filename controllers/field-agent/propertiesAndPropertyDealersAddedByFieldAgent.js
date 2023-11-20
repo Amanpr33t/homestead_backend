@@ -2,10 +2,14 @@ require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
 const FieldAgent = require('../../models/fieldAgent')
 const PropertyDealer = require('../../models/propertyDealer')
+const AgriculturalProperty = require('../../models/agriculturalProperty')
 
-const propertiesAddedByFieldAgent = async (req, res, next) => {
+const agriculturalPropertiesAddedByFieldAgent = async (req, res, next) => {
     try {
-        return res.status(StatusCodes.OK).json({ status: 'ok' })
+        const agriculturalProperties = await AgriculturalProperty.find({
+            addedByFieldAgent: req.fieldAgent._id
+        }).sort({ createdAt: 1 })
+        return res.status(StatusCodes.OK).json({ status: 'ok', agriculturalProperties })
     } catch (error) {
         next(error)
     }
@@ -15,8 +19,17 @@ const propertyDealersAddedByFieldAgent = async (req, res, next) => {
     try {
         const propertyDealers = await PropertyDealer.find({
             addedByFieldAgent: req.fieldAgent._id
-        }).sort({ createdAt: -1 })
+        }).sort({ createdAt: 1 })
         return res.status(StatusCodes.OK).json({ status: 'ok', propertyDealers })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const propertyDealerOfaProperty = async (req, res, next) => {
+    try {
+        const dealer = await PropertyDealer.findOne({ _id: req.params.id })
+        return res.status(StatusCodes.OK).json({ status: 'ok', firmName: dealer.firmName })
     } catch (error) {
         next(error)
     }
@@ -36,5 +49,5 @@ const numberOfPropertyDealersAndPropertiesAddedByFieldAgent = async (req, res, n
 
 
 module.exports = {
-    numberOfPropertyDealersAndPropertiesAddedByFieldAgent, propertyDealersAddedByFieldAgent
+    numberOfPropertyDealersAndPropertiesAddedByFieldAgent, propertyDealersAddedByFieldAgent, agriculturalPropertiesAddedByFieldAgent, propertyDealerOfaProperty
 }

@@ -8,41 +8,41 @@ const Schema = mongoose.Schema;
 const AddressSchema = new mongoose.Schema({
     flatPlotHouseNumber: {
         type: String,
-        trim:true,
-        required: [true,'Provide flat/plot/house number']
+        trim: true,
+        required: [true, 'Provide flat/plot/house number']
     },
     areaSectorVillage: {
-        type:String,
-        trim:true,
-        required: [true,'Provide area/sector/village']
+        type: String,
+        trim: true,
+        required: [true, 'Provide area/sector/village']
     },
     landmark: {
         type: String,
-        trim:true
+        trim: true
     },
     postalCode: {
-        type:Number,
-        required: [true,'Provide postal code']
+        type: Number,
+        required: [true, 'Provide postal code']
     },
     city: {
-        type:String,
-        trim:true,
-        required: [true,'Provide city']
+        type: String,
+        trim: true,
+        required: [true, 'Provide city']
     },
     state: {
-        type:String,
-        trim:true,
-        required: [true,'Provide state']
+        type: String,
+        trim: true,
+        required: [true, 'Provide state']
     },
     district: {
-        type:String,
-        trim:true,
-        required: [true,'Provide district']
+        type: String,
+        trim: true,
+        required: [true, 'Provide district']
     },
     _id: {
         type: Schema.Types.ObjectId,
         default: undefined,
-      }
+    },
 })
 
 const PropertyDealerSchema = new mongoose.Schema({
@@ -57,17 +57,17 @@ const PropertyDealerSchema = new mongoose.Schema({
         trim: true
     },
     propertiesAdded: {
-        agricultural:{
-            type:Array,
-            default:[]
+        agricultural: {
+            type: Array,
+            default: []
         },
-        commercial:{
-            type:Array,
-            default:[]
+        commercial: {
+            type: Array,
+            default: []
         },
-        residential:{
-            type:Array,
-            default:[]
+        residential: {
+            type: Array,
+            default: []
         }
     },
     firmLogoUrl: {
@@ -85,7 +85,7 @@ const PropertyDealerSchema = new mongoose.Schema({
     gstNumber: {
         type: String,
         required: [true, 'Please add gst number'],
-        trim:true
+        trim: true
     },
     email: {
         type: String,

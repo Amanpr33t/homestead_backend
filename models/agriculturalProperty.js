@@ -1,10 +1,9 @@
-
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 const validator = require('validator')
 const mongoose = require('mongoose')
-const bcrypt = require('bcryptjs');
-const Schema = mongoose.Schema;
+const bcrypt = require('bcryptjs')
+const Schema = mongoose.Schema
 
 const LandSizeSchema = new mongoose.Schema({
     size: {
@@ -19,7 +18,8 @@ const LandSizeSchema = new mongoose.Schema({
     details: {
         type: String,
         trim: true
-    },_id: {
+    },
+    _id: {
         type: Schema.Types.ObjectId,
         default: undefined,
       },
@@ -127,7 +127,7 @@ const ReservoirSchema = new mongoose.Schema({
 })
 
 const AgriculturalPropertySchema = new mongoose.Schema({
-    landsize: LandSizeSchema,
+    landSize: LandSizeSchema,
     location: PropertyLocationSchema,
     roadConnectivity: RoadConnectivitySchema,
     agriculturalLandImagesUrl: {
@@ -190,6 +190,5 @@ const AgriculturalPropertySchema = new mongoose.Schema({
         required: [true, 'Please provide a property dealer id']
     }
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
-
 
 module.exports = mongoose.model('AgriculturalProperty', AgriculturalPropertySchema)

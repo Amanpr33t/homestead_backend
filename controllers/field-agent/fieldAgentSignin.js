@@ -13,12 +13,11 @@ const signIn = async (req, res, next) => {
         }
 
         const fieldAgent = await FieldAgent.findOne({ email })
-        const isPasswordCorrect = fieldAgent && await fieldAgent.comparePassword(password)
-
         if (!fieldAgent) {
             return res.status(StatusCodes.OK).json({ status: 'not_found', msg: 'Enter valid credentials' })
         }
-
+        
+        const isPasswordCorrect = fieldAgent && await fieldAgent.comparePassword(password)
         if (!isPasswordCorrect) {
             return res.status(StatusCodes.OK).json({ status: 'incorrect_password', msg: 'Enter valid credentials' })
         }
@@ -32,6 +31,7 @@ const signIn = async (req, res, next) => {
         return res.status(StatusCodes.OK).json({ status: 'ok', authToken })
 
     } catch (error) {
+        console.log(error)
         next(error)
     }
 }

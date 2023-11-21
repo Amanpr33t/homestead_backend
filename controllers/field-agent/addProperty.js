@@ -65,7 +65,13 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
     try {
         const { email, contactNumber, otp } = req.query
 
-        const dealer = await PropertyDealer.findOne(email ? { email: email.trim() } : { contactNumber: +contactNumber.trim() })
+        let dealer
+        if (email.trim()) {
+            dealer = await PropertyDealer.findOne({ email: email.trim() })
+        } else if (+contactNumber.trim()) {
+            dealer = await PropertyDealer.findOne({ contactNumber: +contactNumber.trim() })
+        }
+
 
         if (!dealer) {
             throw new CustomAPIError('Dealer with this email or contact number does not exist', 204)
@@ -77,11 +83,21 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
             return res.status(StatusCodes.OK).json({ status: 'incorrect_token', msg: 'Access denied' })
         }
 
-        await PropertyDealer.findOneAndUpdate(email ? { email: email.trim() } : { contactNumber: +contactNumber.trim() },
-            {
-                otpForVerification: null, otpForVerificationExpirationDate: null
-            },
-            { new: true, runValidators: true })
+
+        if (email.trim()) {
+            await PropertyDealer.findOneAndUpdate({ email: email.trim() },
+                {
+                    otpForVerification: null, otpForVerificationExpirationDate: null
+                },
+                { new: true, runValidators: true })
+        } else if (+contactNumber.trim()) {
+            await PropertyDealer.findOneAndUpdate({ contactNumber: +contactNumber.trim() },
+                {
+                    otpForVerification: null, otpForVerificationExpirationDate: null
+                },
+                { new: true, runValidators: true })
+        }
+
 
         return res.status(StatusCodes.OK).json({
             status: 'ok', msg: 'OTP has been verified', dealer: {

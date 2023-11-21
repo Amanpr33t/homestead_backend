@@ -1,3 +1,4 @@
+require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
 const PropertyDealer = require('../../models/propertyDealer')
 const AgriculturalProperty = require('../../models/agriculturalProperty')

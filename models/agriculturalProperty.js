@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
-
+require('express-async-errors')
 const LandSizeSchema = new mongoose.Schema({
     size: {
         type: Number,

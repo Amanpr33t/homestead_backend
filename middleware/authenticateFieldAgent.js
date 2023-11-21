@@ -1,3 +1,4 @@
+require('express-async-errors')
 const FieldAgent = require('../models/fieldAgent')
 const jwt = require('jsonwebtoken')
 const CustomAPIError = require('../errors/custom-error')

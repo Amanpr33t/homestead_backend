@@ -1,3 +1,4 @@
+require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
 const FieldAgent = require('../../models/fieldAgent')
 const PropertyDealer = require('../../models/propertyDealer')

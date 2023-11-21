@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema;
+require('express-async-errors')
 
 const AddressSchema = new mongoose.Schema({
     flatPlotHouseNumber: {

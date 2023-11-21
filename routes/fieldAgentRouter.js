@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+require('express-async-errors')
 const { signIn, logout, signup } = require('../controllers/field-agent/fieldAgentSignin')
 const { forgotPassword, updatePassword, confirmPasswordVerificationToken, resetPasswordVerificationToken } = require('../controllers/field-agent/forgotPassword')
 const authenticateFieldAgent = require('../middleware/authenticateFieldAgent')

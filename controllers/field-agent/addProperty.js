@@ -7,7 +7,6 @@ const crypto = require('crypto')
 const sendEmail = require('../../utils/sendEmail')
 const CustomAPIError = require('../../errors/custom-error')
 const emailValidator = require("email-validator");
-const { ObjectId } = require('mongodb')
 
 const propertyDealerExists = async (req, res, next) => {
     try {
@@ -65,13 +64,7 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
     try {
         const { email, contactNumber, otp } = req.query
 
-        let dealer
-        if (email.trim()) {
-            dealer = await PropertyDealer.findOne({ email: email.trim() })
-        } else if (+contactNumber.trim()) {
-            dealer = await PropertyDealer.findOne({ contactNumber: +contactNumber.trim() })
-        }
-
+        const dealer = await PropertyDealer.findOne(email.trim() ? { email: email.trim() } : { contactNumber: +contactNumber.trim() })
 
         if (!dealer) {
             throw new CustomAPIError('Dealer with this email or contact number does not exist', 204)
@@ -83,20 +76,11 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
             return res.status(StatusCodes.OK).json({ status: 'incorrect_token', msg: 'Access denied' })
         }
 
-
-        if (email.trim()) {
-            await PropertyDealer.findOneAndUpdate({ email: email.trim() },
-                {
-                    otpForVerification: null, otpForVerificationExpirationDate: null
-                },
-                { new: true, runValidators: true })
-        } else if (+contactNumber.trim()) {
-            await PropertyDealer.findOneAndUpdate({ contactNumber: +contactNumber.trim() },
-                {
-                    otpForVerification: null, otpForVerificationExpirationDate: null
-                },
-                { new: true, runValidators: true })
-        }
+        await PropertyDealer.findOneAndUpdate(email.trim() ? { email: email.trim() } : { contactNumber: +contactNumber.trim() },
+            {
+                otpForVerification: null, otpForVerificationExpirationDate: null
+            },
+            { new: true, runValidators: true })
 
 
         return res.status(StatusCodes.OK).json({

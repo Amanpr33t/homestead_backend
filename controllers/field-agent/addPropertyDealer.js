@@ -6,11 +6,10 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const CustomAPIError = require('../../errors/custom-error')
 const origin = process.env.ORIGIN
-const emailValidator = require("email-validator");
+const emailValidator = require("email-validator")
 
 const addPropertyDealer = async (req, res, next) => {
     try {
-        console.log(req.body)
         req.body.addedByFieldAgent = req.fieldAgent._id
         const {
             addressArray,

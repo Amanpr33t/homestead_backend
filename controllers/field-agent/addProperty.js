@@ -95,8 +95,6 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
     }
 }
 
-
-
 const addAgriculturalProperty = async (req, res, next) => {
     try {
         console.log(req.body)

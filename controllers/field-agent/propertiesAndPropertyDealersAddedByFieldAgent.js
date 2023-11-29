@@ -2,6 +2,7 @@ require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
 const PropertyDealer = require('../../models/propertyDealer')
 const AgriculturalProperty = require('../../models/agriculturalProperty')
+const CommercialProperty = require('../../models/commercialProperty')
 
 const agriculturalPropertiesAddedByFieldAgent = async (req, res, next) => {
     try {
@@ -9,6 +10,17 @@ const agriculturalPropertiesAddedByFieldAgent = async (req, res, next) => {
             addedByFieldAgent: req.fieldAgent._id
         }).sort({ createdAt: 1 })
         return res.status(StatusCodes.OK).json({ status: 'ok', agriculturalProperties })
+    } catch (error) {
+        next(error)
+    }
+}
+
+const commercialPropertiesAddedByFieldAgent = async (req, res, next) => {
+    try {
+        const commercialProperties = await CommercialProperty.find({
+            addedByFieldAgent: req.fieldAgent._id
+        }).sort({ createdAt: 1 })
+        return res.status(StatusCodes.OK).json({ status: 'ok', commercialProperties })
     } catch (error) {
         next(error)
     }
@@ -48,5 +60,9 @@ const numberOfPropertyDealersAndPropertiesAddedByFieldAgent = async (req, res, n
 
 
 module.exports = {
-    numberOfPropertyDealersAndPropertiesAddedByFieldAgent, propertyDealersAddedByFieldAgent, agriculturalPropertiesAddedByFieldAgent, propertyDealerOfaProperty
+    numberOfPropertyDealersAndPropertiesAddedByFieldAgent,
+    propertyDealersAddedByFieldAgent,
+    agriculturalPropertiesAddedByFieldAgent,
+    propertyDealerOfaProperty,
+    commercialPropertiesAddedByFieldAgent
 }

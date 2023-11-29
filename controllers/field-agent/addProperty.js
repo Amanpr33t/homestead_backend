@@ -1,6 +1,7 @@
 require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
 const PropertyDealer = require('../../models/propertyDealer')
+const CommercialProperty = require('../../models/commercialProperty')
 const AgriculturalProperty = require('../../models/agriculturalProperty')
 const FieldAgent = require('../../models/fieldAgent')
 const crypto = require('crypto')
@@ -97,7 +98,6 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
 
 const addAgriculturalProperty = async (req, res, next) => {
     try {
-        console.log(req.body)
         req.body.addedByFieldAgent = req.fieldAgent._id
 
         const { waterSource, reservoir, irrigationSystem, crops, road, legalRestrictions, agriculturalLandImagesUrl } = req.body
@@ -122,7 +122,7 @@ const addAgriculturalProperty = async (req, res, next) => {
             }
         }
         irrigationSystem.forEach(system => {
-            if (system.trim() !== 'sprinkler' && system.trim() !== 'drip' && system.trim() !== 'underground pipeline') {
+            if (system.trim() !== 'Sprinkler' && system.trim() !== 'Drip' && system.trim() !== 'Underground pipeline') {
                 throw new CustomAPIError('Wrong irrigation sysyem information', 204)
             }
         })
@@ -130,11 +130,11 @@ const addAgriculturalProperty = async (req, res, next) => {
             throw new CustomAPIError('No crops provided', 204)
         }
         crops.forEach(crop => {
-            if (crop.trim() !== 'rice' && crop.trim() !== 'maize' && crop.trim() !== 'cotton' && crop.trim() !== 'wheat') {
+            if (crop.trim() !== 'Rice' && crop.trim() !== 'Maize' && crop.trim() !== 'Cotton' && crop.trim() !== 'Wheat') {
                 throw new CustomAPIError('Wrong crop information', 204)
             }
         })
-        if (!road.type.length || (road.type !== 'unpaved road' && road.type !== 'village road' && road.type !== 'district road' && road.type !== 'state highway' && road.type !== 'national highway')) {
+        if (!road.type.length || (road.type !== 'Unpaved road' && road.type !== 'Village road' && road.type !== 'District road' && road.type !== 'State highway' && road.type !== 'National highway')) {
             throw new CustomAPIError('Wrong road information', 204)
         }
         if (legalRestrictions.isLegalRestrictions && !legalRestrictions.details) {
@@ -143,12 +143,11 @@ const addAgriculturalProperty = async (req, res, next) => {
         if (!agriculturalLandImagesUrl.length) {
             throw new CustomAPIError('No land images provided', 204)
         }
-        console.log(req.body)
         const property = await AgriculturalProperty.create(req.body)
 
         const fieldAgent = req.fieldAgent
         const updatedAgriculturalPropertiesFieldAgent = [...fieldAgent.propertiesAdded.agricultural, property._id]
-        updatedPropertiesFieldAgent = {
+        const updatedPropertiesFieldAgent = {
             agricultural: updatedAgriculturalPropertiesFieldAgent,
             commercial: fieldAgent.propertiesAdded.commercial,
             residential: fieldAgent.propertiesAdded.residential
@@ -160,7 +159,7 @@ const addAgriculturalProperty = async (req, res, next) => {
 
         const propertyDealer = await PropertyDealer.findOne({ id: req.body.addedByPropertyDealer })
         const updatedAgriculturalPropertiesPropertyDealer = [...propertyDealer.propertiesAdded.agricultural, property._id]
-        updatedPropertiesPropertyDealer = {
+        const updatedPropertiesPropertyDealer = {
             agricultural: updatedAgriculturalPropertiesPropertyDealer,
             commercial: propertyDealer.propertiesAdded.commercial,
             residential: propertyDealer.propertiesAdded.residential
@@ -171,10 +170,68 @@ const addAgriculturalProperty = async (req, res, next) => {
 
         return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Agricultural property has been added' })
     } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+
+const addCommercialProperty = async (req, res, next) => {
+    try {
+        req.body.addedByFieldAgent = req.fieldAgent._id
+        const { stateOfProperty, commercialPropertyType, legalRestrictions, commercialLandImagesUrl, shopPropertyType } = req.body
+
+        if (commercialPropertyType !== 'shop' && commercialPropertyType !== 'industrial') {
+            throw new CustomAPIError('Commercial type details are wrong', 204)
+        }
+        if ((!stateOfProperty.empty && !stateOfProperty.builtUp) || (stateOfProperty.empty && stateOfProperty.builtUp)) {
+            throw new CustomAPIError('Both values cannot be true or false at the same time', 204)
+        }
+        if (commercialPropertyType === 'industrial' && stateOfProperty.builtUp && !stateOfProperty.builtUpPropertyType) {
+            throw new CustomAPIError('Insufficient data', 204)
+        }
+
+        if (commercialPropertyType === 'shop' && !shopPropertyType) {
+            throw new CustomAPIError('Insufficient data', 204)
+        }
+
+        if (legalRestrictions.isLegalRestrictions && !legalRestrictions.details) {
+            throw new CustomAPIError('Details of legal restrictions not provided', 204)
+        }
+        if (!commercialLandImagesUrl.length) {
+            throw new CustomAPIError('No land images provided', 204)
+        }
+
+        const property = await CommercialProperty.create(req.body)
+
+        const fieldAgent = req.fieldAgent
+        const updatedCommercialPropertiesFieldAgent = [...fieldAgent.propertiesAdded.commercial, property._id]
+        const updatedPropertiesFieldAgent = {
+            agricultural: fieldAgent.propertiesAdded.agricultural,
+            commercial: updatedCommercialPropertiesFieldAgent,
+            residential: fieldAgent.propertiesAdded.residential
+        }
+        await FieldAgent.findOneAndUpdate({ _id: req.fieldAgent._id },
+            { propertiesAdded: updatedPropertiesFieldAgent },
+            { new: true, runValidators: true })
+
+        const propertyDealer = await PropertyDealer.findOne({ id: req.body.addedByPropertyDealer })
+        const updatedCommercialPropertiesPropertyDealer = [...propertyDealer.propertiesAdded.commercial, property._id]
+        const updatedPropertiesPropertyDealer = {
+            agricultural: propertyDealer.propertiesAdded.agricultural,
+            commercial: updatedCommercialPropertiesPropertyDealer,
+            residential: propertyDealer.propertiesAdded.residential
+        }
+        await PropertyDealer.findOneAndUpdate({ _id: req.body.addedByPropertyDealer },
+            { propertiesAdded: updatedPropertiesPropertyDealer },
+            { new: true, runValidators: true })
+
+        return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Commercial property has been added' })
+    } catch (error) {
+        console.log(error)
         next(error)
     }
 }
 
 module.exports = {
-    propertyDealerExists, sendOtpToEmailForDealerVerification, confirmOtpForDealerVerification, addAgriculturalProperty
+    propertyDealerExists, sendOtpToEmailForDealerVerification, confirmOtpForDealerVerification, addAgriculturalProperty, addCommercialProperty
 }

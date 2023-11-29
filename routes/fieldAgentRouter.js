@@ -5,8 +5,8 @@ const { signIn, logout, signup } = require('../controllers/field-agent/fieldAgen
 const { forgotPassword, updatePassword, confirmPasswordVerificationToken, resetPasswordVerificationToken } = require('../controllers/field-agent/forgotPassword')
 const authenticateFieldAgent = require('../middleware/authenticateFieldAgent')
 const { addPropertyDealer, propertyDealerEmailExists, propertyDealerContactNumberExists, propertyDealerGstNumberExists } = require('../controllers/field-agent/addPropertyDealer')
-const { numberOfPropertyDealersAndPropertiesAddedByFieldAgent, propertyDealersAddedByFieldAgent, agriculturalPropertiesAddedByFieldAgent, propertyDealerOfaProperty } = require('../controllers/field-agent/propertiesAndPropertyDealersAddedByFieldAgent')
-const { propertyDealerExists, sendOtpToEmailForDealerVerification, confirmOtpForDealerVerification, addAgriculturalProperty } = require('../controllers/field-agent/addProperty')
+const { numberOfPropertyDealersAndPropertiesAddedByFieldAgent, propertyDealersAddedByFieldAgent, agriculturalPropertiesAddedByFieldAgent, propertyDealerOfaProperty,commercialPropertiesAddedByFieldAgent } = require('../controllers/field-agent/propertiesAndPropertyDealersAddedByFieldAgent')
+const { propertyDealerExists, sendOtpToEmailForDealerVerification, confirmOtpForDealerVerification, addAgriculturalProperty, addCommercialProperty } = require('../controllers/field-agent/addProperty')
 
 router.post('/signIn', signIn)
 router.patch('/logout', authenticateFieldAgent, logout)
@@ -24,10 +24,12 @@ router.get('/propertyDealerGstNumberExists', propertyDealerGstNumberExists)
 router.get('/numberOfPropertyDealersAndPropertiesAddedByFieldAgent', authenticateFieldAgent, numberOfPropertyDealersAndPropertiesAddedByFieldAgent)
 router.get('/propertyDealersAddedByFieldAgent', authenticateFieldAgent, propertyDealersAddedByFieldAgent)
 router.get('/agriculturalPropertiesAddedByFieldAgent', authenticateFieldAgent, agriculturalPropertiesAddedByFieldAgent)
+router.get('/commercialPropertiesAddedByFieldAgent', authenticateFieldAgent, commercialPropertiesAddedByFieldAgent)
 router.get('/propertyDealerOfaProperty/:id', authenticateFieldAgent, propertyDealerOfaProperty)
 
 router.get('/propertyDealerOtpGeneration', authenticateFieldAgent, propertyDealerExists, sendOtpToEmailForDealerVerification)
 router.get('/propertyDealerOtpVerification', authenticateFieldAgent, confirmOtpForDealerVerification)
 router.post('/addAgriculturalProperty', authenticateFieldAgent, addAgriculturalProperty)
+router.post('/addCommercialProperty', authenticateFieldAgent, addCommercialProperty)
 
 module.exports = router

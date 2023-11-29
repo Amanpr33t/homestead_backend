@@ -22,7 +22,7 @@ cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,
     api_key: process.env.CLOUD_API_KEY,
     api_secret: process.env.CLOUD_API_SECRET,
-})
+})  
 
 //app.set('trust proxy',1)
 //app.use(helmet())

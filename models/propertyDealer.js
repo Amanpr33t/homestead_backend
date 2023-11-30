@@ -3,6 +3,9 @@ const Schema = mongoose.Schema;
 require('express-async-errors')
 
 const AddressSchema = new mongoose.Schema({
+    addressId: {
+        type: Number
+    },
     flatPlotHouseNumber: {
         type: String,
         trim: true,
@@ -106,6 +109,10 @@ const PropertyDealerSchema = new mongoose.Schema({
     otpForVerificationExpirationDate: {
         type: Date,
         default: null
+    },
+    uniqueId: {
+        type: String,
+        required: true
     }
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 

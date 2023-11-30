@@ -177,6 +177,10 @@ const CommercialPropertySchema = new mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: 'PropertyDealer',
         required: [true, 'Please provide a property dealer id']
+    },
+    uniqueId:{
+        type:String,
+        required:true
     }
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 

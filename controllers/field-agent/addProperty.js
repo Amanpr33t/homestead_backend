@@ -3,6 +3,7 @@ const { StatusCodes } = require('http-status-codes')
 const PropertyDealer = require('../../models/propertyDealer')
 const CommercialProperty = require('../../models/commercialProperty')
 const AgriculturalProperty = require('../../models/agriculturalProperty')
+const { uniqueIdGeneratorForProperty } = require('../../utils/uniqueIdGenerator')
 const FieldAgent = require('../../models/fieldAgent')
 const crypto = require('crypto')
 const sendEmail = require('../../utils/sendEmail')
@@ -11,17 +12,24 @@ const emailValidator = require("email-validator");
 
 const propertyDealerExists = async (req, res, next) => {
     try {
-        const { email, contactNumber } = req.query
+        const { email, contactNumber, dealerId: uniqueId } = req.query
+
+        if ((email && !email.trim() && contactNumber && !contactNumber.trim() && uniqueId && !uniqueId.trim()) || (email && email.trim() && contactNumber && contactNumber.trim()) || (contactNumber && contactNumber.trim() && uniqueId && uniqueId.trim()) || (email && email.trim() && uniqueId && uniqueId.trim()) || (email && email.trim() && contactNumber && contactNumber.trim() && uniqueId && uniqueId.trim())) {
+            throw new CustomAPIError('Insufficient data', 204)
+        }
+
         let dealer
         if (contactNumber && contactNumber.trim()) {
-            dealer = await PropertyDealer.findOne({ contactNumber })
-        }
-        if (email && email.trim()) {
+            dealer = await PropertyDealer.findOne({ contactNumber: contactNumber.trim() })
+        } else if (email && email.trim()) {
             if (!emailValidator.validate(email.trim())) {
-                throw new CustomAPIError('Email not in correct format', 204)
+                throw new CustomAPIError('Email not in correct format', StatusCodes.BAD_GATEWAY)
             }
             dealer = await PropertyDealer.findOne({ email: email.trim() })
+        } else if (uniqueId && uniqueId.trim()) {
+            dealer = await PropertyDealer.findOne({ uniqueId: uniqueId.trim() })
         }
+
         if (!dealer) {
             return res.status(StatusCodes.OK).json({ status: 'noDealerExists', message: 'No dealer with this email or contact number exists' })
         }
@@ -57,18 +65,34 @@ const sendOtpToEmailForDealerVerification = async (req, res, next) => {
 
         return res.status(StatusCodes.OK).json({ status: 'ok', msg: 'A verification token has been sent to your email' })
     } catch (error) {
+        console.log(error)
         next(error)
     }
 }
 
 const confirmOtpForDealerVerification = async (req, res, next) => {
     try {
-        const { email, contactNumber, otp } = req.query
+        const { email, contactNumber, dealerId: uniqueId, otp } = req.query
 
-        const dealer = await PropertyDealer.findOne(email.trim() ? { email: email.trim() } : { contactNumber: +contactNumber.trim() })
+        if ((email && !email.trim() && contactNumber && !contactNumber.trim() && uniqueId && !uniqueId.trim()) || (email && email.trim() && contactNumber && contactNumber.trim()) || (contactNumber && contactNumber.trim() && uniqueId && uniqueId.trim()) || (email && email.trim() && uniqueId && uniqueId.trim()) || (email && email.trim() && contactNumber && contactNumber.trim() && uniqueId && uniqueId.trim())) {
+            throw new CustomAPIError('Insufficient data', StatusCodes.BAD_REQUEST)
+        }
+
+        if (otp && !otp.trim()) {
+            throw new CustomAPIError('Insufficient data', StatusCodes.BAD_REQUEST)
+        }
+
+        let dealer
+        if (email && email.trim()) {
+            dealer = await PropertyDealer.findOne({ email: email.trim() })
+        } else if (contactNumber && contactNumber.trim()) {
+            dealer = await PropertyDealer.findOne({ contactNumber: contactNumber.trim() })
+        } else if (uniqueId && uniqueId.trim()) {
+            dealer = await PropertyDealer.findOne({ uniqueId: uniqueId.trim() })
+        }
 
         if (!dealer) {
-            throw new CustomAPIError('Dealer with this email or contact number does not exist', 204)
+            throw new CustomAPIError('Dealer with this email or contact number does not exist', StatusCodes.NOT_FOUND)
         }
         if (dealer.otpForVerificationExpirationDate.getTime() <= Date.now()) {
             return res.status(StatusCodes.OK).json({ status: 'token_expired', msg: 'Token expired' })
@@ -77,12 +101,19 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
             return res.status(StatusCodes.OK).json({ status: 'incorrect_token', msg: 'Access denied' })
         }
 
-        await PropertyDealer.findOneAndUpdate(email.trim() ? { email: email.trim() } : { contactNumber: +contactNumber.trim() },
+        let identifier
+        if (email && email.trim()) {
+            identifier = { email: email.trim() }
+        } else if (contactNumber && contactNumber.trim()) {
+            identifier = { contactNumber: contactNumber.trim() }
+        } else if (uniqueId && uniqueId.trim()) {
+            identifier = { uniqueId: uniqueId.trim() }
+        }
+        await PropertyDealer.findOneAndUpdate(identifier,
             {
                 otpForVerification: null, otpForVerificationExpirationDate: null
             },
             { new: true, runValidators: true })
-
 
         return res.status(StatusCodes.OK).json({
             status: 'ok', msg: 'OTP has been verified', dealer: {
@@ -103,47 +134,49 @@ const addAgriculturalProperty = async (req, res, next) => {
         const { waterSource, reservoir, irrigationSystem, crops, road, legalRestrictions, agriculturalLandImagesUrl } = req.body
 
         if (!waterSource.canal.length && !waterSource.river.length && !waterSource.tubewells.numberOfTubewells) {
-            throw new CustomAPIError('Water source information not provided', 204)
+            throw new CustomAPIError('Water source information not provided', StatusCodes.BAD_REQUEST)
         }
         if (reservoir.isReservoir) {
             if (!reservoir.type.length) {
-                throw new CustomAPIError('No reservoir type provided', 204)
+                throw new CustomAPIError('No reservoir type provided', StatusCodes.BAD_REQUEST)
             }
             if (reservoir.type.length > 2) {
-                throw new CustomAPIError('Illegal reservoir type information', 204)
+                throw new CustomAPIError('Illegal reservoir type information', StatusCodes.BAD_REQUEST)
             }
             reservoir.type.forEach(type => {
                 if (type.trim().toLowerCase() !== 'private' && type.trim().toLowerCase() !== 'public') {
-                    throw new CustomAPIError('Incorrect type information', 204)
+                    throw new CustomAPIError('Incorrect type information', StatusCodes.BAD_REQUEST)
                 }
             })
             if (reservoir.type.includes('private') && (!reservoir.capacityOfPrivateReservoir || (reservoir.unitOfCapacityForPrivateReservoir !== 'cusec' && reservoir.unitOfCapacityForPrivateReservoir !== 'litre'))) {
-                throw new CustomAPIError('Incorrect inforamtion regarding capacity and ', 204)
+                throw new CustomAPIError('Incorrect inforamtion regarding capacity and ', StatusCodes.BAD_REQUEST)
             }
         }
         irrigationSystem.forEach(system => {
             if (system.trim() !== 'Sprinkler' && system.trim() !== 'Drip' && system.trim() !== 'Underground pipeline') {
-                throw new CustomAPIError('Wrong irrigation sysyem information', 204)
+                throw new CustomAPIError('Wrong irrigation sysyem information', StatusCodes.BAD_REQUEST)
             }
         })
         if (!crops.length) {
-            throw new CustomAPIError('No crops provided', 204)
+            throw new CustomAPIError('No crops provided', StatusCodes.BAD_REQUEST)
         }
         crops.forEach(crop => {
             if (crop.trim() !== 'Rice' && crop.trim() !== 'Maize' && crop.trim() !== 'Cotton' && crop.trim() !== 'Wheat') {
-                throw new CustomAPIError('Wrong crop information', 204)
+                throw new CustomAPIError('Wrong crop information', StatusCodes.BAD_REQUEST)
             }
         })
         if (!road.type.length || (road.type !== 'Unpaved road' && road.type !== 'Village road' && road.type !== 'District road' && road.type !== 'State highway' && road.type !== 'National highway')) {
-            throw new CustomAPIError('Wrong road information', 204)
+            throw new CustomAPIError('Wrong road information', StatusCodes.BAD_REQUEST)
         }
         if (legalRestrictions.isLegalRestrictions && !legalRestrictions.details) {
-            throw new CustomAPIError('Details of legal restrictions not provided', 204)
+            throw new CustomAPIError('Details of legal restrictions not provided', StatusCodes.BAD_REQUEST)
         }
         if (!agriculturalLandImagesUrl.length) {
-            throw new CustomAPIError('No land images provided', 204)
+            throw new CustomAPIError('No land images provided', StatusCodes.BAD_REQUEST)
         }
-        const property = await AgriculturalProperty.create(req.body)
+
+        const uniqueId = await uniqueIdGeneratorForProperty('agricultural', req.body.location.name.state)
+        const property = await AgriculturalProperty.create({ ...req.body, uniqueId })
 
         const fieldAgent = req.fieldAgent
         const updatedAgriculturalPropertiesFieldAgent = [...fieldAgent.propertiesAdded.agricultural, property._id]
@@ -155,7 +188,6 @@ const addAgriculturalProperty = async (req, res, next) => {
         await FieldAgent.findOneAndUpdate({ _id: req.fieldAgent._id },
             { propertiesAdded: updatedPropertiesFieldAgent },
             { new: true, runValidators: true })
-
 
         const propertyDealer = await PropertyDealer.findOne({ id: req.body.addedByPropertyDealer })
         const updatedAgriculturalPropertiesPropertyDealer = [...propertyDealer.propertiesAdded.agricultural, property._id]
@@ -170,7 +202,6 @@ const addAgriculturalProperty = async (req, res, next) => {
 
         return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Agricultural property has been added' })
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }
@@ -181,27 +212,28 @@ const addCommercialProperty = async (req, res, next) => {
         const { stateOfProperty, commercialPropertyType, legalRestrictions, commercialLandImagesUrl, shopPropertyType } = req.body
 
         if (commercialPropertyType !== 'shop' && commercialPropertyType !== 'industrial') {
-            throw new CustomAPIError('Commercial type details are wrong', 204)
+            throw new CustomAPIError('Commercial type details are wrong', StatusCodes.BAD_REQUEST)
         }
         if ((!stateOfProperty.empty && !stateOfProperty.builtUp) || (stateOfProperty.empty && stateOfProperty.builtUp)) {
-            throw new CustomAPIError('Both values cannot be true or false at the same time', 204)
+            throw new CustomAPIError('Both values cannot be true or false at the same time', StatusCodes.BAD_REQUEST)
         }
         if (commercialPropertyType === 'industrial' && stateOfProperty.builtUp && !stateOfProperty.builtUpPropertyType) {
-            throw new CustomAPIError('Insufficient data', 204)
+            throw new CustomAPIError('Insufficient data', StatusCodes.BAD_REQUEST)
         }
 
         if (commercialPropertyType === 'shop' && !shopPropertyType) {
-            throw new CustomAPIError('Insufficient data', 204)
+            throw new CustomAPIError('Insufficient data', StatusCodes.BAD_REQUEST)
         }
 
         if (legalRestrictions.isLegalRestrictions && !legalRestrictions.details) {
-            throw new CustomAPIError('Details of legal restrictions not provided', 204)
+            throw new CustomAPIError('Details of legal restrictions not provided', StatusCodes.BAD_REQUEST)
         }
         if (!commercialLandImagesUrl.length) {
-            throw new CustomAPIError('No land images provided', 204)
+            throw new CustomAPIError('No land images provided', StatusCodes.BAD_REQUEST)
         }
 
-        const property = await CommercialProperty.create(req.body)
+        const uniqueId = await uniqueIdGeneratorForProperty('commercial', req.body.location.name.state)
+        const property = await CommercialProperty.create({ ...req.body, uniqueId })
 
         const fieldAgent = req.fieldAgent
         const updatedCommercialPropertiesFieldAgent = [...fieldAgent.propertiesAdded.commercial, property._id]
@@ -227,7 +259,6 @@ const addCommercialProperty = async (req, res, next) => {
 
         return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Commercial property has been added' })
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }

@@ -41,7 +41,6 @@ app.use('/field-agent', fieldAgentRouter)
 app.use(notFound)
 app.use(errorHandlerMiddleware)
 
-
 const start = async () => {
     try {
         await connectDB(process.env.MONGO_URI)

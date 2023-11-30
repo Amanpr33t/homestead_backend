@@ -57,8 +57,6 @@ const numberOfPropertyDealersAndPropertiesAddedByFieldAgent = async (req, res, n
     }
 }
 
-
-
 module.exports = {
     numberOfPropertyDealersAndPropertiesAddedByFieldAgent,
     propertyDealersAddedByFieldAgent,

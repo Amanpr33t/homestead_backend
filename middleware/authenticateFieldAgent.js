@@ -12,6 +12,7 @@ const authenticateFieldAgent = async (req, res, next) => {
             return res.status(StatusCodes.OK).json({ status: 'invalid_authentication' })
         }
         const token = authHeader.split(' ')[1]
+        
         const payload = jwt.verify(token, process.env.JWT_SECRET)
         if (!payload) {
             return res.status(StatusCodes.OK).json({ status: 'invalid_authentication' })

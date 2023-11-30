@@ -7,10 +7,10 @@ const signIn = async (req, res, next) => {
     try {
         const { email, password } = req.body
         if (!email || !password) {
-            throw new CustomAPIError('Please enter email and password ', 204)
+            throw new CustomAPIError('Please enter email and password ', StatusCodes.NO_CONTENT)
         }
         if (password.length > 10 || password.length < 6) {
-            throw new CustomAPIError('Please enter email and password ', 400)
+            throw new CustomAPIError('Please enter email and password ', StatusCodes.BAD_REQUEST)
         }
 
         const fieldAgent = await FieldAgent.findOne({ email })
@@ -32,7 +32,6 @@ const signIn = async (req, res, next) => {
         return res.status(StatusCodes.OK).json({ status: 'ok', authToken })
 
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }
@@ -66,7 +65,6 @@ const signup = async (req, res, next) => {
     } catch (error) {
         next(error)
     }
-
 }
 
 module.exports = {

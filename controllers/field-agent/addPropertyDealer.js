@@ -7,6 +7,7 @@ const bcrypt = require('bcryptjs')
 const CustomAPIError = require('../../errors/custom-error')
 const origin = process.env.ORIGIN
 const emailValidator = require("email-validator")
+const { uniqueIdGeneratorForPropertyDealer } = require('../../utils/uniqueIdGenerator')
 
 const addPropertyDealer = async (req, res, next) => {
     try {
@@ -24,7 +25,7 @@ const addPropertyDealer = async (req, res, next) => {
             }
         })
 
-        if (!addressArray.length || !emailValidator.validate(email.trim()) || about.trim().split(/\s+/) > 150 ) {
+        if (!addressArray.length || !emailValidator.validate(email.trim()) || about.trim().split(/\s+/) > 150) {
             throw new CustomAPIError('Incorrect data', 204)
         }
 
@@ -36,7 +37,8 @@ const addPropertyDealer = async (req, res, next) => {
             throw new CustomAPIError('Another property dealer with the same email, gst number or contact number already exists', 204)
         }
 
-        const newPropertyDealer = await PropertyDealer.create(req.body)
+        const uniqueId = await uniqueIdGeneratorForPropertyDealer()
+        const newPropertyDealer = await PropertyDealer.create({ ...req.body, uniqueId })
 
         const propertyDealersAddedByFieldAgent = req.fieldAgent.propertyDealersAdded
         const updatePropertyDealersAddedByFieldAgent = newPropertyDealer && [...propertyDealersAddedByFieldAgent, newPropertyDealer._id]

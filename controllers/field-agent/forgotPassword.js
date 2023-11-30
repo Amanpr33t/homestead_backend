@@ -10,7 +10,7 @@ const forgotPassword = async (req, res, next) => {
     try {
         const { email } = req.body
         if (!email) {
-            throw new CustomAPIError('No email', 204)
+            throw new CustomAPIError('No email', StatusCodes.NO_CONTENT)
         }
 
         const fieldAgent = await FieldAgent.findOne({ email })
@@ -47,7 +47,7 @@ const confirmPasswordVerificationToken = async (req, res) => {
         const fieldAgent = await FieldAgent.findOne({ email })
         
         if (!fieldAgent) {
-            throw new CustomAPIError('Field agent with this email does not exist', 204)
+            throw new CustomAPIError('Field agent with this email does not exist', StatusCodes.BAD_REQUEST)
         }
 
         if (fieldAgent.passwordVerificationToken !== passwordVerificationToken) {
@@ -64,21 +64,19 @@ const confirmPasswordVerificationToken = async (req, res) => {
     }
 }
 
-
-
 const updatePassword = async (req, res) => {
     try {
         const { email, newPassword, passwordVerificationToken } = req.body
         const fieldAgent = await FieldAgent.findOne({ email })
         if (!fieldAgent) {
-            throw new CustomAPIError('No field agent exists', 204)
+            throw new CustomAPIError('No field agent exists', StatusCodes.NO_CONTENT)
         }
         if (fieldAgent.passwordVerificationToken !== passwordVerificationToken) {
-            throw new CustomAPIError('Incorrect verificationtoken', 400)
+            throw new CustomAPIError('Incorrect verificationtoken', StatusCodes.BAD_REQUEST)
         }
 
         if (fieldAgent.passwordVerificationTokenExpirationDate.getTime() <= Date.now()) {
-            throw new CustomAPIError('Verification token expired', 400)
+            throw new CustomAPIError('Verification token expired', StatusCodes.BAD_REQUEST)
         }
 
         const salt = await bcrypt.genSalt(10)

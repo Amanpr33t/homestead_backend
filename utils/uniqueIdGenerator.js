@@ -1,8 +1,9 @@
 require('express-async-errors')
 const CommercialProperty = require('../models/commercialProperty')
 const AgriculturalProperty = require('../models/agriculturalProperty')
+const ResidentialProperty = require('../models/residentialProperty')
 const PropertyDealer = require('../models/propertyDealer')
-const FieldAgent= require('../models/fieldAgent')
+const FieldAgent = require('../models/fieldAgent')
 
 const uniqueIdGeneratorForProperty = async (propertyType, state) => {
 
@@ -14,7 +15,8 @@ const uniqueIdGeneratorForProperty = async (propertyType, state) => {
         const properties = await AgriculturalProperty.find()
         serialNumber = properties.length + 1
     } else if (propertyType === 'residential') {
-
+        const properties = await ResidentialProperty.find()
+        serialNumber = properties.length + 1
     }
 
     let type

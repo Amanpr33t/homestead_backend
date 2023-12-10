@@ -3,6 +3,7 @@ const { StatusCodes } = require('http-status-codes')
 const PropertyDealer = require('../../models/propertyDealer')
 const CommercialProperty = require('../../models/commercialProperty')
 const AgriculturalProperty = require('../../models/agriculturalProperty')
+const ResidentialProperty = require('../../models/residentialProperty')
 const { uniqueIdGeneratorForProperty } = require('../../utils/uniqueIdGenerator')
 const FieldAgent = require('../../models/fieldAgent')
 const crypto = require('crypto')
@@ -65,7 +66,6 @@ const sendOtpToEmailForDealerVerification = async (req, res, next) => {
 
         return res.status(StatusCodes.OK).json({ status: 'ok', msg: 'A verification token has been sent to your email' })
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }
@@ -263,6 +263,63 @@ const addCommercialProperty = async (req, res, next) => {
     }
 }
 
+const addResidentialProperty = async (req, res, next) => {
+    try {
+        req.body.addedByFieldAgent = req.fieldAgent._id
+
+        const { residentialPropertyType, residentialLandImagesUrl, price, legalRestrictions } = req.body
+
+        if (residentialPropertyType.toLowerCase() !== 'flat' && residentialPropertyType.toLowerCase() !== 'plot' && residentialPropertyType.toLowerCase() !== 'house') {
+            throw new CustomAPIError('Residential type details are not present', StatusCodes.BAD_REQUEST)
+        }
+
+        if (!price.fixed && (!price.range.from && !price.range.to)) {
+            throw new CustomAPIError('Price not provided', StatusCodes.BAD_REQUEST)
+        } else if (price.range && (!price.range.from || !price.range.to)) {
+            throw new CustomAPIError('Range of price not provided', StatusCodes.BAD_REQUEST)
+        }
+
+        if (legalRestrictions.isLegalRestrictions && !legalRestrictions.details) {
+            throw new CustomAPIError('Details of legal restrictions not provided', StatusCodes.BAD_REQUEST)
+        }
+
+        if (!residentialLandImagesUrl.length) {
+            throw new CustomAPIError('No land images provided', StatusCodes.BAD_REQUEST)
+        }
+
+        const uniqueId = await uniqueIdGeneratorForProperty('residential', req.body.location.name.state)
+        const property = await ResidentialProperty.create({ ...req.body, uniqueId })
+
+        const fieldAgent = req.fieldAgent
+        const updatedResidentialPropertiesFieldAgent = [...fieldAgent.propertiesAdded.residential, property._id]
+        const updatedPropertiesFieldAgent = {
+            agricultural: fieldAgent.propertiesAdded.agricultural,
+            commercial: fieldAgent.propertiesAdded.commercial,
+            residential: updatedResidentialPropertiesFieldAgent
+        }
+        await FieldAgent.findOneAndUpdate({ _id: req.fieldAgent._id },
+            { propertiesAdded: updatedPropertiesFieldAgent },
+            { new: true, runValidators: true })
+
+        const propertyDealer = await PropertyDealer.findOne({ id: req.body.addedByPropertyDealer })
+        const updatedResidentialPropertiesPropertyDealer = [...propertyDealer.propertiesAdded.residential, property._id]
+        const updatedPropertiesPropertyDealer = {
+            agricultural: propertyDealer.propertiesAdded.agricultural,
+            commercial: propertyDealer.propertiesAdded.commercial,
+            residential: updatedResidentialPropertiesFieldAgent
+        }
+        await PropertyDealer.findOneAndUpdate({ _id: req.body.addedByPropertyDealer },
+            { propertiesAdded: updatedPropertiesPropertyDealer },
+            { new: true, runValidators: true })
+
+        return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Residential property has been added' })
+    } catch (error) {
+        next(error)
+    }
+}
+
+
+
 module.exports = {
-    propertyDealerExists, sendOtpToEmailForDealerVerification, confirmOtpForDealerVerification, addAgriculturalProperty, addCommercialProperty
+    propertyDealerExists, sendOtpToEmailForDealerVerification, confirmOtpForDealerVerification, addAgriculturalProperty, addCommercialProperty, addResidentialProperty
 }

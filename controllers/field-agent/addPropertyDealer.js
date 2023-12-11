@@ -30,11 +30,12 @@ const addPropertyDealer = async (req, res, next) => {
         }
 
         const propertyDealerGstNumberExists = await PropertyDealer.findOne({ gstNumber: req.body.gstNumber })
+        const propertyDealerReraNumberExists = await PropertyDealer.findOne({ reraNumber: req.body.reraNumber })
         const propertyDealerEmailExists = await PropertyDealer.findOne({ email: req.body.email })
         const propertyDealerContactNumberExists = await PropertyDealer.findOne({ contactNumber: req.body.contactNumber })
 
-        if (propertyDealerEmailExists || propertyDealerContactNumberExists || propertyDealerGstNumberExists) {
-            throw new CustomAPIError('Another property dealer with the same email, gst number or contact number already exists', 204)
+        if (propertyDealerEmailExists || propertyDealerContactNumberExists || propertyDealerGstNumberExists || propertyDealerReraNumberExists) {
+            throw new CustomAPIError('Another property dealer with the same email, gst number, RERA number or contact number already exists', 204)
         }
 
         const uniqueId = await uniqueIdGeneratorForPropertyDealer()
@@ -91,6 +92,19 @@ const propertyDealerGstNumberExists = async (req, res, next) => {
     }
 }
 
+const propertyDealerReraNumberExists = async (req, res, next) => {
+    try {
+        const { reraNumber } = req.query
+        const propertyDealerReraNumberExists = await PropertyDealer.findOne({ reraNumber })
+        if (propertyDealerReraNumberExists) {
+            return res.status(StatusCodes.OK).json({ status: 'reraNumberExists', message: 'RERA number already exist' })
+        }
+        res.status(StatusCodes.OK).json({ status: 'ok', message: 'Valid RERA number' })
+    } catch (error) {
+        next(error)
+    }
+}
+
 module.exports = {
-    addPropertyDealer, propertyDealerContactNumberExists, propertyDealerEmailExists, propertyDealerGstNumberExists
+    addPropertyDealer, propertyDealerContactNumberExists, propertyDealerEmailExists, propertyDealerGstNumberExists, propertyDealerReraNumberExists
 }

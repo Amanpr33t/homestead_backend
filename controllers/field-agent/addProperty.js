@@ -46,7 +46,7 @@ const sendOtpToEmailForDealerVerification = async (req, res, next) => {
         const { email } = req.body
 
         //const otpForVerification = crypto.randomBytes(3).toString('hex')
-        const otpForVerification = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpForVerification = Math.floor(1000 + Math.random() * 9000).toString()
         const msg = `<p>OTP for dealer verification to add property is: <h2>${otpForVerification}</h2></p>`
 
         const emailData = {

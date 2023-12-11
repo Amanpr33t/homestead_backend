@@ -87,6 +87,11 @@ const PropertyDealerSchema = new mongoose.Schema({
         required: [true, 'Please add gst number'],
         trim: true
     },
+    reraNumber: {
+        type: String,
+        required: [true, 'Please add rera number'],
+        trim: true
+    },
     email: {
         type: String,
         required: [true, 'Please provide an email'],

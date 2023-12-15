@@ -5,6 +5,7 @@ const ResidentialProperty = require('../models/residentialProperty')
 const PropertyDealer = require('../models/propertyDealer')
 const FieldAgent = require('../models/fieldAgent')
 
+//The function is used to generate a unique ID for a property
 const uniqueIdGeneratorForProperty = async (propertyType, state) => {
 
     let serialNumber
@@ -40,6 +41,7 @@ const uniqueIdGeneratorForProperty = async (propertyType, state) => {
     return `P${type}${year.toString().slice(-2)}${stateCode}${serialNumber}`
 }
 
+//The function is used to generate a unique ID for a property daler
 const uniqueIdGeneratorForPropertyDealer = async () => {
     const propertyDealers = await PropertyDealer.find()
     const serialNumber = propertyDealers.length + 1

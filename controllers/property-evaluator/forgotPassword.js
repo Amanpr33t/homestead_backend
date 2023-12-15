@@ -1,12 +1,12 @@
 require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
-const FieldAgent = require('../../models/fieldAgent')
+const PropertyEvaluator = require('../../models/propertyEvaluator')
 const CustomAPIError = require('../../errors/custom-error')
 const crypto = require('crypto')
 const sendEmail = require('../../utils/sendEmail')
 const bcrypt = require('bcryptjs');
 
-//The function is used to generate a password verification token and sent that token to the field agent
+//The function is used to generate a password verification token and sent that token to the proeprty evaluator
 const forgotPassword = async (req, res, next) => {
     try {
         const { email } = req.body
@@ -14,9 +14,9 @@ const forgotPassword = async (req, res, next) => {
             throw new CustomAPIError('No email', StatusCodes.NO_CONTENT)
         }
 
-        const fieldAgent = await FieldAgent.findOne({ email })
-        if (!fieldAgent) {
-            return res.status(StatusCodes.OK).json({ status: 'not_found', msg: 'No field agent exists' })
+        const propertyEvaluator = await PropertyEvaluator.findOne({ email })
+        if (!propertyEvaluator) {
+            return res.status(StatusCodes.OK).json({ status: 'not_found', msg: 'No property evaluator exists' })
         }
 
         const passwordVerificationToken = crypto.randomBytes(3).toString('hex')
@@ -32,7 +32,7 @@ const forgotPassword = async (req, res, next) => {
         const tenMinutes = 1000 * 60 * 10
 
         const passwordVerificationTokenExpirationDate = new Date(Date.now() + tenMinutes)
-        await FieldAgent.findOneAndUpdate({ email },
+        await PropertyEvaluator.findOneAndUpdate({ email },
             { passwordVerificationToken, passwordVerificationTokenExpirationDate },
             { new: true, runValidators: true })
 
@@ -42,21 +42,21 @@ const forgotPassword = async (req, res, next) => {
     }
 }
 
-//The function is used to confirm the validity of the password verification token sent by the field agent
+//The function is used to confirm the validity of the password verification token sent by the property evaluator
 const confirmPasswordVerificationToken = async (req, res) => {
     try {
         const { email, passwordVerificationToken } = req.body
-        const fieldAgent = await FieldAgent.findOne({ email })
+        const propertyEvaluator = await PropertyEvaluator.findOne({ email })
         
-        if (!fieldAgent) {
-            throw new CustomAPIError('Field agent with this email does not exist', StatusCodes.BAD_REQUEST)
+        if (!propertyEvaluator) {
+            throw new CustomAPIError('Property evaluator with this email does not exist', StatusCodes.BAD_REQUEST)
         }
 
-        if (fieldAgent.passwordVerificationToken !== passwordVerificationToken) {
+        if (propertyEvaluator.passwordVerificationToken !== passwordVerificationToken) {
             return res.status(StatusCodes.OK).json({ status: 'incorrect_token', msg: 'Access denied' })
         }
 
-        if (fieldAgent.passwordVerificationTokenExpirationDate.getTime() <= Date.now()) {
+        if (propertyEvaluator.passwordVerificationTokenExpirationDate.getTime() <= Date.now()) {
             return res.status(StatusCodes.OK).json({ status: 'token_expired', msg: 'Token expired' })
         }
 
@@ -66,26 +66,26 @@ const confirmPasswordVerificationToken = async (req, res) => {
     }
 }
 
-//The function is used to update the password
+//The function is used to update the password for property evaluator
 const updatePassword = async (req, res) => {
     try {
         const { email, newPassword, passwordVerificationToken } = req.body
-        const fieldAgent = await FieldAgent.findOne({ email })
-        if (!fieldAgent) {
-            throw new CustomAPIError('No field agent exists', StatusCodes.NO_CONTENT)
+        const propertyEvaluator = await PropertyEvaluator.findOne({ email })
+        if (!propertyEvaluator) {
+            throw new CustomAPIError('No property evaluator exists', StatusCodes.NO_CONTENT)
         }
-        if (fieldAgent.passwordVerificationToken !== passwordVerificationToken) {
+        if (propertyEvaluator.passwordVerificationToken !== passwordVerificationToken) {
             throw new CustomAPIError('Incorrect verificationtoken', StatusCodes.BAD_REQUEST)
         }
 
-        if (fieldAgent.passwordVerificationTokenExpirationDate.getTime() <= Date.now()) {
+        if (propertyEvaluator.passwordVerificationTokenExpirationDate.getTime() <= Date.now()) {
             throw new CustomAPIError('Verification token expired', StatusCodes.BAD_REQUEST)
         }
 
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(newPassword, salt)
 
-        await FieldAgent.findOneAndUpdate({ email },
+        await PropertyEvaluator.findOneAndUpdate({ email },
             {
                 password: hashedPassword,
                 passwordVerificationToken: null,
@@ -104,7 +104,7 @@ const resetPasswordVerificationToken = async (req, res) => {
     try {
         const { email } = req.body
 
-        await FieldAgent.findOneAndUpdate({ email },
+        await PropertyEvaluator.findOneAndUpdate({ email },
             {
                 passwordVerificationToken: null,
                 passwordVerificationTokenExpirationDate: null

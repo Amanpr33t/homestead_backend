@@ -185,6 +185,11 @@ const AgriculturalPropertySchema = new mongoose.Schema({
         ref: 'PropertyDealer',
         required: [true, 'Please provide a property dealer id']
     },
+    propertyEvaluator:{
+        type: mongoose.Types.ObjectId,
+        ref: 'PropertyEvaluator',
+        required: [true, 'Please provide a property evaluator id']
+    },
     uniqueId:{
         type:String,
         required:true

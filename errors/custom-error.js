@@ -1,4 +1,5 @@
 require('express-async-errors')
+// This is our custom error function
 class CustomAPIError extends Error{
     constructor(message,statusCode){
         super(message)

@@ -1,12 +1,12 @@
 require('express-async-errors')
-const FieldAgent = require('../models/fieldAgent')
+const PropertyEvaluator = require('../models/propertyEvaluator')
 const jwt = require('jsonwebtoken')
 const CustomAPIError = require('../errors/custom-error')
 require('dotenv').config()
 const { StatusCodes } = require('http-status-codes')
 
-//This function is used to authenticate a field agent. The field agent is authenticated using a authentication token
-const authenticateFieldAgent = async (req, res, next) => {
+//This function is used to authenticate a property evaluator. The property evaluator is authenticated using a authentication token
+const authenticatePropertyEvaluator = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization
 
@@ -14,27 +14,28 @@ const authenticateFieldAgent = async (req, res, next) => {
             return res.status(StatusCodes.OK).json({ status: 'invalid_authentication' })
         }
         const token = authHeader.split(' ')[1]
-        
+
         const payload = jwt.verify(token, process.env.JWT_SECRET)
+
         if (!payload) {
             return res.status(StatusCodes.OK).json({ status: 'invalid_authentication' })
         }
 
-        const fieldAgent = await FieldAgent.findOne({ _id: payload.fieldAgentId })
-        if (!fieldAgent) {
+        const propertyEvaluator = await PropertyEvaluator.findOne({ _id: payload.propertyEvaluatorId })
+        if (!propertyEvaluator) {
             return res.status(StatusCodes.OK).json({ status: 'invalid_authentication' })
         }
-        if (fieldAgent.authTokenExpiration < new Date()) {
-            await FieldAgent.findOneAndUpdate({ _id: payload.fieldAgentId },
+        if (propertyEvaluator.authTokenExpiration < new Date()) {
+            await PropertyEvaluator.findOneAndUpdate({ _id: payload.propertyEvaluatorId },
                 { authTokenExpiration: null },
                 { new: true, runValidators: true })
             return res.status(StatusCodes.OK).json({ status: 'invalid_authentication' })
         }
-        req.fieldAgent = fieldAgent
+        req.propertyEvaluator = propertyEvaluator
         next()
     } catch (error) {
         next(error)
     }
 }
 
-module.exports = authenticateFieldAgent
+module.exports = authenticatePropertyEvaluator

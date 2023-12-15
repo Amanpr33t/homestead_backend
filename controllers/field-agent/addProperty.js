@@ -4,6 +4,7 @@ const PropertyDealer = require('../../models/propertyDealer')
 const CommercialProperty = require('../../models/commercialProperty')
 const AgriculturalProperty = require('../../models/agriculturalProperty')
 const ResidentialProperty = require('../../models/residentialProperty')
+const PropertyEvaluator = require('../../models/propertyEvaluator')
 const { uniqueIdGeneratorForProperty } = require('../../utils/uniqueIdGenerator')
 const FieldAgent = require('../../models/fieldAgent')
 const crypto = require('crypto')
@@ -11,15 +12,19 @@ const sendEmail = require('../../utils/sendEmail')
 const CustomAPIError = require('../../errors/custom-error')
 const emailValidator = require("email-validator");
 
+//This function is used to check whether a property dealer exists
 const propertyDealerExists = async (req, res, next) => {
     try {
         const { email, contactNumber, dealerId: uniqueId } = req.query
 
+        //Out of email, contactNumber and uniqueId only 1 should be received. This if statement throws an error if more than 1 items are available
         if ((email && !email.trim() && contactNumber && !contactNumber.trim() && uniqueId && !uniqueId.trim()) || (email && email.trim() && contactNumber && contactNumber.trim()) || (contactNumber && contactNumber.trim() && uniqueId && uniqueId.trim()) || (email && email.trim() && uniqueId && uniqueId.trim()) || (email && email.trim() && contactNumber && contactNumber.trim() && uniqueId && uniqueId.trim())) {
             throw new CustomAPIError('Insufficient data', 204)
         }
 
-        let dealer
+        let dealer //This variable will store the dealers data fetched from database
+
+        //The if statements run depending upon the availability of email, uniqueId and contactNumber
         if (contactNumber && contactNumber.trim()) {
             dealer = await PropertyDealer.findOne({ contactNumber: contactNumber.trim() })
         } else if (email && email.trim()) {
@@ -34,18 +39,20 @@ const propertyDealerExists = async (req, res, next) => {
         if (!dealer) {
             return res.status(StatusCodes.OK).json({ status: 'noDealerExists', message: 'No dealer with this email or contact number exists' })
         }
-        req.body.email = dealer.email
+
+        req.body.email = dealer.email //Here we add the email of property dealer to the body
         next()
     } catch (error) {
         next(error)
     }
 }
 
+//This function is used to send OTP to the registered email of the dealer.
 const sendOtpToEmailForDealerVerification = async (req, res, next) => {
     try {
         const { email } = req.body
 
-        //const otpForVerification = crypto.randomBytes(3).toString('hex')
+        //Here we generate a 4 digit OTP
         const otpForVerification = Math.floor(1000 + Math.random() * 9000).toString()
         const msg = `<p>OTP for dealer verification to add property is: <h2>${otpForVerification}</h2></p>`
 
@@ -56,11 +63,13 @@ const sendOtpToEmailForDealerVerification = async (req, res, next) => {
             msg
         }
 
-        await sendEmail(emailData)
+        await sendEmail(emailData) //sendEmail function is imported from utils folder
 
         const tenMinutes = 1000 * 60 * 10
 
-        const otpForVerificationExpirationDate = new Date(Date.now() + tenMinutes)
+        const otpForVerificationExpirationDate = new Date(Date.now() + tenMinutes) //This variable is used to set the expiration date of the OTP
+
+        //The query below is used to update the otpForVerification and otpForVerificationExpirationDate fields in the dealers document
         await PropertyDealer.findOneAndUpdate({ email },
             { otpForVerification, otpForVerificationExpirationDate },
             { new: true, runValidators: true })
@@ -71,10 +80,12 @@ const sendOtpToEmailForDealerVerification = async (req, res, next) => {
     }
 }
 
+//This function is used to confirm the OTP sent by the user
 const confirmOtpForDealerVerification = async (req, res, next) => {
     try {
         const { email, contactNumber, dealerId: uniqueId, otp } = req.query
 
+        //Out of email, contactNumber and uniqueId only 1 should be received. This if statement throws an error if more than 1 items are available
         if ((email && !email.trim() && contactNumber && !contactNumber.trim() && uniqueId && !uniqueId.trim()) || (email && email.trim() && contactNumber && contactNumber.trim()) || (contactNumber && contactNumber.trim() && uniqueId && uniqueId.trim()) || (email && email.trim() && uniqueId && uniqueId.trim()) || (email && email.trim() && contactNumber && contactNumber.trim() && uniqueId && uniqueId.trim())) {
             throw new CustomAPIError('Insufficient data', StatusCodes.BAD_REQUEST)
         }
@@ -83,7 +94,9 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
             throw new CustomAPIError('Insufficient data', StatusCodes.BAD_REQUEST)
         }
 
-        let dealer
+        let dealer //This variable will store the dealers data fetched from database
+
+        //The if statements run depending upon the availability of email, uniqueId and contactNumber
         if (email && email.trim()) {
             dealer = await PropertyDealer.findOne({ email: email.trim() })
         } else if (contactNumber && contactNumber.trim()) {
@@ -95,9 +108,11 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
         if (!dealer) {
             throw new CustomAPIError('Dealer with this email or contact number does not exist', StatusCodes.NOT_FOUND)
         }
+
         if (dealer.otpForVerificationExpirationDate.getTime() <= Date.now()) {
             return res.status(StatusCodes.OK).json({ status: 'token_expired', msg: 'Token expired' })
         }
+
         if (dealer.otpForVerification !== otp) {
             return res.status(StatusCodes.OK).json({ status: 'incorrect_token', msg: 'Access denied' })
         }
@@ -110,6 +125,8 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
         } else if (uniqueId && uniqueId.trim()) {
             identifier = { uniqueId: uniqueId.trim() }
         }
+
+        //The code below is used to update the dealer document in the database once the OTP has been successfully verified
         await PropertyDealer.findOneAndUpdate(identifier,
             {
                 otpForVerification: null, otpForVerificationExpirationDate: null
@@ -128,12 +145,14 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
     }
 }
 
+//This function is used to add an agricultural property to database
 const addAgriculturalProperty = async (req, res, next) => {
     try {
-        req.body.addedByFieldAgent = req.fieldAgent._id
+        req.body.addedByFieldAgent = req.fieldAgent._id //Here we add the id of the fieldAgent to the body
 
         const { waterSource, reservoir, irrigationSystem, crops, road, legalRestrictions, agriculturalLandImagesUrl } = req.body
 
+        //The if statements below are used to verify the content received in the body
         if (!waterSource.canal.length && !waterSource.river.length && !waterSource.tubewells.numberOfTubewells) {
             throw new CustomAPIError('Water source information not provided', StatusCodes.BAD_REQUEST)
         }
@@ -176,42 +195,85 @@ const addAgriculturalProperty = async (req, res, next) => {
             throw new CustomAPIError('No land images provided', StatusCodes.BAD_REQUEST)
         }
 
-        const uniqueId = await uniqueIdGeneratorForProperty('agricultural', req.body.location.name.state)
-        const property = await AgriculturalProperty.create({ ...req.body, uniqueId })
+        //The code below is used to assign the property to an evaluator
+        let propertyEvaluators
+        propertyEvaluators = await PropertyEvaluator.find({ district: req.body.location.name.district.toLowerCase(), isActive: true }) //We get all the evaluators with the same district and who are active
 
-        const fieldAgent = req.fieldAgent
-        const updatedAgriculturalPropertiesFieldAgent = [...fieldAgent.propertiesAdded.agricultural, property._id]
-        const updatedPropertiesFieldAgent = {
-            agricultural: updatedAgriculturalPropertiesFieldAgent,
-            commercial: fieldAgent.propertiesAdded.commercial,
-            residential: fieldAgent.propertiesAdded.residential
+        if (propertyEvaluators && propertyEvaluators.length === 0) {
+            //The if statement is run when we get no evaluators with the same district
+            propertyEvaluators = await PropertyEvaluator.find({ state: req.body.location.name.state.toLowerCase(), isActive: true }) //We get all the evaluators with the same state and who are active
+            if (propertyEvaluators.length === 0) {
+                //The if statement is run when we get no evaluators with the same district and state
+                return res.status(StatusCodes.OK).json({ status: 'no-evaluator-available', message: 'No evaluator is available' })
+            }
         }
-        await FieldAgent.findOneAndUpdate({ _id: req.fieldAgent._id },
-            { propertiesAdded: updatedPropertiesFieldAgent },
-            { new: true, runValidators: true })
 
-        const propertyDealer = await PropertyDealer.findOne({ id: req.body.addedByPropertyDealer })
-        const updatedAgriculturalPropertiesPropertyDealer = [...propertyDealer.propertiesAdded.agricultural, property._id]
-        const updatedPropertiesPropertyDealer = {
-            agricultural: updatedAgriculturalPropertiesPropertyDealer,
-            commercial: propertyDealer.propertiesAdded.commercial,
-            residential: propertyDealer.propertiesAdded.residential
+        //The if statement below is run when we get some evaluators from the database
+        if (propertyEvaluators && propertyEvaluators.length > 0) {
+            const randomIndex = Math.floor(Math.random() * propertyEvaluators.length) // Generate a random index
+            const randomPropertyEvaluator = propertyEvaluators[randomIndex]   // Retrieve the random evaluator
+            req.body.propertyEvaluator = randomPropertyEvaluator._id //we add the ID of the evaluator to the body of the agricultural property
+
+            const uniqueId = await uniqueIdGeneratorForProperty('agricultural', req.body.location.name.state) //The code is used to generate a unique Id for the agricultural property
+
+            const property = await AgriculturalProperty.create({ ...req.body, uniqueId }) //A new agricultural proeprty is created
+
+            //This variable contains updated value of all the properties which have to be evaluated by the evaluator
+            const pendingPropertyEvaluations = [...randomPropertyEvaluator.pendingPropertyEvaluations, {
+                propertyType: 'agricultural',
+                district: req.body.location.name.district.toLowerCase(),
+                state: req.body.location.name.state.toLowerCase(),
+                date: Date.now(),
+                propertyId: property._id
+            }]
+
+            //The query below is used to update the pendingPropertyEvaluations field in the evaluator document
+            await PropertyEvaluator.findOneAndUpdate({ _id: randomPropertyEvaluator._id },
+                { pendingPropertyEvaluations },
+                { new: true, runValidators: true })
+
+            const fieldAgent = req.fieldAgent //This variable contains the fieldAgent data
+            const updatedAgriculturalPropertiesFieldAgent = [...fieldAgent.propertiesAdded.agricultural, property._id] //This variable contains the updated agricultural properties added by the fieldAgent
+            const updatedPropertiesFieldAgent = {
+                agricultural: updatedAgriculturalPropertiesFieldAgent,
+                commercial: fieldAgent.propertiesAdded.commercial,
+                residential: fieldAgent.propertiesAdded.residential
+            } //This variable contains all the properties added by the field agent
+
+            //The query below is used to update the propertiesAdded field in the fieldAgent document
+            await FieldAgent.findOneAndUpdate({ _id: req.fieldAgent._id },
+                { propertiesAdded: updatedPropertiesFieldAgent },
+                { new: true, runValidators: true })
+
+            const propertyDealer = await PropertyDealer.findOne({ _id: req.body.addedByPropertyDealer }) //This variable contains the data about propertyDealer that adds the property
+
+            const updatedAgriculturalPropertiesPropertyDealer = [...propertyDealer.propertiesAdded.agricultural, property._id] //This variable contains the updated agricultural properties added by the property dealer
+            const updatedPropertiesPropertyDealer = {
+                agricultural: updatedAgriculturalPropertiesPropertyDealer,
+                commercial: propertyDealer.propertiesAdded.commercial,
+                residential: propertyDealer.propertiesAdded.residential
+            } //This variable contains all the properties added by the proeprty dealer
+
+            //The query below is used to update the propertiesAdded field in the proeprty dealer document
+            await PropertyDealer.findOneAndUpdate({ _id: req.body.addedByPropertyDealer },
+                { propertiesAdded: updatedPropertiesPropertyDealer },
+                { new: true, runValidators: true })
+
+            return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Agricultural property has been added' })
         }
-        await PropertyDealer.findOneAndUpdate({ _id: req.body.addedByPropertyDealer },
-            { propertiesAdded: updatedPropertiesPropertyDealer },
-            { new: true, runValidators: true })
-
-        return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Agricultural property has been added' })
     } catch (error) {
         next(error)
     }
 }
 
+//This function is used to add a commercial property to database
 const addCommercialProperty = async (req, res, next) => {
     try {
-        req.body.addedByFieldAgent = req.fieldAgent._id
+        req.body.addedByFieldAgent = req.fieldAgent._id //Here we add the ID of field agent to the request body
+
         const { stateOfProperty, commercialPropertyType, legalRestrictions, commercialLandImagesUrl, shopPropertyType } = req.body
 
+        //The if statements below are used to verify the data received in request body
         if (commercialPropertyType !== 'shop' && commercialPropertyType !== 'industrial') {
             throw new CustomAPIError('Commercial type details are wrong', StatusCodes.BAD_REQUEST)
         }
@@ -233,30 +295,71 @@ const addCommercialProperty = async (req, res, next) => {
             throw new CustomAPIError('No land images provided', StatusCodes.BAD_REQUEST)
         }
 
-        const uniqueId = await uniqueIdGeneratorForProperty('commercial', req.body.location.name.state)
-        const property = await CommercialProperty.create({ ...req.body, uniqueId })
+        //The code below is used to assign the property to an evaluator
+        let propertyEvaluators
+        propertyEvaluators = await PropertyEvaluator.find({ district: req.body.location.name.district.toLowerCase(), isActive: true }) //We get all the evaluators with the same district and who are active
 
-        const fieldAgent = req.fieldAgent
-        const updatedCommercialPropertiesFieldAgent = [...fieldAgent.propertiesAdded.commercial, property._id]
-        const updatedPropertiesFieldAgent = {
-            agricultural: fieldAgent.propertiesAdded.agricultural,
-            commercial: updatedCommercialPropertiesFieldAgent,
-            residential: fieldAgent.propertiesAdded.residential
+        if (propertyEvaluators && propertyEvaluators.length === 0) {
+            //The if statement is run when we get no evaluators with the same district
+            propertyEvaluators = await PropertyEvaluator.find({ state: req.body.location.name.state.toLowerCase(), isActive: true }) //We get all the evaluators with the same state and who are active
+            if (propertyEvaluators.length === 0) {
+                //The if statement is run when we get no evaluators with the same district and state
+                return res.status(StatusCodes.OK).json({ status: 'no-evaluator-available', message: 'No evaluator is available' })
+            }
         }
-        await FieldAgent.findOneAndUpdate({ _id: req.fieldAgent._id },
-            { propertiesAdded: updatedPropertiesFieldAgent },
-            { new: true, runValidators: true })
 
-        const propertyDealer = await PropertyDealer.findOne({ id: req.body.addedByPropertyDealer })
-        const updatedCommercialPropertiesPropertyDealer = [...propertyDealer.propertiesAdded.commercial, property._id]
-        const updatedPropertiesPropertyDealer = {
-            agricultural: propertyDealer.propertiesAdded.agricultural,
-            commercial: updatedCommercialPropertiesPropertyDealer,
-            residential: propertyDealer.propertiesAdded.residential
+        //The if statement below is run when we get some evaluators from the database
+        if (propertyEvaluators && propertyEvaluators.length > 0) {
+            const randomIndex = Math.floor(Math.random() * propertyEvaluators.length) // Generate a random index
+            const randomPropertyEvaluator = propertyEvaluators[randomIndex]   // Retrieve the random evaluator
+            req.body.propertyEvaluator = randomPropertyEvaluator._id //we add the ID of the evaluator to the body of the commercial property
+
+            const uniqueId = await uniqueIdGeneratorForProperty('commercial', req.body.location.name.state) //The code is used to generate a unique Id for the commercial property
+            const property = await CommercialProperty.create({ ...req.body, uniqueId }) //A new commercial proeprty is added to the database
+
+            //This variable contains updated value of all the properties which have to be evaluated by the evaluator
+            const pendingPropertyEvaluations = [...randomPropertyEvaluator.pendingPropertyEvaluations, {
+                propertyType: 'commercial',
+                district: req.body.location.name.district.toLowerCase(),
+                state: req.body.location.name.state.toLowerCase(),
+                date: Date.now(),
+                propertyId: property._id
+            }]
+
+            //The query below is used to update the pendingPropertyEvaluations field in the evaluator document
+            await PropertyEvaluator.findOneAndUpdate({ _id: randomPropertyEvaluator._id },
+                { pendingPropertyEvaluations },
+                { new: true, runValidators: true })
+
+            const fieldAgent = req.fieldAgent //This variable contains the fieldAgent data
+            const updatedCommercialPropertiesFieldAgent = [...fieldAgent.propertiesAdded.commercial, property._id] //This variable contains the updated commercial properties added by the fieldAgent
+            const updatedPropertiesFieldAgent = {
+                agricultural: fieldAgent.propertiesAdded.agricultural,
+                commercial: updatedCommercialPropertiesFieldAgent,
+                residential: fieldAgent.propertiesAdded.residential
+            } //This variable contains all the properties added by the field agent
+
+            //The query below is used to update the propertiesAdded field in the fieldAgent document
+            await FieldAgent.findOneAndUpdate({ _id: req.fieldAgent._id },
+                { propertiesAdded: updatedPropertiesFieldAgent },
+                { new: true, runValidators: true })
+
+            const propertyDealer = await PropertyDealer.findOne({ _id: req.body.addedByPropertyDealer }) //This variable contains the data about propertyDealer that adds the property
+
+            const updatedCommercialPropertiesPropertyDealer = [...propertyDealer.propertiesAdded.commercial, property._id]  //This variable contains the updated commercia properties added by the property dealer
+            const updatedPropertiesPropertyDealer = {
+                agricultural: propertyDealer.propertiesAdded.agricultural,
+                commercial: updatedCommercialPropertiesPropertyDealer,
+                residential: propertyDealer.propertiesAdded.residential
+            } //This variable contains all the properties added by the proeprty dealer
+
+            //The query below is used to update the propertiesAdded field in the proeprty dealer document
+            await PropertyDealer.findOneAndUpdate({ _id: req.body.addedByPropertyDealer },
+                { propertiesAdded: updatedPropertiesPropertyDealer },
+                { new: true, runValidators: true })
+
+            return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Commercial property has been added' })
         }
-        await PropertyDealer.findOneAndUpdate({ _id: req.body.addedByPropertyDealer },
-            { propertiesAdded: updatedPropertiesPropertyDealer },
-            { new: true, runValidators: true })
 
         return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Commercial property has been added' })
     } catch (error) {
@@ -264,19 +367,25 @@ const addCommercialProperty = async (req, res, next) => {
     }
 }
 
+//This function is used to add a residential property to database
 const addResidentialProperty = async (req, res, next) => {
     try {
-        req.body.addedByFieldAgent = req.fieldAgent._id
+        req.body.addedByFieldAgent = req.fieldAgent._id  //Here we add the ID of field agent to the request body
 
         const { residentialPropertyType, residentialLandImagesUrl, price, legalRestrictions } = req.body
 
+        //The if statements below are used to verify the data received in request body
         if (residentialPropertyType.toLowerCase() !== 'flat' && residentialPropertyType.toLowerCase() !== 'plot' && residentialPropertyType.toLowerCase() !== 'house') {
             throw new CustomAPIError('Residential type details are not present', StatusCodes.BAD_REQUEST)
         }
 
+        console.log(req.body)
+
         if (!price.fixed && (!price.range.from && !price.range.to)) {
             throw new CustomAPIError('Price not provided', StatusCodes.BAD_REQUEST)
-        } else if (price.range && (!price.range.from || !price.range.to)) {
+        } else if (price.fixed && (price.range.from || price.range.to)) {
+            throw new CustomAPIError('Invalide data', StatusCodes.BAD_REQUEST)
+        } else if ((price.range.from && !price.range.to) || (!price.range.from && price.range.to)) {
             throw new CustomAPIError('Range of price not provided', StatusCodes.BAD_REQUEST)
         }
 
@@ -288,38 +397,76 @@ const addResidentialProperty = async (req, res, next) => {
             throw new CustomAPIError('No land images provided', StatusCodes.BAD_REQUEST)
         }
 
-        const uniqueId = await uniqueIdGeneratorForProperty('residential', req.body.location.name.state)
-        const property = await ResidentialProperty.create({ ...req.body, uniqueId })
 
-        const fieldAgent = req.fieldAgent
-        const updatedResidentialPropertiesFieldAgent = [...fieldAgent.propertiesAdded.residential, property._id]
-        const updatedPropertiesFieldAgent = {
-            agricultural: fieldAgent.propertiesAdded.agricultural,
-            commercial: fieldAgent.propertiesAdded.commercial,
-            residential: updatedResidentialPropertiesFieldAgent
+        //The code below is used to assign the property to an evaluator
+        let propertyEvaluators
+        propertyEvaluators = await PropertyEvaluator.find({ district: req.body.location.name.district.toLowerCase(), isActive: true }) //We get all the evaluators with the same district and who are active
+
+        if (propertyEvaluators && propertyEvaluators.length === 0) {
+            //The if statement is run when we get no evaluators with the same district
+            propertyEvaluators = await PropertyEvaluator.find({ state: req.body.location.name.state.toLowerCase(), isActive: true }) //We get all the evaluators with the same state and who are active
+            if (propertyEvaluators.length === 0) {
+                //The if statement is run when we get no evaluators with the same district and state
+                return res.status(StatusCodes.OK).json({ status: 'no-evaluator-available', message: 'No evaluator is available' })
+            }
         }
-        await FieldAgent.findOneAndUpdate({ _id: req.fieldAgent._id },
-            { propertiesAdded: updatedPropertiesFieldAgent },
-            { new: true, runValidators: true })
 
-        const propertyDealer = await PropertyDealer.findOne({ id: req.body.addedByPropertyDealer })
-        const updatedResidentialPropertiesPropertyDealer = [...propertyDealer.propertiesAdded.residential, property._id]
-        const updatedPropertiesPropertyDealer = {
-            agricultural: propertyDealer.propertiesAdded.agricultural,
-            commercial: propertyDealer.propertiesAdded.commercial,
-            residential: updatedResidentialPropertiesFieldAgent
+        //The if statement below is run when we get some evaluators from the database
+        if (propertyEvaluators && propertyEvaluators.length > 0) {
+            const randomIndex = Math.floor(Math.random() * propertyEvaluators.length) // Generate a random index
+            const randomPropertyEvaluator = propertyEvaluators[randomIndex] // Retrieve the random evaluator
+            req.body.propertyEvaluator = randomPropertyEvaluator._id //we add the ID of the evaluator to the body of the residential property
+
+            const uniqueId = await uniqueIdGeneratorForProperty('residential', req.body.location.name.state) //The code is used to generate a unique Id for the residential property
+            const property = await ResidentialProperty.create({ ...req.body, uniqueId }) //A new residential proeprty is added to the database
+
+            //This variable contains updated value of all the properties which have to be evaluated by the evaluator
+            const pendingPropertyEvaluations = [...randomPropertyEvaluator.pendingPropertyEvaluations, {
+                propertyType: 'residential',
+                district: req.body.location.name.district.toLowerCase(),
+                state: req.body.location.name.state.toLowerCase(),
+                date: Date.now(),
+                propertyId: property._id
+            }]
+
+            //The query below is used to update the pendingPropertyEvaluations field in the evaluator document
+            await PropertyEvaluator.findOneAndUpdate({ _id: randomPropertyEvaluator._id },
+                { pendingPropertyEvaluations },
+                { new: true, runValidators: true })
+
+            const fieldAgent = req.fieldAgent //This variable contains the fieldAgent data
+            const updatedResidentialPropertiesFieldAgent = [...fieldAgent.propertiesAdded.residential, property._id] //This variable contains the updated residential properties added by the fieldAgent
+            const updatedPropertiesFieldAgent = {
+                agricultural: fieldAgent.propertiesAdded.agricultural,
+                commercial: fieldAgent.propertiesAdded.commercial,
+                residential: updatedResidentialPropertiesFieldAgent
+            }//This variable contains all the properties added by the field agent
+
+            //The query below is used to update the propertiesAdded field in the fieldAgent document
+            await FieldAgent.findOneAndUpdate({ _id: req.fieldAgent._id },
+                { propertiesAdded: updatedPropertiesFieldAgent },
+                { new: true, runValidators: true })
+
+            const propertyDealer = await PropertyDealer.findOne({ _id: req.body.addedByPropertyDealer }) //This variable contains the data about propertyDealer that adds the property
+
+            const updatedResidentialPropertiesPropertyDealer = [...propertyDealer.propertiesAdded.residential, property._id]  //This variable contains the updated residential properties added by the property dealer
+            const updatedPropertiesPropertyDealer = {
+                agricultural: propertyDealer.propertiesAdded.agricultural,
+                commercial: propertyDealer.propertiesAdded.commercial,
+                residential: updatedResidentialPropertiesPropertyDealer
+            } //This variable contains all the properties added by the proeprty dealer
+
+            //The query below is used to update the propertiesAdded field in the proeprty dealer document
+            await PropertyDealer.findOneAndUpdate({ _id: req.body.addedByPropertyDealer },
+                { propertiesAdded: updatedPropertiesPropertyDealer },
+                { new: true, runValidators: true })
+
+            return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Residential property has been added' })
         }
-        await PropertyDealer.findOneAndUpdate({ _id: req.body.addedByPropertyDealer },
-            { propertiesAdded: updatedPropertiesPropertyDealer },
-            { new: true, runValidators: true })
-
-        return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Residential property has been added' })
     } catch (error) {
         next(error)
     }
 }
-
-
 
 module.exports = {
     propertyDealerExists, sendOtpToEmailForDealerVerification, confirmOtpForDealerVerification, addAgriculturalProperty, addCommercialProperty, addResidentialProperty

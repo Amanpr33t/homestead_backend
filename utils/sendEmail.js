@@ -1,5 +1,7 @@
 const nodemailer = require("nodemailer");
 require('express-async-errors')
+
+//This function is used to send an email
 const sendEmail = async ({ from, to, subject, msg }) => {
     const transporter = nodemailer.createTransport({
         host: 'smtp.ethereal.email',

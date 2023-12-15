@@ -16,6 +16,7 @@ const errorHandlerMiddleware = require('./middleware/errorHandlerMiddleware')
 //const rateLimit = require('express-rate-limit')
 //const mongoSanitize= require('express-mongo-sanitize')
 const fieldAgentRouter = require('./routes/fieldAgentRouter')
+const propertyEvaluatorRouter = require('./routes/propertyEvaluatorRouter')
 
 const cloudinary = require('cloudinary').v2
 cloudinary.config({
@@ -40,8 +41,10 @@ app.use((req, res, next) => {
 //app.use(mongoSanitize())
 
 app.use('/field-agent', fieldAgentRouter)
-app.use(notFound)
-app.use(errorHandlerMiddleware)
+app.use('/property-evaluator', propertyEvaluatorRouter)
+app.use(notFound) //this middleware runs when no other route is matched
+app.use(errorHandlerMiddleware) //the error handling middleware
+
 
 const start = async () => {
     try {

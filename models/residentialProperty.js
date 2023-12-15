@@ -40,8 +40,8 @@ const ResidentialPropertySchema = new mongoose.Schema({
             required: true
         },
         twentyFourHours: {
-            type: Boolean,
-            required: true
+            type: Boolean || null,
+            default: null
         }
     },
     electricityConnection: {
@@ -120,8 +120,7 @@ const ResidentialPropertySchema = new mongoose.Schema({
         },
         details: {
             type: String,
-            required: true,
-            trim: true
+            trim: true,
         },
     },
     propertyTaxes: {
@@ -255,6 +254,11 @@ const ResidentialPropertySchema = new mongoose.Schema({
         type: mongoose.Types.ObjectId,
         ref: 'PropertyDealer',
         required: [true, 'Please provide a property dealer id']
+    },
+    propertyEvaluator:{
+        type: mongoose.Types.ObjectId,
+        ref: 'PropertyEvaluator',
+        required: [true, 'Please provide a property evaluator id']
     },
     uniqueId: {
         type: String,

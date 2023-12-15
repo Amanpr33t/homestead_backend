@@ -5,6 +5,7 @@ const AgriculturalProperty = require('../../models/agriculturalProperty')
 const CommercialProperty = require('../../models/commercialProperty')
 const ResidentialProperty = require('../../models/residentialProperty')
 
+//The function provides the number of agricultural proeprties added by the field agent
 const agriculturalPropertiesAddedByFieldAgent = async (req, res, next) => {
     try {
         const agriculturalProperties = await AgriculturalProperty.find({
@@ -16,6 +17,7 @@ const agriculturalPropertiesAddedByFieldAgent = async (req, res, next) => {
     }
 }
 
+//The function provides the number of commercial proeprties added by the field agent
 const commercialPropertiesAddedByFieldAgent = async (req, res, next) => {
     try {
         const commercialProperties = await CommercialProperty.find({
@@ -27,6 +29,7 @@ const commercialPropertiesAddedByFieldAgent = async (req, res, next) => {
     }
 }
 
+//The function provides the number of residential proeprties added by the field agent
 const residentialPropertiesAddedByFieldAgent = async (req, res, next) => {
     try {
         const residentialProperties = await ResidentialProperty.find({
@@ -38,6 +41,7 @@ const residentialPropertiesAddedByFieldAgent = async (req, res, next) => {
     }
 }
 
+//The function provides the number of property dealers added by the field agent
 const propertyDealersAddedByFieldAgent = async (req, res, next) => {
     try {
         const propertyDealers = await PropertyDealer.find({
@@ -49,6 +53,7 @@ const propertyDealersAddedByFieldAgent = async (req, res, next) => {
     }
 }
 
+//The function is used to get the firmName of property dealer of a property
 const propertyDealerOfaProperty = async (req, res, next) => {
     try {
         const dealer = await PropertyDealer.findOne({ _id: req.params.id })
@@ -58,6 +63,7 @@ const propertyDealerOfaProperty = async (req, res, next) => {
     }
 }
 
+////The function provides the number of proeprties and property dealers added by the field agent
 const numberOfPropertyDealersAndPropertiesAddedByFieldAgent = async (req, res, next) => {
     try {
         const propertyDealersAddedByFieldAgent = req.fieldAgent.propertyDealersAdded.length

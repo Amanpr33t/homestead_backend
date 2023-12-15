@@ -9,50 +9,53 @@ const origin = process.env.ORIGIN
 const emailValidator = require("email-validator")
 const { uniqueIdGeneratorForPropertyDealer } = require('../../utils/uniqueIdGenerator')
 
+//The function is used to add a property dealer
 const addPropertyDealer = async (req, res, next) => {
     try {
-        req.body.addedByFieldAgent = req.fieldAgent._id
+        req.body.addedByFieldAgent = req.fieldAgent._id //field agent ID is added to the request body
         const {
             addressArray,
             about,
             email,
         } = req.body
 
+        //The if statements below are used to verify the request body data
         addressArray.forEach(address => {
             const { postalCode } = address
             if (postalCode && postalCode.toString().length !== 6) {
                 throw new CustomAPIError('Postal code should be a 6 digit number', 204)
             }
         })
-
         if (!addressArray.length || !emailValidator.validate(email.trim()) || about.trim().split(/\s+/) > 150) {
             throw new CustomAPIError('Incorrect data', 204)
         }
 
-        const propertyDealerGstNumberExists = await PropertyDealer.findOne({ gstNumber: req.body.gstNumber })
-        const propertyDealerReraNumberExists = await PropertyDealer.findOne({ reraNumber: req.body.reraNumber })
-        const propertyDealerEmailExists = await PropertyDealer.findOne({ email: req.body.email })
-        const propertyDealerContactNumberExists = await PropertyDealer.findOne({ contactNumber: req.body.contactNumber })
+        const propertyDealerGstNumberExists = await PropertyDealer.findOne({ gstNumber: req.body.gstNumber }) //Checks whether another property dealer with same gst number exists
+        const propertyDealerReraNumberExists = await PropertyDealer.findOne({ reraNumber: req.body.reraNumber }) //Checks whether another property dealer with same RERA number exists
+        const propertyDealerEmailExists = await PropertyDealer.findOne({ email: req.body.email }) //Checks whether another property dealer with same email exists
+        const propertyDealerContactNumberExists = await PropertyDealer.findOne({ contactNumber: req.body.contactNumber }) //Checks whether another property dealer with same contact number exists
 
         if (propertyDealerEmailExists || propertyDealerContactNumberExists || propertyDealerGstNumberExists || propertyDealerReraNumberExists) {
             throw new CustomAPIError('Another property dealer with the same email, gst number, RERA number or contact number already exists', 204)
         }
 
-        const uniqueId = await uniqueIdGeneratorForPropertyDealer()
-        const newPropertyDealer = await PropertyDealer.create({ ...req.body, uniqueId })
+        const uniqueId = await uniqueIdGeneratorForPropertyDealer() //generates a unique ID for the proeprty dealer
+        const newPropertyDealer = await PropertyDealer.create({ ...req.body, uniqueId }) //Creates a new proeprty dealer in the database
 
-        const propertyDealersAddedByFieldAgent = req.fieldAgent.propertyDealersAdded
-        const updatePropertyDealersAddedByFieldAgent = newPropertyDealer && [...propertyDealersAddedByFieldAgent, newPropertyDealer._id]
+        const propertyDealersAddedByFieldAgent = req.fieldAgent.propertyDealersAdded //This variable stores all the property dealers that have been stored by the field agent
+        const updatePropertyDealersAddedByFieldAgent = newPropertyDealer && [...propertyDealersAddedByFieldAgent, newPropertyDealer._id] //Updated value of the property dealers added by the field agent
 
         await FieldAgent.findOneAndUpdate({ _id: req.fieldAgent._id },
             { propertyDealersAdded: updatePropertyDealersAddedByFieldAgent },
             { new: true, runValidators: true })
+
         return res.status(StatusCodes.OK).json({ status: 'ok', message: 'property dealer has been successfully added' })
     } catch (error) {
         next(error)
     }
 }
 
+//The function is used to check if the another property dealer with same email exists
 const propertyDealerEmailExists = async (req, res, next) => {
     try {
         const { email } = req.query
@@ -66,6 +69,7 @@ const propertyDealerEmailExists = async (req, res, next) => {
     }
 }
 
+//The function is used to check if the another property dealer with same contact number exists
 const propertyDealerContactNumberExists = async (req, res, next) => {
     try {
         const { contactNumber } = req.query
@@ -79,6 +83,7 @@ const propertyDealerContactNumberExists = async (req, res, next) => {
     }
 }
 
+//The function is used to check if the another property dealer with same gst number exists
 const propertyDealerGstNumberExists = async (req, res, next) => {
     try {
         const { gstNumber } = req.query
@@ -92,6 +97,7 @@ const propertyDealerGstNumberExists = async (req, res, next) => {
     }
 }
 
+//The function is used to check if the another property dealer with same RERA number exists
 const propertyDealerReraNumberExists = async (req, res, next) => {
     try {
         const { reraNumber } = req.query

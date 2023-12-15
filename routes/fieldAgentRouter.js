@@ -1,38 +1,42 @@
 const express = require('express')
 const router = express.Router()
 require('express-async-errors')
+
+const authenticateFieldAgent = require('../middleware/authenticateFieldAgent')
+
 const { signIn, logout, signup } = require('../controllers/field-agent/fieldAgentSignin')
 const { forgotPassword, updatePassword, confirmPasswordVerificationToken, resetPasswordVerificationToken } = require('../controllers/field-agent/forgotPassword')
-const authenticateFieldAgent = require('../middleware/authenticateFieldAgent')
+
 const { addPropertyDealer, propertyDealerEmailExists, propertyDealerContactNumberExists, propertyDealerGstNumberExists, propertyDealerReraNumberExists } = require('../controllers/field-agent/addPropertyDealer')
 const { numberOfPropertyDealersAndPropertiesAddedByFieldAgent, propertyDealersAddedByFieldAgent, agriculturalPropertiesAddedByFieldAgent, propertyDealerOfaProperty, commercialPropertiesAddedByFieldAgent, residentialPropertiesAddedByFieldAgent } = require('../controllers/field-agent/propertiesAndPropertyDealersAddedByFieldAgent')
+
 const { propertyDealerExists, sendOtpToEmailForDealerVerification, confirmOtpForDealerVerification, addAgriculturalProperty, addCommercialProperty, addResidentialProperty } = require('../controllers/field-agent/addProperty')
 
-router.post('/signIn', signIn)
-router.patch('/logout', authenticateFieldAgent, logout)
-router.post('/signUp', signup)
-router.patch('/forgotPassword', forgotPassword)
-router.patch('/updatePassword', updatePassword)
-router.post('/confirmPasswordVerificationToken', confirmPasswordVerificationToken)
-router.patch('/resetPasswordVerificationToken', resetPasswordVerificationToken)
+router.post('/signIn', signIn) //to sign in a field agent
+router.patch('/logout', authenticateFieldAgent, logout) //to logout a field agent
+router.post('/signUp', signup) 
+router.patch('/forgotPassword', forgotPassword) //in case the field agent forgets password
+router.patch('/updatePassword', updatePassword) //to update a new password for field agent
+router.post('/confirmPasswordVerificationToken', confirmPasswordVerificationToken) //to confirm the OTP send by the user for password updation
+router.patch('/resetPasswordVerificationToken', resetPasswordVerificationToken) //to reset the value of password verification token in the database
 
-router.post('/addPropertyDealer', authenticateFieldAgent, addPropertyDealer)
-router.get('/propertyDealerEmailExists', propertyDealerEmailExists)
-router.get('/propertyDealerContactNumberExists', propertyDealerContactNumberExists)
-router.get('/propertyDealerGstNumberExists', propertyDealerGstNumberExists)
-router.get('/propertyDealerReraNumberExists', propertyDealerReraNumberExists)
+router.post('/addPropertyDealer', authenticateFieldAgent, addPropertyDealer) //to add a property dealer
+router.get('/propertyDealerEmailExists', propertyDealerEmailExists) //to check if a property dealer with similar email exists
+router.get('/propertyDealerContactNumberExists', propertyDealerContactNumberExists) //to check if a property dealer with similar contact number exists
+router.get('/propertyDealerGstNumberExists', propertyDealerGstNumberExists) //to check if a property dealer with similar GST number exists
+router.get('/propertyDealerReraNumberExists', propertyDealerReraNumberExists) //to check if a property dealer with similar email exists
 
-router.get('/numberOfPropertyDealersAndPropertiesAddedByFieldAgent', authenticateFieldAgent, numberOfPropertyDealersAndPropertiesAddedByFieldAgent)
-router.get('/propertyDealersAddedByFieldAgent', authenticateFieldAgent, propertyDealersAddedByFieldAgent)
-router.get('/agriculturalPropertiesAddedByFieldAgent', authenticateFieldAgent, agriculturalPropertiesAddedByFieldAgent)
-router.get('/commercialPropertiesAddedByFieldAgent', authenticateFieldAgent, commercialPropertiesAddedByFieldAgent)
-router.get('/residentialPropertiesAddedByFieldAgent', authenticateFieldAgent, residentialPropertiesAddedByFieldAgent)
-router.get('/propertyDealerOfaProperty/:id', authenticateFieldAgent, propertyDealerOfaProperty)
+router.get('/numberOfPropertyDealersAndPropertiesAddedByFieldAgent', authenticateFieldAgent, numberOfPropertyDealersAndPropertiesAddedByFieldAgent) //to get the number of properties and proerty dealers added by the field agent
+router.get('/propertyDealersAddedByFieldAgent', authenticateFieldAgent, propertyDealersAddedByFieldAgent) //to get the property dealers added by the field agent
+router.get('/agriculturalPropertiesAddedByFieldAgent', authenticateFieldAgent, agriculturalPropertiesAddedByFieldAgent)  //to get the agricultural properties added by the field agent
+router.get('/commercialPropertiesAddedByFieldAgent', authenticateFieldAgent, commercialPropertiesAddedByFieldAgent)  //to get the commercial properties added by the field agent
+router.get('/residentialPropertiesAddedByFieldAgent', authenticateFieldAgent, residentialPropertiesAddedByFieldAgent) //to get the residential properties added by the field agent
+router.get('/propertyDealerOfaProperty/:id', authenticateFieldAgent, propertyDealerOfaProperty) //to get the firmName of a property dealer of aproeprty
 
-router.get('/propertyDealerOtpGeneration', authenticateFieldAgent, propertyDealerExists, sendOtpToEmailForDealerVerification)
-router.get('/propertyDealerOtpVerification', authenticateFieldAgent, confirmOtpForDealerVerification)
-router.post('/addAgriculturalProperty', authenticateFieldAgent, addAgriculturalProperty)
-router.post('/addCommercialProperty', authenticateFieldAgent, addCommercialProperty)
-router.post('/addResidentialProperty', authenticateFieldAgent, addResidentialProperty)
+router.get('/propertyDealerOtpGeneration', authenticateFieldAgent, propertyDealerExists, sendOtpToEmailForDealerVerification) //To send an OTP to property dealer before a field agent can add a proeprty
+router.get('/propertyDealerOtpVerification', authenticateFieldAgent, confirmOtpForDealerVerification) //to confirm the OTP sent to property dealer before adding a property
+router.post('/addAgriculturalProperty', authenticateFieldAgent, addAgriculturalProperty) //to add an agricultural property
+router.post('/addCommercialProperty', authenticateFieldAgent, addCommercialProperty) //to add a commercial property
+router.post('/addResidentialProperty', authenticateFieldAgent, addResidentialProperty) //to add an residential property
 
 module.exports = router

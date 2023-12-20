@@ -32,12 +32,32 @@ const PropertyEvaluatorSchema = new mongoose.Schema({
         default: null
     },
     propertiesSuccessfullyEvaluated: {
-        type: Array,
-        default: []
+        agricultural: {
+            type: Array,
+            default: []
+        },
+        commercial: {
+            type: Array,
+            default: []
+        },
+        residential: {
+            type: Array,
+            default: []
+        }
     },
     propertiesSentToFieldAgentForReconsideration: {
-        type: Array,
-        default: []
+        agricultural: {
+            type: Array,
+            default: []
+        },
+        commercial: {
+            type: Array,
+            default: []
+        },
+        residential: {
+            type: Array,
+            default: []
+        }
     },
     pendingPropertyEvaluations: [
         {

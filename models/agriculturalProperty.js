@@ -18,7 +18,7 @@ const LandSizeSchema = new mongoose.Schema({
     _id: {
         type: Schema.Types.ObjectId,
         default: undefined,
-      },
+    },
 })
 const RoadConnectivitySchema = new mongoose.Schema({
     roadType: {
@@ -33,7 +33,7 @@ const RoadConnectivitySchema = new mongoose.Schema({
     _id: {
         type: Schema.Types.ObjectId,
         default: undefined,
-      },
+    },
 })
 const LegalRestrictionsSchema = new mongoose.Schema({
     isLegalRestrictions: {
@@ -47,7 +47,7 @@ const LegalRestrictionsSchema = new mongoose.Schema({
     _id: {
         type: Schema.Types.ObjectId,
         default: undefined,
-      },
+    },
 })
 const PropertyLocationSchema = new mongoose.Schema({
     name: {
@@ -77,7 +77,7 @@ const PropertyLocationSchema = new mongoose.Schema({
     _id: {
         type: Schema.Types.ObjectId,
         default: undefined,
-      }
+    }
 })
 const WaterSourceSchema = new mongoose.Schema({
     canal: {
@@ -100,7 +100,7 @@ const WaterSourceSchema = new mongoose.Schema({
     _id: {
         type: Schema.Types.ObjectId,
         default: undefined,
-      }
+    }
 })
 const ReservoirSchema = new mongoose.Schema({
     isReservoir: {
@@ -119,10 +119,14 @@ const ReservoirSchema = new mongoose.Schema({
     _id: {
         type: Schema.Types.ObjectId,
         default: undefined,
-      }
+    }
 })
 
 const AgriculturalPropertySchema = new mongoose.Schema({
+    propertyType:{
+        type:String,
+        default:'agricultural'
+    },
     landSize: LandSizeSchema,
     location: PropertyLocationSchema,
     roadConnectivity: RoadConnectivitySchema,
@@ -185,14 +189,78 @@ const AgriculturalPropertySchema = new mongoose.Schema({
         ref: 'PropertyDealer',
         required: [true, 'Please provide a property dealer id']
     },
-    propertyEvaluator:{
+    propertyEvaluator: {
         type: mongoose.Types.ObjectId,
         ref: 'PropertyEvaluator',
         required: [true, 'Please provide a property evaluator id']
     },
-    uniqueId:{
-        type:String,
-        required:true
+    uniqueId: {
+        type: String,
+        required: true
+    },
+    isEvaluatedSuccessfully: {
+        type: Boolean,
+        default: false
+    },
+    sentBackTofieldAgentForReevaluation: {
+        type: Boolean,
+        default: false
+    },
+    evaluationData: {
+        information: {
+            isInformationComplete: {
+                type: Boolean,
+                default: null
+            },
+            details: {
+                type: Array
+            }
+        },
+        photographs: {
+            arePhotographsComplete: {
+                type: Boolean,
+                default: null
+            },
+            details: {
+                type: String,
+                default: null
+            }
+        },
+        typeOfLocation: {
+            type: String,
+            default: null
+        },
+        locationStatus: {
+            type: String,
+            default: null
+        },
+        fairValueOfProperty: {
+            type: Number,
+            default: null
+        },
+        fiveYearProjectionOfPrices: {
+            increase: {
+                type: Boolean,
+                default: null
+            },
+            decrease: {
+                type: Boolean,
+                default: null
+            },
+            percentageIncreaseOrDecrease: {
+                type: Number,
+                default: null
+            }
+        },
+        conditionOfConstruction: {
+            type: String,
+            default: null
+        },
+        qualityOfConstructionRating: {
+            type: Number,
+            default: null
+        },
+        evaluatedAt: Date
     }
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 

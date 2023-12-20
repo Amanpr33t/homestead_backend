@@ -6,7 +6,7 @@ const authenticatePropertyEvaluator = require('../middleware/authenticatePropert
 const { signIn, logout, signup } = require('../controllers/property-evaluator/signIn')
 const { forgotPassword, updatePassword, confirmPasswordVerificationToken, resetPasswordVerificationToken } = require('../controllers/property-evaluator/forgotPassword')
 
-const { propertyEvaluationData } = require('../controllers/property-evaluator/propertyEvaluationData')
+const { propertyEvaluationData, propertiesPendingToBeEvaluated, fetchSelectedProperty, propertyReevaluationOfData, successfulEvaluationOfData } = require('../controllers/property-evaluator/propertyEvaluationData')
 
 
 router.post('/signIn', signIn) //to sign in an evaluator
@@ -18,5 +18,9 @@ router.post('/confirmPasswordVerificationToken', confirmPasswordVerificationToke
 router.patch('/resetPasswordVerificationToken', resetPasswordVerificationToken) //to reset the password verification token
 
 router.get('/propertyEvaluationData', authenticatePropertyEvaluator, propertyEvaluationData) //to get data about properties evaluated by the the evaluator
+router.get('/propertiesPendingToBeEvaluated', authenticatePropertyEvaluator, propertiesPendingToBeEvaluated)
+router.get('/fetch-selected-property', authenticatePropertyEvaluator, fetchSelectedProperty)
+router.post('/property-evaluation-data-update', authenticatePropertyEvaluator, propertyReevaluationOfData)
+router.post('/successful-evaluation-of-data', authenticatePropertyEvaluator, successfulEvaluationOfData)
 
 module.exports = router

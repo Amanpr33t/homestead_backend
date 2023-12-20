@@ -68,12 +68,16 @@ const PropertyLocationSchema = new mongoose.Schema({
 })
 
 const CommercialPropertySchema = new mongoose.Schema({
+    propertyType:{
+        type:String,
+        default:'commercial'
+    },
     commercialPropertyType: {
         type: String,
         required: true,
         trim: true
     },
-    stateOfProperty:{
+    stateOfProperty: {
         empty: {
             type: Boolean,
             required: true
@@ -158,7 +162,7 @@ const CommercialPropertySchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    legalRestrictions:{
+    legalRestrictions: {
         isLegalRestrictions: {
             type: Boolean,
             required: true
@@ -178,15 +182,82 @@ const CommercialPropertySchema = new mongoose.Schema({
         ref: 'PropertyDealer',
         required: [true, 'Please provide a property dealer id']
     },
-    propertyEvaluator:{
+    propertyEvaluator: {
         type: mongoose.Types.ObjectId,
         ref: 'PropertyEvaluator',
         required: [true, 'Please provide a property evaluator id']
     },
-    uniqueId:{
-        type:String,
-        required:true
+    uniqueId: {
+        type: String,
+        required: true
+    },
+    isEvaluatedSuccessfully: {
+        type: Boolean,
+        default: false
+    },
+    sentBackTofieldAgentForReevaluation: {
+        type: Boolean,
+        default: false
+    },
+    evaluationData: {
+        information: {
+            isInformationComplete: {
+                type: Boolean,
+                default: null
+            },
+            details: {
+                type: Array
+            }
+        },
+        photographs: {
+            arePhotographsComplete: {
+                type: Boolean,
+                default: null
+            },
+            details: {
+                type: String,
+                default: null
+            }
+        },
+        typeOfLocation: {
+            type: String,
+            default: null
+        },
+        locationStatus: {
+            type: String,
+            default: null
+        },
+        fairValueOfProperty: {
+            type: Number,
+            default: null
+        },
+        fiveYearProjectionOfPrices: {
+            increase: {
+                type: Boolean,
+                default: null
+            },
+            decrease: {
+                type: Boolean,
+                default: null
+            },
+            percentageIncreaseOrDecrease: {
+                type: Number,
+                default: null
+            }
+        },
+        conditionOfConstruction: {
+            type: String,
+            default: null
+        },
+        qualityOfConstructionRating: {
+            type: Number,
+            default: null
+        },
+        evaluatedAt:Date
     }
+
+
+    
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 
 module.exports = mongoose.model('CommercialProperty', CommercialPropertySchema)

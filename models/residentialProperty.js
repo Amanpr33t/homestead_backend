@@ -4,6 +4,10 @@ require('express-async-errors')
 
 const ResidentialPropertySchema = new mongoose.Schema({
     //common fields
+    propertyType:{
+        type:String,
+        default:'residential'
+    },
     residentialPropertyType: {
         type: String,
         required: true,
@@ -125,12 +129,10 @@ const ResidentialPropertySchema = new mongoose.Schema({
     },
     propertyTaxes: {
         type: Number || null,
-        required: true,
         default: null
     },
     homeOwnersAssociationFees: {
         type: Number || null,
-        required: true,
         default: null
     },
     location: {
@@ -255,14 +257,78 @@ const ResidentialPropertySchema = new mongoose.Schema({
         ref: 'PropertyDealer',
         required: [true, 'Please provide a property dealer id']
     },
-    propertyEvaluator:{
+    uniqueId: {
+        type: String,
+        required: true
+    },
+    propertyEvaluator: {
         type: mongoose.Types.ObjectId,
         ref: 'PropertyEvaluator',
         required: [true, 'Please provide a property evaluator id']
     },
-    uniqueId: {
-        type: String,
-        required: true
+    isEvaluatedSuccessfully: {
+        type: Boolean,
+        default: false
+    },
+    sentBackTofieldAgentForReevaluation: {
+        type: Boolean,
+        default: false
+    },
+    evaluationData: {
+        information: {
+            isInformationComplete: {
+                type: Boolean,
+                default: null
+            },
+            details: {
+                type: Array
+            }
+        },
+        photographs: {
+            arePhotographsComplete: {
+                type: Boolean,
+                default: null
+            },
+            details: {
+                type: String,
+                default: null
+            }
+        },
+        typeOfLocation: {
+            type: String,
+            default: null
+        },
+        locationStatus: {
+            type: String,
+            default: null
+        },
+        fairValueOfProperty: {
+            type: Number,
+            default: null
+        },
+        fiveYearProjectionOfPrices: {
+            increase: {
+                type: Boolean,
+                default: null
+            },
+            decrease: {
+                type: Boolean,
+                default: null
+            },
+            percentageIncreaseOrDecrease: {
+                type: Number,
+                default: null
+            }
+        },
+        conditionOfConstruction: {
+            type: String,
+            default: null
+        },
+        qualityOfConstructionRating: {
+            type: Number,
+            default: null
+        },
+        evaluatedAt: Date
     }
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 

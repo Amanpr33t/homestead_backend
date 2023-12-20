@@ -1,7 +1,7 @@
 const validator = require('validator')
 const mongoose = require('mongoose')
 const bcrypt = require('bcryptjs');
-const jwt= require('jsonwebtoken')
+const jwt = require('jsonwebtoken')
 require('express-async-errors')
 
 const FieldAgentSchema = new mongoose.Schema({
@@ -23,17 +23,17 @@ const FieldAgentSchema = new mongoose.Schema({
         default: null
     },
     propertiesAdded: {
-        agricultural:{
-            type:Array,
-            default:[]
+        agricultural: {
+            type: Array,
+            default: []
         },
-        commercial:{
-            type:Array,
-            default:[]
+        commercial: {
+            type: Array,
+            default: []
         },
-        residential:{
-            type:Array,
-            default:[]
+        residential: {
+            type: Array,
+            default: []
         }
     },
     propertyDealersAdded: {
@@ -47,6 +47,20 @@ const FieldAgentSchema = new mongoose.Schema({
     passwordVerificationTokenExpirationDate: {
         type: Date,
         default: null
+    },
+    propertyReceivedForReevaluation: {
+        agricultural: {
+            type: Array,
+            default: []
+        },
+        commercial: {
+            type: Array,
+            default: []
+        },
+        residential: {
+            type: Array,
+            default: []
+        }
     }
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 

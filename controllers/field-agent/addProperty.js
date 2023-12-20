@@ -204,7 +204,7 @@ const addAgriculturalProperty = async (req, res, next) => {
             propertyEvaluators = await PropertyEvaluator.find({ state: req.body.location.name.state.toLowerCase(), isActive: true }) //We get all the evaluators with the same state and who are active
             if (propertyEvaluators.length === 0) {
                 //The if statement is run when we get no evaluators with the same district and state
-                return res.status(StatusCodes.OK).json({ status: 'no-evaluator-available', message: 'No evaluator is available' })
+                propertyEvaluators = await PropertyEvaluator.find()
             }
         }
 
@@ -304,7 +304,7 @@ const addCommercialProperty = async (req, res, next) => {
             propertyEvaluators = await PropertyEvaluator.find({ state: req.body.location.name.state.toLowerCase(), isActive: true }) //We get all the evaluators with the same state and who are active
             if (propertyEvaluators.length === 0) {
                 //The if statement is run when we get no evaluators with the same district and state
-                return res.status(StatusCodes.OK).json({ status: 'no-evaluator-available', message: 'No evaluator is available' })
+                propertyEvaluators = await PropertyEvaluator.find()
             }
         }
 
@@ -379,8 +379,6 @@ const addResidentialProperty = async (req, res, next) => {
             throw new CustomAPIError('Residential type details are not present', StatusCodes.BAD_REQUEST)
         }
 
-        console.log(req.body)
-
         if (!price.fixed && (!price.range.from && !price.range.to)) {
             throw new CustomAPIError('Price not provided', StatusCodes.BAD_REQUEST)
         } else if (price.fixed && (price.range.from || price.range.to)) {
@@ -397,17 +395,17 @@ const addResidentialProperty = async (req, res, next) => {
             throw new CustomAPIError('No land images provided', StatusCodes.BAD_REQUEST)
         }
 
-
         //The code below is used to assign the property to an evaluator
         let propertyEvaluators
+
         propertyEvaluators = await PropertyEvaluator.find({ district: req.body.location.name.district.toLowerCase(), isActive: true }) //We get all the evaluators with the same district and who are active
 
         if (propertyEvaluators && propertyEvaluators.length === 0) {
             //The if statement is run when we get no evaluators with the same district
             propertyEvaluators = await PropertyEvaluator.find({ state: req.body.location.name.state.toLowerCase(), isActive: true }) //We get all the evaluators with the same state and who are active
             if (propertyEvaluators.length === 0) {
-                //The if statement is run when we get no evaluators with the same district and state
-                return res.status(StatusCodes.OK).json({ status: 'no-evaluator-available', message: 'No evaluator is available' })
+                //The if statement is run when we get no evaluators with the same district and state is found
+                propertyEvaluators = await PropertyEvaluator.find()
             }
         }
 

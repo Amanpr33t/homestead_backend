@@ -218,47 +218,6 @@ const addAgriculturalProperty = async (req, res, next) => {
 
             const property = await AgriculturalProperty.create({ ...req.body, uniqueId }) //A new agricultural proeprty is created
 
-            //This variable contains updated value of all the properties which have to be evaluated by the evaluator
-            const pendingPropertyEvaluations = [...randomPropertyEvaluator.pendingPropertyEvaluations, {
-                propertyType: 'agricultural',
-                district: req.body.location.name.district.toLowerCase(),
-                state: req.body.location.name.state.toLowerCase(),
-                date: Date.now(),
-                propertyId: property._id
-            }]
-
-            //The query below is used to update the pendingPropertyEvaluations field in the evaluator document
-            await PropertyEvaluator.findOneAndUpdate({ _id: randomPropertyEvaluator._id },
-                { pendingPropertyEvaluations },
-                { new: true, runValidators: true })
-
-            const fieldAgent = req.fieldAgent //This variable contains the fieldAgent data
-            const updatedAgriculturalPropertiesFieldAgent = [...fieldAgent.propertiesAdded.agricultural, property._id] //This variable contains the updated agricultural properties added by the fieldAgent
-            const updatedPropertiesFieldAgent = {
-                agricultural: updatedAgriculturalPropertiesFieldAgent,
-                commercial: fieldAgent.propertiesAdded.commercial,
-                residential: fieldAgent.propertiesAdded.residential
-            } //This variable contains all the properties added by the field agent
-
-            //The query below is used to update the propertiesAdded field in the fieldAgent document
-            await FieldAgent.findOneAndUpdate({ _id: req.fieldAgent._id },
-                { propertiesAdded: updatedPropertiesFieldAgent },
-                { new: true, runValidators: true })
-
-            const propertyDealer = await PropertyDealer.findOne({ _id: req.body.addedByPropertyDealer }) //This variable contains the data about propertyDealer that adds the property
-
-            const updatedAgriculturalPropertiesPropertyDealer = [...propertyDealer.propertiesAdded.agricultural, property._id] //This variable contains the updated agricultural properties added by the property dealer
-            const updatedPropertiesPropertyDealer = {
-                agricultural: updatedAgriculturalPropertiesPropertyDealer,
-                commercial: propertyDealer.propertiesAdded.commercial,
-                residential: propertyDealer.propertiesAdded.residential
-            } //This variable contains all the properties added by the proeprty dealer
-
-            //The query below is used to update the propertiesAdded field in the proeprty dealer document
-            await PropertyDealer.findOneAndUpdate({ _id: req.body.addedByPropertyDealer },
-                { propertiesAdded: updatedPropertiesPropertyDealer },
-                { new: true, runValidators: true })
-
             return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Agricultural property has been added' })
         }
     } catch (error) {
@@ -317,51 +276,8 @@ const addCommercialProperty = async (req, res, next) => {
             const uniqueId = await uniqueIdGeneratorForProperty('commercial', req.body.location.name.state) //The code is used to generate a unique Id for the commercial property
             const property = await CommercialProperty.create({ ...req.body, uniqueId }) //A new commercial proeprty is added to the database
 
-            //This variable contains updated value of all the properties which have to be evaluated by the evaluator
-            const pendingPropertyEvaluations = [...randomPropertyEvaluator.pendingPropertyEvaluations, {
-                propertyType: 'commercial',
-                district: req.body.location.name.district.toLowerCase(),
-                state: req.body.location.name.state.toLowerCase(),
-                date: Date.now(),
-                propertyId: property._id
-            }]
-
-            //The query below is used to update the pendingPropertyEvaluations field in the evaluator document
-            await PropertyEvaluator.findOneAndUpdate({ _id: randomPropertyEvaluator._id },
-                { pendingPropertyEvaluations },
-                { new: true, runValidators: true })
-
-            const fieldAgent = req.fieldAgent //This variable contains the fieldAgent data
-            const updatedCommercialPropertiesFieldAgent = [...fieldAgent.propertiesAdded.commercial, property._id] //This variable contains the updated commercial properties added by the fieldAgent
-            const updatedPropertiesFieldAgent = {
-                agricultural: fieldAgent.propertiesAdded.agricultural,
-                commercial: updatedCommercialPropertiesFieldAgent,
-                residential: fieldAgent.propertiesAdded.residential
-            } //This variable contains all the properties added by the field agent
-
-            //The query below is used to update the propertiesAdded field in the fieldAgent document
-            await FieldAgent.findOneAndUpdate({ _id: req.fieldAgent._id },
-                { propertiesAdded: updatedPropertiesFieldAgent },
-                { new: true, runValidators: true })
-
-            const propertyDealer = await PropertyDealer.findOne({ _id: req.body.addedByPropertyDealer }) //This variable contains the data about propertyDealer that adds the property
-
-            const updatedCommercialPropertiesPropertyDealer = [...propertyDealer.propertiesAdded.commercial, property._id]  //This variable contains the updated commercia properties added by the property dealer
-            const updatedPropertiesPropertyDealer = {
-                agricultural: propertyDealer.propertiesAdded.agricultural,
-                commercial: updatedCommercialPropertiesPropertyDealer,
-                residential: propertyDealer.propertiesAdded.residential
-            } //This variable contains all the properties added by the proeprty dealer
-
-            //The query below is used to update the propertiesAdded field in the proeprty dealer document
-            await PropertyDealer.findOneAndUpdate({ _id: req.body.addedByPropertyDealer },
-                { propertiesAdded: updatedPropertiesPropertyDealer },
-                { new: true, runValidators: true })
-
             return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Commercial property has been added' })
         }
-
-        return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Commercial property has been added' })
     } catch (error) {
         next(error)
     }
@@ -417,47 +333,6 @@ const addResidentialProperty = async (req, res, next) => {
 
             const uniqueId = await uniqueIdGeneratorForProperty('residential', req.body.location.name.state) //The code is used to generate a unique Id for the residential property
             const property = await ResidentialProperty.create({ ...req.body, uniqueId }) //A new residential proeprty is added to the database
-
-            //This variable contains updated value of all the properties which have to be evaluated by the evaluator
-            const pendingPropertyEvaluations = [...randomPropertyEvaluator.pendingPropertyEvaluations, {
-                propertyType: 'residential',
-                district: req.body.location.name.district.toLowerCase(),
-                state: req.body.location.name.state.toLowerCase(),
-                date: Date.now(),
-                propertyId: property._id
-            }]
-
-            //The query below is used to update the pendingPropertyEvaluations field in the evaluator document
-            await PropertyEvaluator.findOneAndUpdate({ _id: randomPropertyEvaluator._id },
-                { pendingPropertyEvaluations },
-                { new: true, runValidators: true })
-
-            const fieldAgent = req.fieldAgent //This variable contains the fieldAgent data
-            const updatedResidentialPropertiesFieldAgent = [...fieldAgent.propertiesAdded.residential, property._id] //This variable contains the updated residential properties added by the fieldAgent
-            const updatedPropertiesFieldAgent = {
-                agricultural: fieldAgent.propertiesAdded.agricultural,
-                commercial: fieldAgent.propertiesAdded.commercial,
-                residential: updatedResidentialPropertiesFieldAgent
-            }//This variable contains all the properties added by the field agent
-
-            //The query below is used to update the propertiesAdded field in the fieldAgent document
-            await FieldAgent.findOneAndUpdate({ _id: req.fieldAgent._id },
-                { propertiesAdded: updatedPropertiesFieldAgent },
-                { new: true, runValidators: true })
-
-            const propertyDealer = await PropertyDealer.findOne({ _id: req.body.addedByPropertyDealer }) //This variable contains the data about propertyDealer that adds the property
-
-            const updatedResidentialPropertiesPropertyDealer = [...propertyDealer.propertiesAdded.residential, property._id]  //This variable contains the updated residential properties added by the property dealer
-            const updatedPropertiesPropertyDealer = {
-                agricultural: propertyDealer.propertiesAdded.agricultural,
-                commercial: propertyDealer.propertiesAdded.commercial,
-                residential: updatedResidentialPropertiesPropertyDealer
-            } //This variable contains all the properties added by the proeprty dealer
-
-            //The query below is used to update the propertiesAdded field in the proeprty dealer document
-            await PropertyDealer.findOneAndUpdate({ _id: req.body.addedByPropertyDealer },
-                { propertiesAdded: updatedPropertiesPropertyDealer },
-                { new: true, runValidators: true })
 
             return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Residential property has been added' })
         }

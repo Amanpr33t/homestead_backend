@@ -13,13 +13,55 @@ const PropertyEvaluator = require('../../models/propertyEvaluator')
 */
 const propertyEvaluationData = async (req, res, next) => {
     try {
-        const propertiesSuccessfullyEvaluated = req.propertyEvaluator.propertiesSuccessfullyEvaluated.agricultural.length + req.propertyEvaluator.propertiesSuccessfullyEvaluated.residential.length + req.propertyEvaluator.propertiesSuccessfullyEvaluated.commercial.length
+        const agriculturalPropertiesSuccessfullyEvaluated = await AgriculturalProperty.countDocuments({
+            propertyEvaluator: req.propertyEvaluator._id,
+            isEvaluatedSuccessfully: true
+        })
+        const commercialPropertiesSuccessfullyEvaluated = await CommercialProperty.countDocuments({
+            propertyEvaluator: req.propertyEvaluator._id,
+            isEvaluatedSuccessfully: true
+        })
+        const residentialPropertiesSuccessfullyEvaluated = await ResidentialProperty.countDocuments({
+            propertyEvaluator: req.propertyEvaluator._id,
+            isEvaluatedSuccessfully: true
+        })
+        const propertiesSuccessfullyEvaluated = agriculturalPropertiesSuccessfullyEvaluated + residentialPropertiesSuccessfullyEvaluated + commercialPropertiesSuccessfullyEvaluated
 
-        const propertiesSentToFieldAgentForReconsideration = req.propertyEvaluator.propertiesSentToFieldAgentForReconsideration.agricultural.length + req.propertyEvaluator.propertiesSentToFieldAgentForReconsideration.residential.length + req.propertyEvaluator.propertiesSentToFieldAgentForReconsideration.commercial.length
 
-        const pendingPropertyEvaluations = req.propertyEvaluator.pendingPropertyEvaluations.length
+        const agriculturalPropertiesSentToFieldAgentForReconsideration = await AgriculturalProperty.countDocuments({
+            propertyEvaluator: req.propertyEvaluator._id,
+            sentBackTofieldAgentForReevaluation: true
+        })
+        const commercialPropertiesSentToFieldAgentForReconsideration = await CommercialProperty.countDocuments({
+            propertyEvaluator: req.propertyEvaluator._id,
+            sentBackTofieldAgentForReevaluation: true
+        })
+        const residentialPropertiesSentToFieldAgentForReconsideration = await ResidentialProperty.countDocuments({
+            propertyEvaluator: req.propertyEvaluator._id,
+            sentBackTofieldAgentForReevaluation: true
+        })
+        const propertiesSentToFieldAgentForReconsideration = residentialPropertiesSentToFieldAgentForReconsideration + agriculturalPropertiesSentToFieldAgentForReconsideration + commercialPropertiesSentToFieldAgentForReconsideration
 
-        return res.status(StatusCodes.OK).json({ status: 'ok', propertiesSuccessfullyEvaluated, propertiesSentToFieldAgentForReconsideration, pendingPropertyEvaluations })
+
+        const agriculturalPropertiesPendingForEvaluation = await AgriculturalProperty.countDocuments({
+            propertyEvaluator: req.propertyEvaluator._id,
+            isSentForEvaluation: true
+        })
+        const commercialPropertiesPendingForEvaluation = await CommercialProperty.countDocuments({
+            propertyEvaluator: req.propertyEvaluator._id,
+            isSentForEvaluation: true
+        })
+        const residentialPropertiesPendingForEvaluation = await ResidentialProperty.countDocuments({
+            propertyEvaluator: req.propertyEvaluator._id,
+            isSentForEvaluation: true
+        })
+        const pendingPropertyEvaluations = residentialPropertiesPendingForEvaluation + agriculturalPropertiesPendingForEvaluation + commercialPropertiesPendingForEvaluation
+
+        return res.status(StatusCodes.OK).json({
+            status: 'ok',
+            propertiesSuccessfullyEvaluated, propertiesSentToFieldAgentForReconsideration,
+            pendingPropertyEvaluations
+        })
     } catch (error) {
         next(error)
     }
@@ -27,7 +69,19 @@ const propertyEvaluationData = async (req, res, next) => {
 
 const propertiesPendingToBeEvaluated = async (req, res, next) => {
     try {
-        const pendingPropertyEvaluations = req.propertyEvaluator.pendingPropertyEvaluations
+        const agriculturalPropertyPendingEvaluations = await AgriculturalProperty.find({
+            propertyEvaluator: req.propertyEvaluator._id,
+            isSentForEvaluation: true
+        }).select('_id propertyType location')
+        const commercialPropertyPendingEvaluations = await CommercialProperty.find({
+            propertyEvaluator: req.propertyEvaluator._id,
+            isSentForEvaluation: true
+        }).select('_id propertyType location')
+        const residentailPropertyPendingEvaluations = await ResidentialProperty.find({
+            propertyEvaluator: req.propertyEvaluator._id,
+            isSentForEvaluation: true
+        }).select('_id propertyType location')
+        const pendingPropertyEvaluations = [...agriculturalPropertyPendingEvaluations, ...commercialPropertyPendingEvaluations, ...residentailPropertyPendingEvaluations]
 
         return res.status(StatusCodes.OK).json({ status: 'ok', pendingPropertyEvaluations })
     } catch (error) {
@@ -55,33 +109,39 @@ const fetchSelectedProperty = async (req, res, next) => {
 
 const propertyReevaluationOfData = async (req, res, next) => {
     try {
-        const { propertyType, propertyId, evaluatorId, fieldAgentId } = req.query
+        const { propertyType, propertyId, evaluatorId, fieldAgentId, numberOfReevaluationsReceived } = req.query
 
         if (propertyType === 'residential') {
             await ResidentialProperty.findOneAndUpdate({ _id: propertyId },
                 {
                     sentBackTofieldAgentForReevaluation: true,
-                    evaluationData: req.body
+                    isSentForEvaluation: false,
+                    evaluationData: req.body,
+                    numberOfReevaluationsReceived: numberOfReevaluationsReceived + 1
                 },
                 { new: true, runValidators: true })
         } else if (propertyType === 'agricultural') {
             await AgriculturalProperty.findOneAndUpdate({ _id: propertyId },
                 {
                     sentBackTofieldAgentForReevaluation: true,
-                    evaluationData: req.body
+                    isSentForEvaluation: false,
+                    evaluationData: req.body,
+                    numberOfReevaluationsReceived: numberOfReevaluationsReceived + 1
                 },
                 { new: true, runValidators: true })
         } else if (propertyType === 'commercial') {
             await CommercialProperty.findOneAndUpdate({ _id: propertyId },
                 {
                     sentBackTofieldAgentForReevaluation: true,
-                    evaluationData: req.body
+                    isSentForEvaluation: false,
+                    evaluationData: req.body,
+                    numberOfReevaluationsReceived: numberOfReevaluationsReceived + 1
                 },
                 { new: true, runValidators: true })
         }
 
 
-        const fieldAgent = await FieldAgent.findOne({ _id: fieldAgentId })
+        /*const fieldAgent = await FieldAgent.findOne({ _id: fieldAgentId })
         if (fieldAgent) {
             let updatedpropertyReceivedForReevaluation
             if (propertyType === 'residential') {
@@ -103,6 +163,7 @@ const propertyReevaluationOfData = async (req, res, next) => {
                     commercial: [...fieldAgent.propertyReceivedForReevaluation.commercial, propertyId]
                 }
             }
+
             await FieldAgent.findOneAndUpdate({ _id: fieldAgentId },
                 {
                     propertyReceivedForReevaluation: updatedpropertyReceivedForReevaluation
@@ -137,7 +198,7 @@ const propertyReevaluationOfData = async (req, res, next) => {
                 propertiesSentToFieldAgentForReconsideration: updatePropertiesSentToFieldAgentForReevaluation,
                 pendingPropertyEvaluations: updatePendingPropertyEvaluations
             },
-            { new: true, runValidators: true })
+            { new: true, runValidators: true })*/
         return res.status(StatusCodes.OK).json({ status: 'ok' })
     } catch (error) {
         console.log(error)
@@ -149,40 +210,43 @@ const successfulEvaluationOfData = async (req, res, next) => {
     try {
         const { propertyType, propertyId, evaluatorId, fieldAgentId } = req.query
 
-        let propertiesSuccessfullyEvaluatedUpdated
-        if (propertyType === 'residential') {
-            propertiesSuccessfullyEvaluatedUpdated = {
-                agricultural: req.propertyEvaluator.propertiesSuccessfullyEvaluated.agricultural,
-                residential: [...req.propertyEvaluator.propertiesSuccessfullyEvaluated.residential, propertyId],
-                commercial: req.propertyEvaluator.propertiesSuccessfullyEvaluated.commercial
-            }
-        } else if (propertyType === 'agricultural') {
-            propertiesSuccessfullyEvaluatedUpdated = {
-                agricultural: [...req.propertyEvaluator.propertiesSuccessfullyEvaluated.agricultural, propertyId],
-                residential: req.propertyEvaluator.propertiesSuccessfullyEvaluated.residential,
-                commercial: req.propertyEvaluator.propertiesSuccessfullyEvaluated.commercial
-            }
-        } else if (propertyType === 'commercial') {
-            propertiesSuccessfullyEvaluatedUpdated = {
-                agricultural: req.propertyEvaluator.propertiesSuccessfullyEvaluated.agricultural,
-                residential: req.propertyEvaluator.propertiesSuccessfullyEvaluated.residential,
-                commercial: [...req.propertyEvaluator.propertiesSuccessfullyEvaluated.commercial, propertyId]
-            }
-        }
+        /* let propertiesSuccessfullyEvaluatedUpdated
+         if (propertyType === 'residential') {
+             propertiesSuccessfullyEvaluatedUpdated = {
+                 agricultural: req.propertyEvaluator.propertiesSuccessfullyEvaluated.agricultural,
+                 residential: [...req.propertyEvaluator.propertiesSuccessfullyEvaluated.residential, propertyId],
+                 commercial: req.propertyEvaluator.propertiesSuccessfullyEvaluated.commercial
+             }
+         } else if (propertyType === 'agricultural') {
+             propertiesSuccessfullyEvaluatedUpdated = {
+                 agricultural: [...req.propertyEvaluator.propertiesSuccessfullyEvaluated.agricultural, propertyId],
+                 residential: req.propertyEvaluator.propertiesSuccessfullyEvaluated.residential,
+                 commercial: req.propertyEvaluator.propertiesSuccessfullyEvaluated.commercial
+             }
+         } else if (propertyType === 'commercial') {
+             propertiesSuccessfullyEvaluatedUpdated = {
+                 agricultural: req.propertyEvaluator.propertiesSuccessfullyEvaluated.agricultural,
+                 residential: req.propertyEvaluator.propertiesSuccessfullyEvaluated.residential,
+                 commercial: [...req.propertyEvaluator.propertiesSuccessfullyEvaluated.commercial, propertyId]
+             }
+         }
+ 
+         const pendingPropertyEvaluationsUpdated = req.propertyEvaluator.pendingPropertyEvaluations.filter(property => property.propertyId !== propertyId)
+ 
+         await PropertyEvaluator.findOneAndUpdate({ _id: evaluatorId },
+             {
+                 propertiesSuccessfullyEvaluated: propertiesSuccessfullyEvaluatedUpdated,
+                 pendingPropertyEvaluations: pendingPropertyEvaluationsUpdated
+             },
+             { new: true, runValidators: true })*/
 
-        const pendingPropertyEvaluationsUpdated = req.propertyEvaluator.pendingPropertyEvaluations.filter(property => property.propertyId !== propertyId)
-
-        await PropertyEvaluator.findOneAndUpdate({ _id: evaluatorId },
-            {
-                propertiesSuccessfullyEvaluated: propertiesSuccessfullyEvaluatedUpdated,
-                pendingPropertyEvaluations: pendingPropertyEvaluationsUpdated
-            },
-            { new: true, runValidators: true })
 
         if (propertyType === 'residential') {
             await ResidentialProperty.findOneAndUpdate({ _id: propertyId },
                 {
                     isEvaluatedSuccessfully: true,
+                    sentBackTofieldAgentForReevaluation: false,
+                    isSentForEvaluation: false,
                     evaluationData: req.body
                 },
                 { new: true, runValidators: true })
@@ -190,6 +254,8 @@ const successfulEvaluationOfData = async (req, res, next) => {
             await AgriculturalProperty.findOneAndUpdate({ _id: propertyId },
                 {
                     isEvaluatedSuccessfully: true,
+                    sentBackTofieldAgentForReevaluation: false,
+                    isSentForEvaluation: false,
                     evaluationData: req.body
                 },
                 { new: true, runValidators: true })
@@ -197,6 +263,8 @@ const successfulEvaluationOfData = async (req, res, next) => {
             await CommercialProperty.findOneAndUpdate({ _id: propertyId },
                 {
                     isEvaluatedSuccessfully: true,
+                    sentBackTofieldAgentForReevaluation: false,
+                    isSentForEvaluation: false,
                     evaluationData: req.body
                 },
                 { new: true, runValidators: true })

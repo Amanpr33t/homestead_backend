@@ -31,47 +31,6 @@ const PropertyEvaluatorSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
-    propertiesSuccessfullyEvaluated: {
-        agricultural: {
-            type: Array,
-            default: []
-        },
-        commercial: {
-            type: Array,
-            default: []
-        },
-        residential: {
-            type: Array,
-            default: []
-        }
-    },
-    propertiesSentToFieldAgentForReconsideration: {
-        agricultural: {
-            type: Array,
-            default: []
-        },
-        commercial: {
-            type: Array,
-            default: []
-        },
-        residential: {
-            type: Array,
-            default: []
-        }
-    },
-    pendingPropertyEvaluations: [
-        {
-            propertyId: String,
-            propertyType: String,
-            district: String,
-            state: String,
-            date: Date,
-            _id: {
-                type: Schema.Types.ObjectId,
-                default: undefined,
-            }
-        }
-    ],
     isActive: {
         type: Boolean,
         default: true

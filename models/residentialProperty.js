@@ -4,9 +4,9 @@ require('express-async-errors')
 
 const ResidentialPropertySchema = new mongoose.Schema({
     //common fields
-    propertyType:{
-        type:String,
-        default:'residential'
+    propertyType: {
+        type: String,
+        default: 'residential'
     },
     residentialPropertyType: {
         type: String,
@@ -266,24 +266,19 @@ const ResidentialPropertySchema = new mongoose.Schema({
         ref: 'PropertyEvaluator',
         required: [true, 'Please provide a property evaluator id']
     },
-    isEvaluatedSuccessfully: {
-        type: Boolean,
-        default: false
-    },
     sentBackTofieldAgentForReevaluation: {
         type: Boolean,
         default: false
     },
+    isSentForEvaluation: {
+        type: Boolean,
+        default: true
+    },
+    isEvaluatedSuccessfully: {
+        type: Boolean,
+        default: false
+    },
     evaluationData: {
-        information: {
-            isInformationComplete: {
-                type: Boolean,
-                default: null
-            },
-            details: {
-                type: Array
-            }
-        },
         photographs: {
             arePhotographsComplete: {
                 type: Boolean,
@@ -329,6 +324,10 @@ const ResidentialPropertySchema = new mongoose.Schema({
             default: null
         },
         evaluatedAt: Date
+    },
+    numberOfReevaluationsReceived: {
+        type: Number,
+        default: 0
     }
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 

@@ -22,24 +22,6 @@ const FieldAgentSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
-    propertiesAdded: {
-        agricultural: {
-            type: Array,
-            default: []
-        },
-        commercial: {
-            type: Array,
-            default: []
-        },
-        residential: {
-            type: Array,
-            default: []
-        }
-    },
-    propertyDealersAdded: {
-        type: Array,
-        default: []
-    },
     passwordVerificationToken: {
         type: String,
         default: null
@@ -47,20 +29,6 @@ const FieldAgentSchema = new mongoose.Schema({
     passwordVerificationTokenExpirationDate: {
         type: Date,
         default: null
-    },
-    propertyReceivedForReevaluation: {
-        agricultural: {
-            type: Array,
-            default: []
-        },
-        commercial: {
-            type: Array,
-            default: []
-        },
-        residential: {
-            type: Array,
-            default: []
-        }
     }
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 

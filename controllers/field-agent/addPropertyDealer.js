@@ -40,14 +40,7 @@ const addPropertyDealer = async (req, res, next) => {
         }
 
         const uniqueId = await uniqueIdGeneratorForPropertyDealer() //generates a unique ID for the proeprty dealer
-        const newPropertyDealer = await PropertyDealer.create({ ...req.body, uniqueId }) //Creates a new proeprty dealer in the database
-
-        const propertyDealersAddedByFieldAgent = req.fieldAgent.propertyDealersAdded //This variable stores all the property dealers that have been stored by the field agent
-        const updatePropertyDealersAddedByFieldAgent = newPropertyDealer && [...propertyDealersAddedByFieldAgent, newPropertyDealer._id] //Updated value of the property dealers added by the field agent
-
-        await FieldAgent.findOneAndUpdate({ _id: req.fieldAgent._id },
-            { propertyDealersAdded: updatePropertyDealersAddedByFieldAgent },
-            { new: true, runValidators: true })
+        await PropertyDealer.create({ ...req.body, uniqueId }) //Creates a new proeprty dealer in the database
 
         return res.status(StatusCodes.OK).json({ status: 'ok', message: 'property dealer has been successfully added' })
     } catch (error) {

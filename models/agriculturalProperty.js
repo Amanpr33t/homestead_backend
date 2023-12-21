@@ -198,24 +198,19 @@ const AgriculturalPropertySchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    isEvaluatedSuccessfully: {
-        type: Boolean,
-        default: false
-    },
     sentBackTofieldAgentForReevaluation: {
         type: Boolean,
         default: false
     },
+    isEvaluatedSuccessfully: {
+        type: Boolean,
+        default: false
+    },
+    isSentForEvaluation:{
+        type:Boolean,
+        default:true
+    },
     evaluationData: {
-        information: {
-            isInformationComplete: {
-                type: Boolean,
-                default: null
-            },
-            details: {
-                type: Array
-            }
-        },
         photographs: {
             arePhotographsComplete: {
                 type: Boolean,
@@ -261,6 +256,10 @@ const AgriculturalPropertySchema = new mongoose.Schema({
             default: null
         },
         evaluatedAt: Date
+    },
+    numberOfReevaluationsReceived:{
+        type:Number,
+        default:0
     }
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 

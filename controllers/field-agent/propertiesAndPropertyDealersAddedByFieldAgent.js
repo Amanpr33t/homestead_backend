@@ -57,9 +57,8 @@ const propertyDealersAddedByFieldAgent = async (req, res, next) => {
 //The function is used to get the firmName of property dealer of a property
 const propertyDealerOfaProperty = async (req, res, next) => {
     try {
-        console.log('hello')
-        const dealer = await PropertyDealer.findOne({ _id: req.params.id })
-        return res.status(StatusCodes.OK).json({ status: 'ok', firmName: dealer.firmName })
+        const dealer = await PropertyDealer.findOne({ _id: req.params.id }).select('firmName')
+        return res.status(StatusCodes.OK).json({ status: 'ok', firmName:dealer.firmName })
     } catch (error) {
         console.log(error)
         next(error)
@@ -69,18 +68,44 @@ const propertyDealerOfaProperty = async (req, res, next) => {
 ////The function provides the number of proeprties and property dealers added by the field agent
 const numberOfPropertyDealersAndPropertiesAddedByFieldAgent = async (req, res, next) => {
     try {
-        const propertyDealersAddedByFieldAgent = req.fieldAgent.propertyDealersAdded.length
-        const propertiesAddedByfieldAgent = req.fieldAgent.propertiesAdded.agricultural.length + req.fieldAgent.propertiesAdded.commercial.length + req.fieldAgent.propertiesAdded.residential.length
+        const agriculturalPropertiesAdded = await AgriculturalProperty.countDocuments({
+            addedByFieldAgent: req.fieldAgent._id
+        })
+        const residentialPropertiesAdded = await ResidentialProperty.countDocuments({
+            addedByFieldAgent: req.fieldAgent._id
+        })
+        const commercialPropertiesAdded = await CommercialProperty.countDocuments({
+            addedByFieldAgent: req.fieldAgent._id
+        })
+        const propertiesAddedByfieldAgent = agriculturalPropertiesAdded + residentialPropertiesAdded + commercialPropertiesAdded
+
+        const propertyDealersAddedByFieldAgent = await PropertyDealer.countDocuments({
+            addedByFieldAgent: req.fieldAgent._id
+        })
 
         return res.status(StatusCodes.OK).json({ status: 'ok', propertyDealersAddedByFieldAgent, propertiesAddedByfieldAgent })
     } catch (error) {
+        console.log(error)
         next(error)
     }
 }
 
 const numberOfPendingPropertyReevaluations = async (req, res, next) => {
     try {
-        const numberOfPendingPropertyReevaluations = req.fieldAgent.propertyReceivedForReevaluation.agricultural.length + req.fieldAgent.propertyReceivedForReevaluation.residential.length + req.fieldAgent.propertyReceivedForReevaluation.commercial.length
+        const agriculturalPropertiesPendingForReevaluation = await AgriculturalProperty.countDocuments({
+            addedByFieldAgent: req.fieldAgent._id,
+            sentBackTofieldAgentForReevaluation: true
+        })
+        const residentialPropertiesPendingForReevaluation = await ResidentialProperty.countDocuments({
+            addedByFieldAgent: req.fieldAgent._id,
+            sentBackTofieldAgentForReevaluation: true
+        })
+        const commercialPropertiesPendingForReevaluation = await CommercialProperty.countDocuments({
+            addedByFieldAgent: req.fieldAgent._id,
+            sentBackTofieldAgentForReevaluation: true
+        })
+
+        const numberOfPendingPropertyReevaluations = agriculturalPropertiesPendingForReevaluation + residentialPropertiesPendingForReevaluation + commercialPropertiesPendingForReevaluation
 
         return res.status(StatusCodes.OK).json({ status: 'ok', numberOfPendingPropertyReevaluations })
     } catch (error) {
@@ -90,29 +115,20 @@ const numberOfPendingPropertyReevaluations = async (req, res, next) => {
 
 const pendingPropertiesForReevaluationByFieldAgent = async (req, res, next) => {
     try {
-        let agriculturalProperties = []
-        if (req.fieldAgent.propertyReceivedForReevaluation.agricultural.length > 0) {
-            agriculturalProperties = await AgriculturalProperty.find({
-                sentBackTofieldAgentForReevaluation: true,
-                addedByFieldAgent: req.fieldAgent._id
-            }).select('propertyType location evaluationData')
-        }
+        const agriculturalProperties = await AgriculturalProperty.find({
+            sentBackTofieldAgentForReevaluation: true,
+            addedByFieldAgent: req.fieldAgent._id
+        }).select('propertyType location evaluationData')
 
-        let commercialProperties = []
-        if (req.fieldAgent.propertyReceivedForReevaluation.commercial.length > 0) {
-            commercialProperties = await CommercialProperty.find({
-                sentBackTofieldAgentForReevaluation: true,
-                addedByFieldAgent: req.fieldAgent._id
-            }).select('propertyType location evaluationData')
-        }
+        const commercialProperties = await CommercialProperty.find({
+            sentBackTofieldAgentForReevaluation: true,
+            addedByFieldAgent: req.fieldAgent._id
+        }).select('propertyType location evaluationData')
 
-        let residentialProperties = []
-        if (req.fieldAgent.propertyReceivedForReevaluation.residential.length > 0) {
-            residentialProperties = await ResidentialProperty.find({
-                sentBackTofieldAgentForReevaluation: true,
-                addedByFieldAgent: req.fieldAgent._id
-            }).select('propertyType location evaluationData')
-        }
+        const residentialProperties = await ResidentialProperty.find({
+            sentBackTofieldAgentForReevaluation: true,
+            addedByFieldAgent: req.fieldAgent._id
+        }).select('propertyType location evaluationData')
 
         const pendingPropertyReevaluations = [...agriculturalProperties, ...residentialProperties, ...commercialProperties]
 

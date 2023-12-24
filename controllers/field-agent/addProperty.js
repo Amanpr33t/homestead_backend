@@ -216,7 +216,11 @@ const addAgriculturalProperty = async (req, res, next) => {
 
             const uniqueId = await uniqueIdGeneratorForProperty('agricultural', req.body.location.name.state) //The code is used to generate a unique Id for the agricultural property
 
-            const property = await AgriculturalProperty.create({ ...req.body, uniqueId }) //A new agricultural proeprty is created
+            await AgriculturalProperty.create({
+                ...req.body,
+                uniqueId,
+                evaluationRequestDate: Date.now()
+            }) //A new agricultural proeprty is created
 
             return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Agricultural property has been added' })
         }
@@ -274,7 +278,11 @@ const addCommercialProperty = async (req, res, next) => {
             req.body.propertyEvaluator = randomPropertyEvaluator._id //we add the ID of the evaluator to the body of the commercial property
 
             const uniqueId = await uniqueIdGeneratorForProperty('commercial', req.body.location.name.state) //The code is used to generate a unique Id for the commercial property
-            const property = await CommercialProperty.create({ ...req.body, uniqueId }) //A new commercial proeprty is added to the database
+            await CommercialProperty.create({
+                ...req.body,
+                uniqueId,
+                evaluationRequestDate: Date.now()
+            }) //A new commercial proeprty is added to the database
 
             return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Commercial property has been added' })
         }
@@ -332,7 +340,11 @@ const addResidentialProperty = async (req, res, next) => {
             req.body.propertyEvaluator = randomPropertyEvaluator._id //we add the ID of the evaluator to the body of the residential property
 
             const uniqueId = await uniqueIdGeneratorForProperty('residential', req.body.location.name.state) //The code is used to generate a unique Id for the residential property
-            const property = await ResidentialProperty.create({ ...req.body, uniqueId }) //A new residential proeprty is added to the database
+            await ResidentialProperty.create({
+                ...req.body,
+                uniqueId,
+                evaluationRequestDate: Date.now()
+            }) //A new residential proeprty is added to the database
 
             return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Residential property has been added' })
         }

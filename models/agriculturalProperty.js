@@ -123,9 +123,9 @@ const ReservoirSchema = new mongoose.Schema({
 })
 
 const AgriculturalPropertySchema = new mongoose.Schema({
-    propertyType:{
-        type:String,
-        default:'agricultural'
+    propertyType: {
+        type: String,
+        default: 'agricultural'
     },
     landSize: LandSizeSchema,
     location: PropertyLocationSchema,
@@ -206,9 +206,12 @@ const AgriculturalPropertySchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    isSentForEvaluation:{
-        type:Boolean,
-        default:true
+    isSentForEvaluation: {
+        type: Boolean,
+        default: true
+    },
+    evaluationRequestDate: {
+        type: Date
     },
     evaluationData: {
         photographs: {
@@ -257,9 +260,9 @@ const AgriculturalPropertySchema = new mongoose.Schema({
         },
         evaluatedAt: Date
     },
-    numberOfReevaluationsReceived:{
-        type:Number,
-        default:0
+    numberOfReevaluationsReceived: {
+        type: Number,
+        default: 0
     }
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 

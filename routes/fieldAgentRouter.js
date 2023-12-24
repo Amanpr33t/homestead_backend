@@ -8,7 +8,7 @@ const { signIn, logout, signup } = require('../controllers/field-agent/fieldAgen
 const { forgotPassword, updatePassword, confirmPasswordVerificationToken, resetPasswordVerificationToken } = require('../controllers/field-agent/forgotPassword')
 
 const { addPropertyDealer, propertyDealerEmailExists, propertyDealerContactNumberExists, propertyDealerGstNumberExists, propertyDealerReraNumberExists } = require('../controllers/field-agent/addPropertyDealer')
-const { numberOfPropertyDealersAndPropertiesAddedByFieldAgent, propertyDealersAddedByFieldAgent, agriculturalPropertiesAddedByFieldAgent, propertyDealerOfaProperty, commercialPropertiesAddedByFieldAgent, residentialPropertiesAddedByFieldAgent,numberOfPendingPropertyReevaluations,pendingPropertiesForReevaluationByFieldAgent, getProperty } = require('../controllers/field-agent/propertiesAndPropertyDealersAddedByFieldAgent')
+const { numberOfPropertyDealersAndPropertiesAddedByFieldAgent, propertyDealersAddedByFieldAgent, agriculturalPropertiesAddedByFieldAgent, propertyDealerOfaProperty, commercialPropertiesAddedByFieldAgent, residentialPropertiesAddedByFieldAgent,numberOfPendingPropertyReevaluations,pendingPropertiesForReevaluationByFieldAgent, getProperty, reevaluateProperty } = require('../controllers/field-agent/propertiesAndPropertyDealersAddedByFieldAgent')
 
 const { propertyDealerExists, sendOtpToEmailForDealerVerification, confirmOtpForDealerVerification, addAgriculturalProperty, addCommercialProperty, addResidentialProperty } = require('../controllers/field-agent/addProperty')
 
@@ -35,6 +35,7 @@ router.get('/propertyDealerOfaProperty/:id', authenticateFieldAgent, propertyDea
 router.get('/numberOfPendingPequestsForReevaluationOfProperty', authenticateFieldAgent, numberOfPendingPropertyReevaluations) 
 router.get('/pendingPropertiesForReevaluationByFieldAgent', authenticateFieldAgent, pendingPropertiesForReevaluationByFieldAgent)
 router.get('/getPropertyData', authenticateFieldAgent, getProperty)
+router.post('/reevaluatePropertyData', authenticateFieldAgent, reevaluateProperty)
 
 router.get('/propertyDealerOtpGeneration', authenticateFieldAgent, propertyDealerExists, sendOtpToEmailForDealerVerification) //To send an OTP to property dealer before a field agent can add a proeprty
 router.get('/propertyDealerOtpVerification', authenticateFieldAgent, confirmOtpForDealerVerification) //to confirm the OTP sent to property dealer before adding a property

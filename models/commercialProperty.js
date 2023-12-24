@@ -203,6 +203,9 @@ const CommercialPropertySchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    evaluationRequestDate: {
+        type: Date
+    },
     evaluationData: {
         photographs: {
             arePhotographsComplete: {

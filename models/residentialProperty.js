@@ -274,6 +274,9 @@ const ResidentialPropertySchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    evaluationRequestDate: {
+        type: Date
+    },
     isEvaluatedSuccessfully: {
         type: Boolean,
         default: false

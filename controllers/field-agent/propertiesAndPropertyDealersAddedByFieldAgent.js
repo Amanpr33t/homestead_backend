@@ -58,7 +58,7 @@ const propertyDealersAddedByFieldAgent = async (req, res, next) => {
 const propertyDealerOfaProperty = async (req, res, next) => {
     try {
         const dealer = await PropertyDealer.findOne({ _id: req.params.id }).select('firmName')
-        return res.status(StatusCodes.OK).json({ status: 'ok', firmName:dealer.firmName })
+        return res.status(StatusCodes.OK).json({ status: 'ok', firmName: dealer.firmName })
     } catch (error) {
         console.log(error)
         next(error)
@@ -153,7 +153,44 @@ const getProperty = async (req, res, next) => {
 
         return res.status(StatusCodes.OK).json({ status: 'ok', propertyData })
     } catch (error) {
-        console.log(error)
+        next(error)
+    }
+}
+
+const reevaluateProperty = async (req, res, next) => {
+    try {
+        const { id, type } = req.query
+        if (type === 'agricultural') {
+            await AgriculturalProperty.findOneAndUpdate({ _id: id },
+                {
+                    isSentForEvaluation: true,
+                    sentBackTofieldAgentForReevaluation: false,
+                    agriculturalLandImagesUrl: req.body.imagesUrl,
+                    evaluationRequestDate: Date.now()
+                },
+                { new: true, runValidators: true })
+        } else if (type === 'residential') {
+            await ResidentialProperty.findOneAndUpdate({ _id: id },
+                {
+                    isSentForEvaluation: true,
+                    sentBackTofieldAgentForReevaluation: false,
+                    residentialLandImagesUrl: req.body.imagesUrl,
+                    evaluationRequestDate: Date.now()
+                },
+                { new: true, runValidators: true })
+        } else if (type === 'commercial') {
+            await CommercialProperty.findOneAndUpdate({ _id: id },
+                {
+                    isSentForEvaluation: true,
+                    sentBackTofieldAgentForReevaluation: false,
+                    commercialLandImagesUrl: req.body.imagesUrl,
+                    evaluationRequestDate: Date.now()
+                },
+                { new: true, runValidators: true })
+        }
+
+        return res.status(StatusCodes.OK).json({ status: 'ok' })
+    } catch (error) {
         next(error)
     }
 }
@@ -167,5 +204,6 @@ module.exports = {
     commercialPropertiesAddedByFieldAgent,
     numberOfPendingPropertyReevaluations,
     pendingPropertiesForReevaluationByFieldAgent,
-    getProperty
+    getProperty,
+    reevaluateProperty
 }

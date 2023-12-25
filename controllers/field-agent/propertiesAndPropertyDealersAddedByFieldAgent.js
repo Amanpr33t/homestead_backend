@@ -160,37 +160,29 @@ const getProperty = async (req, res, next) => {
 const reevaluateProperty = async (req, res, next) => {
     try {
         const { id, type } = req.query
+        const updatedData = {
+            isSentForEvaluation: true,
+            sentBackTofieldAgentForReevaluation: false,
+            propertyImagesUrl: req.body.imagesUrl,
+            evaluationRequestDate: Date.now()
+        }
         if (type === 'agricultural') {
             await AgriculturalProperty.findOneAndUpdate({ _id: id },
-                {
-                    isSentForEvaluation: true,
-                    sentBackTofieldAgentForReevaluation: false,
-                    agriculturalLandImagesUrl: req.body.imagesUrl,
-                    evaluationRequestDate: Date.now()
-                },
+                updatedData,
                 { new: true, runValidators: true })
         } else if (type === 'residential') {
             await ResidentialProperty.findOneAndUpdate({ _id: id },
-                {
-                    isSentForEvaluation: true,
-                    sentBackTofieldAgentForReevaluation: false,
-                    residentialLandImagesUrl: req.body.imagesUrl,
-                    evaluationRequestDate: Date.now()
-                },
+                updatedData,
                 { new: true, runValidators: true })
         } else if (type === 'commercial') {
             await CommercialProperty.findOneAndUpdate({ _id: id },
-                {
-                    isSentForEvaluation: true,
-                    sentBackTofieldAgentForReevaluation: false,
-                    commercialLandImagesUrl: req.body.imagesUrl,
-                    evaluationRequestDate: Date.now()
-                },
+                updatedData,
                 { new: true, runValidators: true })
         }
 
         return res.status(StatusCodes.OK).json({ status: 'ok' })
     } catch (error) {
+        console.log(error)
         next(error)
     }
 }

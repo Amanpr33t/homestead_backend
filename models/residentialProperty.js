@@ -161,7 +161,7 @@ const ResidentialPropertySchema = new mongoose.Schema({
             }
         },
     },
-    residentialLandImagesUrl: {
+    propertyImagesUrl: {
         type: Array,
         default: []
     },

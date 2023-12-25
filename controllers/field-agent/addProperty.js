@@ -150,7 +150,7 @@ const addAgriculturalProperty = async (req, res, next) => {
     try {
         req.body.addedByFieldAgent = req.fieldAgent._id //Here we add the id of the fieldAgent to the body
 
-        const { waterSource, reservoir, irrigationSystem, crops, road, legalRestrictions, agriculturalLandImagesUrl } = req.body
+        const { waterSource, reservoir, irrigationSystem, crops, road, legalRestrictions, propertyImagesUrl } = req.body
 
         //The if statements below are used to verify the content received in the body
         if (!waterSource.canal.length && !waterSource.river.length && !waterSource.tubewells.numberOfTubewells) {
@@ -191,7 +191,7 @@ const addAgriculturalProperty = async (req, res, next) => {
         if (legalRestrictions.isLegalRestrictions && !legalRestrictions.details) {
             throw new CustomAPIError('Details of legal restrictions not provided', StatusCodes.BAD_REQUEST)
         }
-        if (!agriculturalLandImagesUrl.length) {
+        if (!propertyImagesUrl.length) {
             throw new CustomAPIError('No land images provided', StatusCodes.BAD_REQUEST)
         }
 
@@ -234,7 +234,7 @@ const addCommercialProperty = async (req, res, next) => {
     try {
         req.body.addedByFieldAgent = req.fieldAgent._id //Here we add the ID of field agent to the request body
 
-        const { stateOfProperty, commercialPropertyType, legalRestrictions, commercialLandImagesUrl, shopPropertyType } = req.body
+        const { stateOfProperty, commercialPropertyType, legalRestrictions, propertyImagesUrl, shopPropertyType } = req.body
 
         //The if statements below are used to verify the data received in request body
         if (commercialPropertyType !== 'shop' && commercialPropertyType !== 'industrial') {
@@ -254,7 +254,7 @@ const addCommercialProperty = async (req, res, next) => {
         if (legalRestrictions.isLegalRestrictions && !legalRestrictions.details) {
             throw new CustomAPIError('Details of legal restrictions not provided', StatusCodes.BAD_REQUEST)
         }
-        if (!commercialLandImagesUrl.length) {
+        if (!propertyImagesUrl.length) {
             throw new CustomAPIError('No land images provided', StatusCodes.BAD_REQUEST)
         }
 
@@ -296,7 +296,7 @@ const addResidentialProperty = async (req, res, next) => {
     try {
         req.body.addedByFieldAgent = req.fieldAgent._id  //Here we add the ID of field agent to the request body
 
-        const { residentialPropertyType, residentialLandImagesUrl, price, legalRestrictions } = req.body
+        const { residentialPropertyType, propertyImagesUrl, price, legalRestrictions } = req.body
 
         //The if statements below are used to verify the data received in request body
         if (residentialPropertyType.toLowerCase() !== 'flat' && residentialPropertyType.toLowerCase() !== 'plot' && residentialPropertyType.toLowerCase() !== 'house') {
@@ -315,7 +315,7 @@ const addResidentialProperty = async (req, res, next) => {
             throw new CustomAPIError('Details of legal restrictions not provided', StatusCodes.BAD_REQUEST)
         }
 
-        if (!residentialLandImagesUrl.length) {
+        if (!propertyImagesUrl.length) {
             throw new CustomAPIError('No land images provided', StatusCodes.BAD_REQUEST)
         }
 

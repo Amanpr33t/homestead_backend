@@ -130,7 +130,7 @@ const AgriculturalPropertySchema = new mongoose.Schema({
     landSize: LandSizeSchema,
     location: PropertyLocationSchema,
     roadConnectivity: RoadConnectivitySchema,
-    agriculturalLandImagesUrl: {
+    propertyImagesUrl: {
         type: Array,
         default: []
     },

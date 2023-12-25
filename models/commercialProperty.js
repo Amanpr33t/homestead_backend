@@ -111,7 +111,7 @@ const CommercialPropertySchema = new mongoose.Schema({
             type: Number
         }
     },
-    commercialLandImagesUrl: {
+    propertyImagesUrl: {
         type: Array,
         default: []
     },

@@ -53,5 +53,6 @@ const uniqueIdGeneratorForPropertyDealer = async () => {
 }
 
 module.exports = {
-    uniqueIdGeneratorForProperty, uniqueIdGeneratorForPropertyDealer
+    uniqueIdGeneratorForProperty,
+    uniqueIdGeneratorForPropertyDealer
 }

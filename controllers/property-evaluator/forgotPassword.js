@@ -47,7 +47,7 @@ const confirmPasswordVerificationToken = async (req, res) => {
     try {
         const { email, passwordVerificationToken } = req.body
         const propertyEvaluator = await PropertyEvaluator.findOne({ email })
-        
+
         if (!propertyEvaluator) {
             throw new CustomAPIError('Property evaluator with this email does not exist', StatusCodes.BAD_REQUEST)
         }
@@ -118,5 +118,8 @@ const resetPasswordVerificationToken = async (req, res) => {
 }
 
 module.exports = {
-    forgotPassword, updatePassword, confirmPasswordVerificationToken, resetPasswordVerificationToken
+    forgotPassword,
+    updatePassword,
+    confirmPasswordVerificationToken,
+    resetPasswordVerificationToken
 }

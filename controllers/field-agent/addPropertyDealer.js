@@ -1,11 +1,7 @@
 require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
-const FieldAgent = require('../../models/fieldAgent')
 const PropertyDealer = require('../../models/propertyDealer')
-const jwt = require('jsonwebtoken')
-const bcrypt = require('bcryptjs')
 const CustomAPIError = require('../../errors/custom-error')
-const origin = process.env.ORIGIN
 const emailValidator = require("email-validator")
 const { uniqueIdGeneratorForPropertyDealer } = require('../../utils/uniqueIdGenerator')
 
@@ -105,5 +101,9 @@ const propertyDealerReraNumberExists = async (req, res, next) => {
 }
 
 module.exports = {
-    addPropertyDealer, propertyDealerContactNumberExists, propertyDealerEmailExists, propertyDealerGstNumberExists, propertyDealerReraNumberExists
+    addPropertyDealer,
+    propertyDealerContactNumberExists,
+    propertyDealerEmailExists,
+    propertyDealerGstNumberExists,
+    propertyDealerReraNumberExists
 }

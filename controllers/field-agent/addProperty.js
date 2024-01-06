@@ -6,8 +6,6 @@ const AgriculturalProperty = require('../../models/agriculturalProperty')
 const ResidentialProperty = require('../../models/residentialProperty')
 const PropertyEvaluator = require('../../models/propertyEvaluator')
 const { uniqueIdGeneratorForProperty } = require('../../utils/uniqueIdGenerator')
-const FieldAgent = require('../../models/fieldAgent')
-const crypto = require('crypto')
 const sendEmail = require('../../utils/sendEmail')
 const CustomAPIError = require('../../errors/custom-error')
 const emailValidator = require("email-validator");
@@ -354,5 +352,10 @@ const addResidentialProperty = async (req, res, next) => {
 }
 
 module.exports = {
-    propertyDealerExists, sendOtpToEmailForDealerVerification, confirmOtpForDealerVerification, addAgriculturalProperty, addCommercialProperty, addResidentialProperty
+    propertyDealerExists,
+    sendOtpToEmailForDealerVerification,
+    confirmOtpForDealerVerification,
+    addAgriculturalProperty,
+    addCommercialProperty,
+    addResidentialProperty
 }

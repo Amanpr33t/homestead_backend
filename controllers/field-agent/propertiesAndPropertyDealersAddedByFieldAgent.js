@@ -4,7 +4,6 @@ const PropertyDealer = require('../../models/propertyDealer')
 const AgriculturalProperty = require('../../models/agriculturalProperty')
 const CommercialProperty = require('../../models/commercialProperty')
 const ResidentialProperty = require('../../models/residentialProperty')
-const FieldAgent = require('../../models/fieldAgent')
 
 //The function provides the number of agricultural proeprties added by the field agent
 const agriculturalPropertiesAddedByFieldAgent = async (req, res, next) => {
@@ -85,11 +84,11 @@ const numberOfPropertyDealersAndPropertiesAddedByFieldAgent = async (req, res, n
 
         return res.status(StatusCodes.OK).json({ status: 'ok', propertyDealersAddedByFieldAgent, propertiesAddedByfieldAgent })
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }
 
+//The function fetches number of property pending for reevaluation by field agent
 const numberOfPendingPropertyReevaluations = async (req, res, next) => {
     try {
         const agriculturalPropertiesPendingForReevaluation = await AgriculturalProperty.countDocuments({
@@ -113,6 +112,7 @@ const numberOfPendingPropertyReevaluations = async (req, res, next) => {
     }
 }
 
+//The function fetches properties pending for reevaluation by field agent
 const pendingPropertiesForReevaluationByFieldAgent = async (req, res, next) => {
     try {
         const agriculturalProperties = await AgriculturalProperty.find({
@@ -139,6 +139,7 @@ const pendingPropertiesForReevaluationByFieldAgent = async (req, res, next) => {
     }
 }
 
+//To get details about a property
 const getProperty = async (req, res, next) => {
     try {
         const { id, type } = req.query
@@ -157,6 +158,7 @@ const getProperty = async (req, res, next) => {
     }
 }
 
+//To update property data after reevaluation
 const reevaluateProperty = async (req, res, next) => {
     try {
         const { id, type } = req.query

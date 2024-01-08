@@ -1,5 +1,8 @@
+const validator = require('validator')
 const mongoose = require('mongoose')
-const Schema = mongoose.Schema;
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken')
+const Schema = mongoose.Schema
 require('express-async-errors')
 
 const AddressSchema = new mongoose.Schema({
@@ -42,7 +45,7 @@ const AddressSchema = new mongoose.Schema({
     _id: {
         type: Schema.Types.ObjectId,
         default: undefined,
-    },
+    }
 })
 
 const PropertyDealerSchema = new mongoose.Schema({
@@ -80,7 +83,11 @@ const PropertyDealerSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        required: [true, 'Please provide an email'],
+        required: [true, 'Please provide email'],
+        validate: {
+            validator: validator.isEmail,
+            message: 'Please provide valid email'
+        },
         trim: true
     },
     contactNumber: {
@@ -88,10 +95,14 @@ const PropertyDealerSchema = new mongoose.Schema({
         required: [true, 'Please provide a contact number'],
         trim: true
     },
+    password: {
+        type: String,
+        trim: true,
+        required: true
+    },
     addedByFieldAgent: {
         type: mongoose.Types.ObjectId,
-        ref: 'FieldAgent',
-        required: [true, 'Please provide a field agent id']
+        ref: 'FieldAgent'
     },
     otpForVerification: {
         type: String,
@@ -104,8 +115,45 @@ const PropertyDealerSchema = new mongoose.Schema({
     uniqueId: {
         type: String,
         required: true
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
+    authTokenExpiration: {
+        type: Date,
+        default: null
+    },
+    passwordVerificationToken: {
+        type: String,
+        default: null
+    },
+    passwordVerificationTokenExpirationDate: {
+        type: Date,
+        default: null
     }
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
+
+PropertyDealerSchema.pre('save', async function (next) {
+    if (!this.isModified('password')) return
+    const salt = await bcrypt.genSalt(10)
+    this.password = await bcrypt.hash(this.password, salt)
+    next()
+})
+
+PropertyDealerSchema.methods.createJWT = function () {
+    return jwt.sign({
+        dealerId: this._id, email: this.email
+    },
+        process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_LIFETIME
+    })
+}
+
+PropertyDealerSchema.methods.comparePassword = async function (candidatePassword) {
+    const isMatch = await bcrypt.compare(candidatePassword, this.password)
+    return isMatch
+}
 
 
 module.exports = mongoose.model('PropertyDealer', PropertyDealerSchema)

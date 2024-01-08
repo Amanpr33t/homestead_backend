@@ -7,6 +7,7 @@ const LandSizeSchema = new mongoose.Schema({
         required: true
     },
     unit: {
+        //can be 'metre-square' or 'acre'
         type: String,
         required: true,
         trim: true
@@ -22,6 +23,7 @@ const LandSizeSchema = new mongoose.Schema({
 })
 const RoadConnectivitySchema = new mongoose.Schema({
     roadType: {
+        //Can be any of these: 'Unpaved road', 'Village road', 'District road', 'State highway', 'National highway'
         type: String,
         required: true,
         trim: true
@@ -145,6 +147,7 @@ const AgriculturalPropertySchema = new mongoose.Schema({
     waterSource: WaterSourceSchema,
     reservoir: ReservoirSchema,
     irrigationSystem: {
+        //Array can have any of the values: 'Sprinkler', 'Drip', 'Underground pipeline'
         type: Array,
         default: []
     },
@@ -160,11 +163,13 @@ const AgriculturalPropertySchema = new mongoose.Schema({
         }
     },
     crops: {
+        //Array can have any of these values: 'Rice', 'Wheat', 'Maize', 'Cotton'
         type: Array,
         default: []
     },
     road: {
         type: {
+            //Can be aynone of these: 'Unpaved road', 'Village road', 'District road', 'State highway', 'National highway
             type: String,
             required: true,
             trim: true
@@ -225,10 +230,12 @@ const AgriculturalPropertySchema = new mongoose.Schema({
             }
         },
         typeOfLocation: {
+            //Can be any one of these: 'Rural', 'Sub-urban', 'Urban', 'Mixed-use', 'Industrial'
             type: String,
             default: null
         },
         locationStatus: {
+            //Can be any of these: 'Posh', 'Premium', 'Popular', 'Ordinary', 'Low Income'
             type: String,
             default: null
         },
@@ -246,15 +253,18 @@ const AgriculturalPropertySchema = new mongoose.Schema({
                 default: null
             },
             percentageIncreaseOrDecrease: {
+                //Number from 0 to 100
                 type: Number,
                 default: null
             }
         },
         conditionOfConstruction: {
+            //Can be anyone of these values: 'Newly built', 'Ready to move', 'Needs renovation', 'Needs repair'
             type: String,
             default: null
         },
         qualityOfConstructionRating: {
+            //A number from 1 to 5
             type: Number,
             default: null
         },

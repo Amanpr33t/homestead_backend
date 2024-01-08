@@ -9,6 +9,7 @@ const ResidentialPropertySchema = new mongoose.Schema({
         default: 'residential'
     },
     residentialPropertyType: {
+        //Can be anyone of these: 'Plot', 'Flat', 'House'
         type: String,
         required: true,
         trim: true
@@ -65,6 +66,7 @@ const ResidentialPropertySchema = new mongoose.Schema({
         required: true
     },
     distance: {
+        //Unit is Km
         distanceFromGroceryStore: {
             type: Number,
             required: true
@@ -87,6 +89,7 @@ const ResidentialPropertySchema = new mongoose.Schema({
         }
     },
     areaType: {
+        //Can be anyone of these: 'Rural', 'Urban', 'Sub-Urban
         type: String,
         required: true,
         trim: true
@@ -231,11 +234,11 @@ const ResidentialPropertySchema = new mongoose.Schema({
         premium: Boolean,
         luxurious: Boolean
     },
-    flooringTypeArray: Array,
-    roofTypeArray: Array,
-    wallTypeArray: Array,
-    windowTypeArray: Array,
-    safetySystemArray: Array,
+    flooringTypeArray: Array,//Can be any of these: 'Cemented', 'Marble', 'Luxurious Marble', 'Standard tiles', 'Premium tiles', 'Luxurious tiles'
+    roofTypeArray: Array,//Can be any of these: 'Standard', 'POP work', 'Down ceiling'
+    wallTypeArray: Array,//Can be any of these: 'Plaster', 'Paint', 'Premium paint', 'Wall paper', 'PVC panelling', 'Art work'
+    windowTypeArray: Array,//Can be any of these: 'Standard', 'Wood', 'Premium material'
+    safetySystemArray: Array,//Can be any of these: 'CCTV', 'Glass break siren', 'Entry sensor', 'Motion sensor', 'Panic button', 'Keypad', 'Keyfob', 'Smoke detector', 'CO detector', 'Water sprinkler', 'Doorbell camera'
     garden: {
         available: Boolean,
         details: {
@@ -244,7 +247,7 @@ const ResidentialPropertySchema = new mongoose.Schema({
         }
     },
     ageOfConstruction: Number,
-    conditionOfProperty: String,
+    conditionOfProperty: String, //Can be anyone of these: 'Exceptionally new', 'Near to new', 'Some signs of agying', 'Need some renovations', 'Needs complete renovation'
 
     //common fields
     addedByFieldAgent: {
@@ -293,10 +296,12 @@ const ResidentialPropertySchema = new mongoose.Schema({
             }
         },
         typeOfLocation: {
+            //Can be any one of these: 'Rural', 'Sub-urban', 'Urban', 'Mixed-use', 'Industrial'
             type: String,
             default: null
         },
         locationStatus: {
+            //Can be any of these: 'Posh', 'Premium', 'Popular', 'Ordinary', 'Low Income'
             type: String,
             default: null
         },
@@ -314,15 +319,18 @@ const ResidentialPropertySchema = new mongoose.Schema({
                 default: null
             },
             percentageIncreaseOrDecrease: {
+                //Number from 0 to 100
                 type: Number,
                 default: null
             }
         },
         conditionOfConstruction: {
+            //Can be anyone of these values: 'Newly built', 'Ready to move', 'Needs renovation', 'Needs repair'
             type: String,
             default: null
         },
         qualityOfConstructionRating: {
+            //A number from 1 to 5
             type: Number,
             default: null
         },

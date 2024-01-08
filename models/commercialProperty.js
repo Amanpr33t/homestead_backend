@@ -73,6 +73,7 @@ const CommercialPropertySchema = new mongoose.Schema({
         default: 'commercial'
     },
     commercialPropertyType: {
+        //can be anyone of these: 'shop' , 'industrial'
         type: String,
         required: true,
         trim: true
@@ -87,6 +88,7 @@ const CommercialPropertySchema = new mongoose.Schema({
             required: true
         },
         builtUpPropertyType: {
+            //Can be anyone of these: 'Hotel/Resort', 'Factory', 'Banquet hall', 'Cold Store', 'Warehouse', 'School', 'Hospital/Clinic', 'other'
             type: String,
             trim: true
         }
@@ -159,6 +161,7 @@ const CommercialPropertySchema = new mongoose.Schema({
         }
     },
     shopPropertyType: {
+        //Can be anyone of these: 'Booth', 'Shop', 'Showroom', 'Retail-space', 'other'
         type: String,
         trim: true
     },
@@ -218,10 +221,12 @@ const CommercialPropertySchema = new mongoose.Schema({
             }
         },
         typeOfLocation: {
+            //Can be any one of these: 'Rural', 'Sub-urban', 'Urban', 'Mixed-use', 'Industrial'
             type: String,
             default: null
         },
         locationStatus: {
+            //Can be any of these: 'Posh', 'Premium', 'Popular', 'Ordinary', 'Low Income'
             type: String,
             default: null
         },
@@ -239,15 +244,18 @@ const CommercialPropertySchema = new mongoose.Schema({
                 default: null
             },
             percentageIncreaseOrDecrease: {
+                //Number from 0 to 100
                 type: Number,
                 default: null
             }
         },
         conditionOfConstruction: {
+            //Can be anyone of these values: 'Newly built', 'Ready to move', 'Needs renovation', 'Needs repair'
             type: String,
             default: null
         },
         qualityOfConstructionRating: {
+            //A number from 1 to 5
             type: Number,
             default: null
         },

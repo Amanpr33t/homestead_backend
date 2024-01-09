@@ -40,7 +40,7 @@ const signIn = async (req, res, next) => {
 //The function runs when a field agent logs out
 const logout = async (req, res, next) => {
     try {
-        await PropertyDealer.findOneAndUpdate({ _id: req.propertyDealer.dealerId },
+        await PropertyDealer.findOneAndUpdate({ _id: req.propertyDealer._id },
             { authTokenExpiration: null },
             { new: true, runValidators: true })
         return res.status(StatusCodes.OK).json({ status: 'ok', msg: 'Successfully logged out' })

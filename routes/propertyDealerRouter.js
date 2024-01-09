@@ -17,6 +17,13 @@ const {
     logout
 } = require('../controllers/property-dealer/signIn')
 
+const {
+    forgotPassword,
+    updatePassword,
+    confirmPasswordVerificationToken,
+    resetPasswordVerificationToken
+} = require('../controllers/property-dealer/forgotPassword')
+
 router.post('/addPropertyDealer', addPropertyDealer) //to add a property dealer
 router.get('/propertyDealerEmailExists', propertyDealerEmailExists) //to check if a property dealer with similar email exists
 router.get('/propertyDealerContactNumberExists', propertyDealerContactNumberExists) //to check if a property dealer with similar contact number exists
@@ -25,5 +32,9 @@ router.get('/propertyDealerReraNumberExists', propertyDealerReraNumberExists) //
 
 router.post('/signIn', signIn) //to sign in a property dealer
 router.patch('/logout', authenticatePropertyDealer, logout) //to logout a property dealer
+router.patch('/forgotPassword', forgotPassword) //in case the property dealer forgets password
+router.patch('/updatePassword', updatePassword) //to update a new password for property dealer
+router.post('/confirmPasswordVerificationToken', confirmPasswordVerificationToken) //to confirm the OTP send by the user for password updation
+router.patch('/resetPasswordVerificationToken', resetPasswordVerificationToken) //to reset the value of password verification token in the database
 
 module.exports = router

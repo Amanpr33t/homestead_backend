@@ -26,6 +26,8 @@ const {
 
 const { getDealerDetails } = require('../controllers/property-dealer/getPropertyDealerDetails')
 
+const { updatePropertyDealerDetails } = require('../controllers/property-dealer/updatePropertyDealerDetails')
+
 router.post('/addPropertyDealer', addPropertyDealer) //to add a property dealer
 router.get('/propertyDealerEmailExists', propertyDealerEmailExists) //to check if a property dealer with similar email exists
 router.get('/propertyDealerContactNumberExists', propertyDealerContactNumberExists) //to check if a property dealer with similar contact number exists
@@ -40,5 +42,7 @@ router.post('/confirmPasswordVerificationToken', confirmPasswordVerificationToke
 router.patch('/resetPasswordVerificationToken', resetPasswordVerificationToken) //to reset the value of password verification token in the database
 
 router.get('/getDealerDetails', authenticatePropertyDealer, getDealerDetails) //to get dealer details
+
+router.patch('/updatePropertyDealerDetails', authenticatePropertyDealer, updatePropertyDealerDetails) //to update dealer details
 
 module.exports = router

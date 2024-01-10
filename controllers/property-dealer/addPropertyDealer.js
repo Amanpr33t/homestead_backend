@@ -8,7 +8,7 @@ const { uniqueIdGeneratorForPropertyDealer } = require('../../utils/uniqueIdGene
 //The function is used to add a property dealer
 const addPropertyDealer = async (req, res, next) => {
     try {
-       // req.body.addedByFieldAgent = req.fieldAgent._id //field agent ID is added to the request body
+        // req.body.addedByFieldAgent = req.fieldAgent._id //field agent ID is added to the request body
         const {
             addressArray,
             about,
@@ -22,7 +22,7 @@ const addPropertyDealer = async (req, res, next) => {
                 throw new CustomAPIError('Postal code should be a 6 digit number', 204)
             }
         })
-        if (!addressArray.length || !emailValidator.validate(email.trim()) || about.trim().split(/\s+/) > 150) {
+        if (!addressArray.length || !emailValidator.validate(email.trim()) || about.trim().length > 400) {
             throw new CustomAPIError('Incorrect data', 204)
         }
 

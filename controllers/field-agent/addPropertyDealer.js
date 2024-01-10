@@ -22,7 +22,7 @@ const addPropertyDealer = async (req, res, next) => {
                 throw new CustomAPIError('Postal code should be a 6 digit number', 204)
             }
         })
-        if (!addressArray.length || !emailValidator.validate(email.trim()) || about.trim().split(/\s+/) > 150) {
+        if (!addressArray.length || !emailValidator.validate(email.trim()) || about.trim().length > 400) {
             throw new CustomAPIError('Incorrect data', 204)
         }
 

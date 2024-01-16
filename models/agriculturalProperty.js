@@ -273,6 +273,20 @@ const AgriculturalPropertySchema = new mongoose.Schema({
     numberOfReevaluationsReceived: {
         type: Number,
         default: 0
+    },
+    stateWherePropertyIsLocated: {
+        type: String,
+        trim: true,
+        required: true
+    },
+    yearOfPropertyAddition: {
+        type: Number,
+        required: true
+    },
+    status: {
+        type: String,
+        required: true,
+        default: 'active'
     }
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 

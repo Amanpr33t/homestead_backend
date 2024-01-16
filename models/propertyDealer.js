@@ -131,7 +131,52 @@ const PropertyDealerSchema = new mongoose.Schema({
     passwordVerificationTokenExpirationDate: {
         type: Date,
         default: null
-    }
+    },
+    requestsFromCustomer: [
+        {
+            propertyType: {
+                type: String,
+                required: true,
+                trim: true
+            },
+            propertyId: {
+                type: String,
+                required: true,
+                trim: true
+            },
+            customerId: {
+                type: String,
+                required: true,
+                trim: true
+            },
+            customerName: {
+                type: String,
+                required: true,
+                trim: true
+            },
+            customerEmail: {
+                type: String,
+                required: true,
+                trim: true
+            },
+            customerContactNumber: {
+                type: Number,
+                required: true
+            },
+            requestSeen: {
+                type: Boolean,
+                default: false
+            },
+            requestDate: {
+                type: Date,
+                required: true
+            },
+            _id: {
+                type: Schema.Types.ObjectId,
+                default: undefined,
+            }
+        }
+    ]
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 
 PropertyDealerSchema.pre('save', async function (next) {

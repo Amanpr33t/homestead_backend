@@ -32,6 +32,13 @@ const { fetchPropertiesAdded } = require('../controllers/property-dealer/fetchPr
 
 const { getPropertyDetails } = require('../controllers/property-dealer/fetchPropertyDetails')
 
+const {
+    fetchCustomerRequests,
+    fetchNumberOfCustomerRequests
+} = require('../controllers/property-dealer/fetchCustomerRequests')
+
+const { updateSeenStatusOfCustomerRequest } = require('../controllers/property-dealer/updateSeenStatusOfCustomerRequest')
+
 router.post('/addPropertyDealer', addPropertyDealer) //to add a property dealer
 router.get('/propertyDealerEmailExists', propertyDealerEmailExists) //to check if a property dealer with similar email exists
 router.get('/propertyDealerContactNumberExists', propertyDealerContactNumberExists) //to check if a property dealer with similar contact number exists
@@ -52,5 +59,11 @@ router.patch('/updatePropertyDealerDetails', authenticatePropertyDealer, updateP
 router.get('/fetchPropertiesAdded', authenticatePropertyDealer, fetchPropertiesAdded) //fetch all properties added by a property dealer
 
 router.get('/getPropertyDetails', authenticatePropertyDealer, getPropertyDetails) //fetch details of a property added by a property dealer
+
+router.get('/fetchCustomerRequests', authenticatePropertyDealer, fetchCustomerRequests) //fetch customer requests sent to property dealer for a property
+
+router.patch('/updateSeenStatusOfCustomerRequest', authenticatePropertyDealer, updateSeenStatusOfCustomerRequest)
+
+router.get('/numberOfCustomerRequests', authenticatePropertyDealer, fetchNumberOfCustomerRequests)
 
 module.exports = router

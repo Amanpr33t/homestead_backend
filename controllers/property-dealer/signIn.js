@@ -18,7 +18,7 @@ const signIn = async (req, res, next) => {
         if (!propertyDealer) {
             return res.status(StatusCodes.OK).json({ status: 'not_found', msg: 'Enter valid credentials' })
         }
-        
+
         const isPasswordCorrect = propertyDealer && await propertyDealer.comparePassword(password)
         if (!isPasswordCorrect) {
             return res.status(StatusCodes.OK).json({ status: 'incorrect_password', msg: 'Enter valid credentials' })
@@ -26,12 +26,13 @@ const signIn = async (req, res, next) => {
 
         const authToken = await propertyDealer.createJWT()
         const oneDay = 1000 * 60 * 60 * 24
-        
+
         await PropertyDealer.findOneAndUpdate({ email },
-            { authTokenExpiration: Date.now() + oneDay },
+            {
+                authTokenExpiration: Date.now() + oneDay
+            },
             { new: true, runValidators: true })
         return res.status(StatusCodes.OK).json({ status: 'ok', authToken })
-
     } catch (error) {
         next(error)
     }

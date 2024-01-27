@@ -1,293 +1,234 @@
-const mongoose = require('mongoose')
-const Schema = mongoose.Schema
-require('express-async-errors')
-const LandSizeSchema = new mongoose.Schema({
+const mongoose = require('mongoose');
+
+const { Schema } = mongoose;
+
+const LandSizeSchema = new Schema({
     size: {
         type: Number,
-        required: true
+        required: true,
     },
     unit: {
-        //can be 'metre-square' or 'acre'
         type: String,
+        enum: ['metre-square', 'acre'],
         required: true,
-        trim: true
+        trim: true,
     },
     details: {
         type: String,
-        trim: true
+        trim: true,
+        default: null
     },
     _id: {
         type: Schema.Types.ObjectId,
         default: undefined,
     },
-})
-const RoadConnectivitySchema = new mongoose.Schema({
-    roadType: {
-        //Can be any of these: 'Unpaved road', 'Village road', 'District road', 'State highway', 'National highway'
+});
+
+const RoadSchema = new Schema({
+    type: {
         type: String,
+        enum: ['unpaved road', 'village road', 'district road', 'state highway', 'national highway'],
         required: true,
-        trim: true
+        trim: true,
     },
-    remarks: {
+    details: {
         type: String,
-        trim: true
+        trim: true,
+        default: null
     },
     _id: {
         type: Schema.Types.ObjectId,
         default: undefined,
     },
-})
-const LegalRestrictionsSchema = new mongoose.Schema({
+});
+
+const LegalRestrictionsSchema = new Schema({
     isLegalRestrictions: {
         type: Boolean,
-        required: true
+        required: true,
     },
     details: {
         type: String,
-        trim: true
+        trim: true,
     },
     _id: {
         type: Schema.Types.ObjectId,
         default: undefined,
     },
-})
-const PropertyLocationSchema = new mongoose.Schema({
+});
+
+const PropertyLocationSchema = new Schema({
     name: {
         village: {
             type: String,
-            trim: true
+            trim: true,
+            default: null
         },
         city: {
             type: String,
-            trim: true
+            trim: true,
+            default: null
         },
         tehsil: {
             type: String,
-            trim: true
+            trim: true,
+            default: null
         },
         district: {
             type: String,
             trim: true,
-            required: true
+            required: true,
         },
         state: {
             type: String,
             trim: true,
-            required: true
-        }
+            required: true,
+        },
     },
     _id: {
         type: Schema.Types.ObjectId,
         default: undefined,
-    }
-})
-const WaterSourceSchema = new mongoose.Schema({
+    },
+});
+
+const WaterSourceSchema = new Schema({
     canal: {
-        type: Array,
-        default: []
+        type: [String],
+        default: null
     },
     river: {
-        type: Array,
-        default: []
+        type: [String],
+        default: null
     },
     tubewells: {
         numberOfTubewells: {
-            type: Number
+            type: Number,
+            required: true,
         },
         depth: {
-            type: Array,
-            default: []
-        }
+            type: [Number],
+            default: null
+        },
     },
     _id: {
         type: Schema.Types.ObjectId,
         default: undefined,
-    }
-})
-const ReservoirSchema = new mongoose.Schema({
+    },
+});
+
+const ReservoirSchema = new Schema({
     isReservoir: {
         type: Boolean,
-        required: true
+        required: true,
     },
     type: {
-        type: Array
+        type: [String],
+        enum: ['public', 'private'],
+        default: null
     },
     capacityOfPrivateReservoir: {
-        type: Number
+        type: Number,
+        default: null
     },
     unitOfCapacityForPrivateReservoir: {
-        type: String
+        type: String,
+        enum: ['cusec', 'litre', null],
+        default: null
     },
     _id: {
         type: Schema.Types.ObjectId,
         default: undefined,
-    }
-})
+    },
+});
 
-const AgriculturalPropertySchema = new mongoose.Schema({
+const AgriculturalPropertySchema = new Schema({
     propertyType: {
         type: String,
+        enum: ['agricultural'],
+        required: true,
         default: 'agricultural'
     },
     landSize: LandSizeSchema,
     location: PropertyLocationSchema,
-    roadConnectivity: RoadConnectivitySchema,
+    road: RoadSchema,
     propertyImagesUrl: {
-        type: Array,
-        default: []
+        type: [String],
+        default: [],
     },
     contractImagesUrl: {
-        type: Array,
-        default: []
+        type: [String],
+        default: null
     },
     numberOfOwners: {
         type: Number,
-        require: true
+        required: true,
     },
     waterSource: WaterSourceSchema,
     reservoir: ReservoirSchema,
     irrigationSystem: {
-        //Array can have any of the values: 'Sprinkler', 'Drip', 'Underground pipeline'
-        type: Array,
-        default: []
+        type: [String],
+        enum: ['sprinkler', 'drip', 'underground pipeline'],
+        default: null
     },
     priceDemanded: {
-        number: {
-            type: Number,
-            required: true
-        },
-        words: {
-            type: String,
-            required: true,
-            trim: true
-        }
+        number: { type: Number, required: true },
+        words: { type: String, required: true, trim: true },
     },
     crops: {
-        //Array can have any of these values: 'Rice', 'Wheat', 'Maize', 'Cotton'
-        type: Array,
-        default: []
-    },
-    road: {
-        type: {
-            //Can be aynone of these: 'Unpaved road', 'Village road', 'District road', 'State highway', 'National highway
-            type: String,
-            required: true,
-            trim: true
-        },
-        details: {
-            type: String,
-            trim: true
-        }
+        type: [String],
+        enum: ['rice', 'wheat', 'maize', 'cotton'],
+        default: [],
     },
     legalRestrictions: LegalRestrictionsSchema,
     nearbyTown: {
         type: String,
-        trim: true
+        trim: true,
+        default: null
     },
     addedByFieldAgent: {
         type: mongoose.Types.ObjectId,
         ref: 'FieldAgent',
-        required: [true, 'Please provide a field agent id']
+        required: [true, 'Please provide a field agent id'],
     },
     addedByPropertyDealer: {
         type: mongoose.Types.ObjectId,
         ref: 'PropertyDealer',
-        required: [true, 'Please provide a property dealer id']
+        required: [true, 'Please provide a property dealer id'],
     },
     propertyEvaluator: {
         type: mongoose.Types.ObjectId,
         ref: 'PropertyEvaluator',
-        required: [true, 'Please provide a property evaluator id']
+        required: [true, 'Please provide a property evaluator id'],
     },
     uniqueId: {
         type: String,
-        required: true
+        required: true,
     },
-    sentBackTofieldAgentForReevaluation: {
-        type: Boolean,
-        default: false
-    },
-    isEvaluatedSuccessfully: {
-        type: Boolean,
-        default: false
-    },
-    isSentForEvaluation: {
-        type: Boolean,
-        default: true
-    },
-    evaluationRequestDate: {
-        type: Date
-    },
+    sentBackTofieldAgentForReevaluation: { type: Boolean, default: false },
+    isEvaluatedSuccessfully: { type: Boolean, default: false },
+    isSentForEvaluation: { type: Boolean, default: true },
+    evaluationRequestDate: { type: Date },
     evaluationData: {
         photographs: {
-            arePhotographsComplete: {
-                type: Boolean,
-                default: null
-            },
-            details: {
-                type: String,
-                default: null
-            }
+            arePhotographsComplete: { type: Boolean, default: null },
+            details: { type: String, default: null },
         },
-        typeOfLocation: {
-            //Can be any one of these: 'Rural', 'Sub-urban', 'Urban', 'Mixed-use', 'Industrial'
-            type: String,
-            default: null
-        },
-        locationStatus: {
-            //Can be any of these: 'Posh', 'Premium', 'Popular', 'Ordinary', 'Low Income'
-            type: String,
-            default: null
-        },
-        fairValueOfProperty: {
-            type: Number,
-            default: null
-        },
+        typeOfLocation: { type: String, default: null },
+        locationStatus: { type: String, default: null },
+        fairValueOfProperty: { type: Number, default: null },
         fiveYearProjectionOfPrices: {
-            increase: {
-                type: Boolean,
-                default: null
-            },
-            decrease: {
-                type: Boolean,
-                default: null
-            },
-            percentageIncreaseOrDecrease: {
-                //Number from 0 to 100
-                type: Number,
-                default: null
-            }
+            increase: { type: Boolean, default: null },
+            decrease: { type: Boolean, default: null },
+            percentageIncreaseOrDecrease: { type: Number, default: null },
         },
-        conditionOfConstruction: {
-            //Can be anyone of these values: 'Newly built', 'Ready to move', 'Needs renovation', 'Needs repair'
-            type: String,
-            default: null
-        },
-        qualityOfConstructionRating: {
-            //A number from 1 to 5
-            type: Number,
-            default: null
-        },
-        evaluatedAt: Date
+        conditionOfConstruction: { type: String, default: null },
+        qualityOfConstructionRating: { type: Number, default: null },
+        evaluatedAt: { type: Date },
     },
-    numberOfReevaluationsReceived: {
-        type: Number,
-        default: 0
-    },
-    stateWherePropertyIsLocated: {
-        type: String,
-        trim: true,
-        required: true
-    },
-    yearOfPropertyAddition: {
-        type: Number,
-        required: true
-    },
-    status: {
-        type: String,
-        required: true,
-        default: 'active'
-    }
-}, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
+    numberOfReevaluationsReceived: { type: Number, default: 0 },
+    stateWherePropertyIsLocated: { type: String, required: true, trim: true },
+    yearOfPropertyAddition: { type: Number, required: true },
+    status: { type: String, required: true, default: 'active' },
+}, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
-module.exports = mongoose.model('AgriculturalProperty', AgriculturalPropertySchema)
+module.exports = mongoose.model('AgriculturalProperty', AgriculturalPropertySchema);

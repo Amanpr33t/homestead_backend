@@ -36,7 +36,10 @@ const forgotPassword = async (req, res, next) => {
             { passwordVerificationToken, passwordVerificationTokenExpirationDate },
             { new: true, runValidators: true })
 
-        return res.status(StatusCodes.OK).json({ status: 'ok', msg: 'A verification token has been sent to your email' })
+        return res.status(StatusCodes.OK).json({
+            status: 'ok',
+            msg: 'A verification token has been sent to your email'
+        })
     } catch (error) {
         next(error)
     }
@@ -60,7 +63,10 @@ const confirmPasswordVerificationToken = async (req, res) => {
             return res.status(StatusCodes.OK).json({ status: 'token_expired', msg: 'Token expired' })
         }
 
-        return res.status(StatusCodes.OK).json({ status: 'ok', msg: 'Password token has been verified' })
+        return res.status(StatusCodes.OK).json({
+            status: 'ok',
+            msg: 'Password token has been verified'
+        })
     } catch (error) {
         next(error)
     }
@@ -93,7 +99,10 @@ const updatePassword = async (req, res) => {
             },
             { new: true, runValidators: true })
 
-        return res.status(StatusCodes.OK).json({ status: 'ok', msg: 'Password updated successfully' })
+        return res.status(StatusCodes.OK).json({
+            status: 'ok',
+            msg: 'Password updated successfully'
+        })
     } catch (error) {
         next(error)
     }
@@ -111,7 +120,10 @@ const resetPasswordVerificationToken = async (req, res) => {
             },
             { new: true, runValidators: true })
 
-        return res.status(StatusCodes.OK).json({ status: 'ok', msg: 'Password verification token has been reset successfully' })
+        return res.status(StatusCodes.OK).json({
+            status: 'ok',
+            msg: 'Password verification token has been reset successfully'
+        })
     } catch (error) {
         next(error)
     }

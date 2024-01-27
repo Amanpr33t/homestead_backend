@@ -27,9 +27,11 @@ const updatePropertyDealerDetails = async (req, res, next) => {
             { ...req.body },
             { new: true, runValidators: true })
 
-        return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Property dealer has been successfully updated' })
+        return res.status(StatusCodes.OK).json({ 
+            status: 'ok', 
+            message: 'Property dealer has been successfully updated'
+         })
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }

@@ -13,10 +13,16 @@ const emailValidator = require("email-validator");
 //This function is used to check whether a property dealer exists
 const propertyDealerExists = async (req, res, next) => {
     try {
-        const { email, contactNumber, dealerId: uniqueId } = req.query
+        const { email,
+            contactNumber,
+            dealerId: uniqueId } = req.query
 
         //Out of email, contactNumber and uniqueId only 1 should be received. This if statement throws an error if more than 1 items are available
-        if ((email && !email.trim() && contactNumber && !contactNumber.trim() && uniqueId && !uniqueId.trim()) || (email && email.trim() && contactNumber && contactNumber.trim()) || (contactNumber && contactNumber.trim() && uniqueId && uniqueId.trim()) || (email && email.trim() && uniqueId && uniqueId.trim()) || (email && email.trim() && contactNumber && contactNumber.trim() && uniqueId && uniqueId.trim())) {
+        if ((email && !email.trim() && contactNumber && !contactNumber.trim() && uniqueId && !uniqueId.trim()) ||
+            (email && email.trim() && contactNumber && contactNumber.trim()) ||
+            (contactNumber && contactNumber.trim() && uniqueId && uniqueId.trim()) ||
+            (email && email.trim() && uniqueId && uniqueId.trim()) ||
+            (email && email.trim() && contactNumber && contactNumber.trim() && uniqueId && uniqueId.trim())) {
             throw new CustomAPIError('Insufficient data', 204)
         }
 
@@ -35,7 +41,8 @@ const propertyDealerExists = async (req, res, next) => {
         }
 
         if (!dealer) {
-            return res.status(StatusCodes.OK).json({ status: 'noDealerExists', message: 'No dealer with this email or contact number exists' })
+            res.status(StatusCodes.OK).json({ status: 'noDealerExists', message: 'No dealer with this email or contact number exists' })
+            return
         }
 
         req.body.email = dealer.email //Here we add the email of property dealer to the body
@@ -49,6 +56,10 @@ const propertyDealerExists = async (req, res, next) => {
 const sendOtpToEmailForDealerVerification = async (req, res, next) => {
     try {
         const { email } = req.body
+
+        if (!email.trim()) {
+            throw new CustomAPIError('Email not provided', StatusCodes.BAD_REQUEST)
+        }
 
         //Here we generate a 4 digit OTP
         const otpForVerification = Math.floor(1000 + Math.random() * 9000).toString()
@@ -69,10 +80,16 @@ const sendOtpToEmailForDealerVerification = async (req, res, next) => {
 
         //The query below is used to update the otpForVerification and otpForVerificationExpirationDate fields in the dealers document
         await PropertyDealer.findOneAndUpdate({ email },
-            { otpForVerification, otpForVerificationExpirationDate },
+            {
+                otpForVerification,
+                otpForVerificationExpirationDate
+            },
             { new: true, runValidators: true })
 
-        return res.status(StatusCodes.OK).json({ status: 'ok', msg: 'A verification token has been sent to your email' })
+        return res.status(StatusCodes.OK).json({
+            status: 'ok',
+            msg: 'A verification token has been sent to your email'
+        })
     } catch (error) {
         next(error)
     }
@@ -81,10 +98,19 @@ const sendOtpToEmailForDealerVerification = async (req, res, next) => {
 //This function is used to confirm the OTP sent by the user
 const confirmOtpForDealerVerification = async (req, res, next) => {
     try {
-        const { email, contactNumber, dealerId: uniqueId, otp } = req.query
+        const {
+            email,
+            contactNumber,
+            dealerId: uniqueId,
+            otp
+        } = req.query
 
         //Out of email, contactNumber and uniqueId only 1 should be received. This if statement throws an error if more than 1 items are available
-        if ((email && !email.trim() && contactNumber && !contactNumber.trim() && uniqueId && !uniqueId.trim()) || (email && email.trim() && contactNumber && contactNumber.trim()) || (contactNumber && contactNumber.trim() && uniqueId && uniqueId.trim()) || (email && email.trim() && uniqueId && uniqueId.trim()) || (email && email.trim() && contactNumber && contactNumber.trim() && uniqueId && uniqueId.trim())) {
+        if ((email && !email.trim() && !contactNumber && uniqueId && !uniqueId.trim()) ||
+            (email && email.trim() && contactNumber) ||
+            (contactNumber && uniqueId && uniqueId.trim()) ||
+            (email && email.trim() && uniqueId && uniqueId.trim()) ||
+            (email && email.trim() && contactNumber && uniqueId && uniqueId.trim())) {
             throw new CustomAPIError('Insufficient data', StatusCodes.BAD_REQUEST)
         }
 
@@ -97,8 +123,8 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
         //The if statements run depending upon the availability of email, uniqueId and contactNumber
         if (email && email.trim()) {
             dealer = await PropertyDealer.findOne({ email: email.trim() })
-        } else if (contactNumber && contactNumber.trim()) {
-            dealer = await PropertyDealer.findOne({ contactNumber: contactNumber.trim() })
+        } else if (contactNumber) {
+            dealer = await PropertyDealer.findOne({ contactNumber })
         } else if (uniqueId && uniqueId.trim()) {
             dealer = await PropertyDealer.findOne({ uniqueId: uniqueId.trim() })
         }
@@ -108,18 +134,20 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
         }
 
         if (dealer.otpForVerificationExpirationDate.getTime() <= Date.now()) {
-            return res.status(StatusCodes.OK).json({ status: 'token_expired', msg: 'Token expired' })
+            res.status(StatusCodes.OK).json({ status: 'token_expired', msg: 'Token expired' })
+            return
         }
 
         if (dealer.otpForVerification !== otp) {
-            return res.status(StatusCodes.OK).json({ status: 'incorrect_token', msg: 'Access denied' })
+            res.status(StatusCodes.OK).json({ status: 'incorrect_token', msg: 'Access denied' })
+            return
         }
 
         let identifier
         if (email && email.trim()) {
             identifier = { email: email.trim() }
-        } else if (contactNumber && contactNumber.trim()) {
-            identifier = { contactNumber: contactNumber.trim() }
+        } else if (contactNumber) {
+            identifier = { contactNumber }
         } else if (uniqueId && uniqueId.trim()) {
             identifier = { uniqueId: uniqueId.trim() }
         }
@@ -127,19 +155,62 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
         //The code below is used to update the dealer document in the database once the OTP has been successfully verified
         await PropertyDealer.findOneAndUpdate(identifier,
             {
-                otpForVerification: null, otpForVerificationExpirationDate: null
+                otpForVerification: null,
+                otpForVerificationExpirationDate: null
             },
             { new: true, runValidators: true })
 
-        return res.status(StatusCodes.OK).json({
-            status: 'ok', msg: 'OTP has been verified', dealer: {
+        res.status(StatusCodes.OK).json({
+            status: 'ok',
+            msg: 'OTP has been verified',
+            dealer: {
                 dealerId: dealer._id,
                 firmName: dealer.firmName,
                 firmLogoUrl: dealer.firmLogoUrl
             }
         })
+        return
     } catch (error) {
         next(error)
+    }
+}
+
+const assignPropertyEvaluatorForProperty = async (district, state) => {
+    //The code below is used to assign the property to an evaluator
+    try {
+        // Find a random property evaluator in the specified district that is active
+        let propertyEvaluator = await PropertyEvaluator.aggregate([
+            { $match: { district, isActive: true } },
+            { $sample: { size: 1 } },
+            { $project: { _id: 1 } }
+        ])
+        if (propertyEvaluator && propertyEvaluator.length === 0) {
+            //The if statement is run when we get no evaluators with the same district
+            propertyEvaluator = await PropertyEvaluator.aggregate([
+                { $match: { state, isActive: true } },
+                { $sample: { size: 1 } },
+                { $project: { _id: 1 } }
+            ]); //We get all the evaluators with the same state and who are active
+            if (propertyEvaluator.length === 0) {
+                //The if statement is run when we get no evaluators with the same district and state
+                propertyEvaluator = await PropertyEvaluator.aggregate([
+                    { $match: { isActive: true } },
+                    { $sample: { size: 1 } },
+                    { $project: { _id: 1 } }
+                ])
+                if (propertyEvaluator.length) {
+                    return propertyEvaluator[0]._id
+                } else {
+                    return 'not-found'
+                }
+            } else if (propertyEvaluator.length) {
+                return propertyEvaluator[0]._id
+            }
+        } else if (propertyEvaluator && propertyEvaluator.length) {
+            return propertyEvaluator[0]._id
+        }
+    } catch (error) {
+        throw new Error('Error occured while assigning evaluator')
     }
 }
 
@@ -148,70 +219,58 @@ const addAgriculturalProperty = async (req, res, next) => {
     try {
         req.body.addedByFieldAgent = req.fieldAgent._id //Here we add the id of the fieldAgent to the body
 
-        const { waterSource, reservoir, irrigationSystem, crops, road, legalRestrictions, propertyImagesUrl } = req.body
+        const {
+            waterSource,
+            reservoir,
+            crops,
+            legalRestrictions,
+            propertyImagesUrl,
+            landSize,
+            location
+        } = req.body
+
+        if (landSize && landSize.details && landSize.details.length > 500) {
+            throw new CustomAPIError('Land size details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
+        }
 
         //The if statements below are used to verify the content received in the body
-        if (!waterSource.canal.length && !waterSource.river.length && !waterSource.tubewells.numberOfTubewells) {
+        if (!waterSource || ((waterSource.canal && !waterSource.canal.length) && (waterSource.river && !waterSource.river.length) && (waterSource.tubewells && !waterSource.tubewells.numberOfTubewells))) {
             throw new CustomAPIError('Water source information not provided', StatusCodes.BAD_REQUEST)
         }
-        if (reservoir.isReservoir) {
-            if (!reservoir.type.length) {
-                throw new CustomAPIError('No reservoir type provided', StatusCodes.BAD_REQUEST)
-            }
-            if (reservoir.type.length > 2) {
+
+        if (reservoir && reservoir.isReservoir) {
+            if (!reservoir.type.length || reservoir.type.length > 2) {
                 throw new CustomAPIError('Illegal reservoir type information', StatusCodes.BAD_REQUEST)
             }
-            reservoir.type.forEach(type => {
-                if (type.trim().toLowerCase() !== 'private' && type.trim().toLowerCase() !== 'public') {
-                    throw new CustomAPIError('Incorrect type information', StatusCodes.BAD_REQUEST)
-                }
-            })
-            if (reservoir.type.includes('private') && (!reservoir.capacityOfPrivateReservoir || (reservoir.unitOfCapacityForPrivateReservoir !== 'cusec' && reservoir.unitOfCapacityForPrivateReservoir !== 'litre'))) {
-                throw new CustomAPIError('Incorrect inforamtion regarding capacity and ', StatusCodes.BAD_REQUEST)
+            if (reservoir.type.includes('private') &&
+                (!reservoir.capacityOfPrivateReservoir || !reservoir.unitOfCapacityForPrivateReservoir)) {
+                throw new CustomAPIError('Incorrect inforamtion regarding capacity and type of private reservoir', StatusCodes.BAD_REQUEST)
             }
         }
-        irrigationSystem.forEach(system => {
-            if (system.trim() !== 'Sprinkler' && system.trim() !== 'Drip' && system.trim() !== 'Underground pipeline') {
-                throw new CustomAPIError('Wrong irrigation sysyem information', StatusCodes.BAD_REQUEST)
-            }
-        })
-        if (!crops.length) {
+
+        if (crops && !crops.length) {
             throw new CustomAPIError('No crops provided', StatusCodes.BAD_REQUEST)
         }
-        crops.forEach(crop => {
-            if (crop.trim() !== 'Rice' && crop.trim() !== 'Maize' && crop.trim() !== 'Cotton' && crop.trim() !== 'Wheat') {
-                throw new CustomAPIError('Wrong crop information', StatusCodes.BAD_REQUEST)
+
+        if (legalRestrictions && legalRestrictions.isLegalRestrictions) {
+            if (!legalRestrictions.details) {
+                throw new CustomAPIError('legal restictions details not provided', StatusCodes.BAD_REQUEST)
+            } else if (legalRestrictions.details && legalRestrictions.details.trim().length > 500) {
+                throw new CustomAPIError('legal restictions details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
             }
-        })
-        if (!road.type.length || (road.type !== 'Unpaved road' && road.type !== 'Village road' && road.type !== 'District road' && road.type !== 'State highway' && road.type !== 'National highway')) {
-            throw new CustomAPIError('Wrong road information', StatusCodes.BAD_REQUEST)
         }
-        if (legalRestrictions.isLegalRestrictions && !legalRestrictions.details) {
-            throw new CustomAPIError('Details of legal restrictions not provided', StatusCodes.BAD_REQUEST)
-        }
+
         if (!propertyImagesUrl.length) {
             throw new CustomAPIError('No land images provided', StatusCodes.BAD_REQUEST)
         }
 
-        //The code below is used to assign the property to an evaluator
-        let propertyEvaluators
-        propertyEvaluators = await PropertyEvaluator.find({ district: req.body.location.name.district.toLowerCase(), isActive: true }) //We get all the evaluators with the same district and who are active
+        const evaluatorId = await assignPropertyEvaluatorForProperty(location.name.district, location.name.state)//id of evaluator to whom the property will be assigned for evaluation
 
-        if (propertyEvaluators && propertyEvaluators.length === 0) {
-            //The if statement is run when we get no evaluators with the same district
-            propertyEvaluators = await PropertyEvaluator.find({ state: req.body.location.name.state.toLowerCase(), isActive: true }) //We get all the evaluators with the same state and who are active
-            if (propertyEvaluators.length === 0) {
-                //The if statement is run when we get no evaluators with the same district and state
-                propertyEvaluators = await PropertyEvaluator.find()
+        //The if statement below is run when we get some evaluator from the database
+        if (evaluatorId) {
+            if (evaluatorId === 'not-found') {
+                throw new CustomAPIError('No evaluator found', StatusCodes.BAD_REQUEST)
             }
-        }
-
-        //The if statement below is run when we get some evaluators from the database
-        if (propertyEvaluators && propertyEvaluators.length > 0) {
-            const randomIndex = Math.floor(Math.random() * propertyEvaluators.length) // Generate a random index
-            const randomPropertyEvaluator = propertyEvaluators[randomIndex]   // Retrieve the random evaluator
-            req.body.propertyEvaluator = randomPropertyEvaluator._id //we add the ID of the evaluator to the body of the agricultural property
-
             const uniqueId = await uniqueIdGeneratorForProperty('agricultural', req.body.location.name.state) //The code is used to generate a unique Id for the agricultural property
 
             const currentDate = new Date();
@@ -220,12 +279,16 @@ const addAgriculturalProperty = async (req, res, next) => {
             await AgriculturalProperty.create({
                 ...req.body,
                 uniqueId,
-                evaluationRequestDate: Date.now(),
+                evaluationRequestDate: new Date(),
                 stateWherePropertyIsLocated: req.body.location.name.state,
-                yearOfPropertyAddition: currentYear
+                yearOfPropertyAddition: currentYear,
+                propertyEvaluator: evaluatorId
             }) //A new agricultural proeprty is created
 
-            return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Agricultural property has been added' })
+            return res.status(StatusCodes.OK).json({
+                status: 'ok',
+                message: 'Agricultural property has been added'
+            })
         }
     } catch (error) {
         next(error)
@@ -236,49 +299,64 @@ const addAgriculturalProperty = async (req, res, next) => {
 const addCommercialProperty = async (req, res, next) => {
     try {
         req.body.addedByFieldAgent = req.fieldAgent._id //Here we add the ID of field agent to the request body
+        const {
+            leasePeriod,
+            lockInPeriod,
+            stateOfProperty,
+            commercialPropertyType,
+            legalRestrictions,
+            propertyImagesUrl,
+            shopPropertyType,
+            landSize,
+            remarks,
+            location
+        } = req.body
 
-        const { stateOfProperty, commercialPropertyType, legalRestrictions, propertyImagesUrl, shopPropertyType } = req.body
+        if (landSize && landSize.details && landSize.details.length > 500) {
+            throw new CustomAPIError('land size details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
+        }
+
+        if (remarks && remarks.length > 500) {
+            throw new CustomAPIError('remarks cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
+        }
 
         //The if statements below are used to verify the data received in request body
-        if (commercialPropertyType !== 'shop' && commercialPropertyType !== 'industrial') {
-            throw new CustomAPIError('Commercial type details are wrong', StatusCodes.BAD_REQUEST)
-        }
-        if ((!stateOfProperty.empty && !stateOfProperty.builtUp) || (stateOfProperty.empty && stateOfProperty.builtUp)) {
+        if (stateOfProperty &&
+            ((!stateOfProperty.empty && !stateOfProperty.builtUp) ||
+                (stateOfProperty.empty && stateOfProperty.builtUp))) {
             throw new CustomAPIError('Both values cannot be true or false at the same time', StatusCodes.BAD_REQUEST)
         }
-        if (commercialPropertyType === 'industrial' && stateOfProperty.builtUp && !stateOfProperty.builtUpPropertyType) {
+        if (stateOfProperty === 'industrial' && stateOfProperty.builtUp && !stateOfProperty.builtUpPropertyType) {
             throw new CustomAPIError('Insufficient data', StatusCodes.BAD_REQUEST)
+        }
+
+        if (commercialPropertyType === 'industrial' && (lockInPeriod || leasePeriod || shopPropertyType)) {
+            throw new CustomAPIError('Inappropriate data', StatusCodes.BAD_REQUEST)
         }
 
         if (commercialPropertyType === 'shop' && !shopPropertyType) {
             throw new CustomAPIError('Insufficient data', StatusCodes.BAD_REQUEST)
         }
 
-        if (legalRestrictions.isLegalRestrictions && !legalRestrictions.details) {
-            throw new CustomAPIError('Details of legal restrictions not provided', StatusCodes.BAD_REQUEST)
-        }
-        if (!propertyImagesUrl.length) {
-            throw new CustomAPIError('No land images provided', StatusCodes.BAD_REQUEST)
-        }
-
-        //The code below is used to assign the property to an evaluator
-        let propertyEvaluators
-        propertyEvaluators = await PropertyEvaluator.find({ district: req.body.location.name.district.toLowerCase(), isActive: true }) //We get all the evaluators with the same district and who are active
-
-        if (propertyEvaluators && propertyEvaluators.length === 0) {
-            //The if statement is run when we get no evaluators with the same district
-            propertyEvaluators = await PropertyEvaluator.find({ state: req.body.location.name.state.toLowerCase(), isActive: true }) //We get all the evaluators with the same state and who are active
-            if (propertyEvaluators.length === 0) {
-                //The if statement is run when we get no evaluators with the same district and state
-                propertyEvaluators = await PropertyEvaluator.find()
+        if (legalRestrictions && legalRestrictions.isLegalRestrictions) {
+            if (!legalRestrictions.details) {
+                throw new CustomAPIError('legal restictions details not provided', StatusCodes.BAD_REQUEST)
+            } else if (legalRestrictions.details && legalRestrictions.details.trim().length > 500) {
+                throw new CustomAPIError('legal restictions details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
             }
         }
 
+        if (!propertyImagesUrl.length) {
+            throw new CustomAPIError('No property images provided', StatusCodes.BAD_REQUEST)
+        }
+
+        const evaluatorId = await assignPropertyEvaluatorForProperty(location.name.district, location.name.state)//id of evaluator to whom the property will be assigned for evaluation
+
         //The if statement below is run when we get some evaluators from the database
-        if (propertyEvaluators && propertyEvaluators.length > 0) {
-            const randomIndex = Math.floor(Math.random() * propertyEvaluators.length) // Generate a random index
-            const randomPropertyEvaluator = propertyEvaluators[randomIndex]   // Retrieve the random evaluator
-            req.body.propertyEvaluator = randomPropertyEvaluator._id //we add the ID of the evaluator to the body of the commercial property
+        if (evaluatorId) {
+            if (evaluatorId === 'not-found') {
+                throw new CustomAPIError('No evaluator found', StatusCodes.BAD_REQUEST)
+            }
 
             const currentDate = new Date();
             const currentYear = currentDate.getFullYear();
@@ -289,7 +367,8 @@ const addCommercialProperty = async (req, res, next) => {
                 uniqueId,
                 evaluationRequestDate: Date.now(),
                 stateWherePropertyIsLocated: req.body.location.name.state,
-                yearOfPropertyAddition: currentYear
+                yearOfPropertyAddition: currentYear,
+                propertyEvaluator: evaluatorId
             }) //A new commercial proeprty is added to the database
 
             return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Commercial property has been added' })
@@ -304,48 +383,71 @@ const addResidentialProperty = async (req, res, next) => {
     try {
         req.body.addedByFieldAgent = req.fieldAgent._id  //Here we add the ID of field agent to the request body
 
-        const { residentialPropertyType, propertyImagesUrl, price, legalRestrictions } = req.body
+        const {
+            propertyImagesUrl,
+            price,
+            legalRestrictions,
+            title,
+            details,
+            waterSupply,
+            furnishing,
+            kitchenFurnishing,
+            kitchenAppliances,
+            garden
+        } = req.body
 
-        //The if statements below are used to verify the data received in request body
-        if (residentialPropertyType.toLowerCase() !== 'flat' && residentialPropertyType.toLowerCase() !== 'plot' && residentialPropertyType.toLowerCase() !== 'house') {
-            throw new CustomAPIError('Residential type details are not present', StatusCodes.BAD_REQUEST)
+        if (waterSupply && waterSupply.available && waterSupply.twentyFourHours === null) {
+            throw new CustomAPIError('data regarding 24 hours water supply not provided', StatusCodes.BAD_REQUEST)
         }
 
-        if (!price.fixed && (!price.range.from && !price.range.to)) {
+        if ((title && title.length > 500) || (details && details.length > 500)) {
+            throw new CustomAPIError('Title and details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
+        }
+        if (furnishing && furnishing.details && furnishing.details.length > 500) {
+            throw new CustomAPIError('furnishing details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
+        }
+        if (kitchenFurnishing && kitchenFurnishing.details && kitchenFurnishing.details.length > 500) {
+            throw new CustomAPIError('kitchen furnishing details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
+        }
+        if (kitchenAppliances && kitchenAppliances.details && kitchenAppliances.details.length > 500) {
+            throw new CustomAPIError('kitchen appliances details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
+        }
+        if (garden && garden.details && garden.details.length > 500) {
+            throw new CustomAPIError('garden details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
+        }
+
+        //The if statements below are used to verify the data received in request body
+        if (!price || (price && !price.range)) {
+            throw new CustomAPIError('Price not provided', StatusCodes.BAD_REQUEST)
+        } else if (!price.fixed && (!price.range.from || !price.range.to)) {
             throw new CustomAPIError('Price not provided', StatusCodes.BAD_REQUEST)
         } else if (price.fixed && (price.range.from || price.range.to)) {
             throw new CustomAPIError('Invalide data', StatusCodes.BAD_REQUEST)
-        } else if ((price.range.from && !price.range.to) || (!price.range.from && price.range.to)) {
+        } else if (!price.fixed && ((price.range.from && !price.range.to) || (!price.range.from && price.range.to))) {
             throw new CustomAPIError('Range of price not provided', StatusCodes.BAD_REQUEST)
+        } else if (price.range.from && price.range.to && +price.range.from >= +price.range.to) {
+            throw new CustomAPIError('From shouls be smaller value than to', StatusCodes.BAD_REQUEST)
         }
 
-        if (legalRestrictions.isLegalRestrictions && !legalRestrictions.details) {
-            throw new CustomAPIError('Details of legal restrictions not provided', StatusCodes.BAD_REQUEST)
-        }
-
-        if (!propertyImagesUrl.length) {
-            throw new CustomAPIError('No land images provided', StatusCodes.BAD_REQUEST)
-        }
-
-        //The code below is used to assign the property to an evaluator
-        let propertyEvaluators
-
-        propertyEvaluators = await PropertyEvaluator.find({ district: req.body.location.name.district.toLowerCase(), isActive: true }) //We get all the evaluators with the same district and who are active
-
-        if (propertyEvaluators && propertyEvaluators.length === 0) {
-            //The if statement is run when we get no evaluators with the same district
-            propertyEvaluators = await PropertyEvaluator.find({ state: req.body.location.name.state.toLowerCase(), isActive: true }) //We get all the evaluators with the same state and who are active
-            if (propertyEvaluators.length === 0) {
-                //The if statement is run when we get no evaluators with the same district and state is found
-                propertyEvaluators = await PropertyEvaluator.find()
+        if (legalRestrictions && legalRestrictions.isLegalRestrictions) {
+            if (!legalRestrictions.details) {
+                throw new CustomAPIError('legal restictions details not provided', StatusCodes.BAD_REQUEST)
+            } else if (legalRestrictions.details && legalRestrictions.details.trim().length > 500) {
+                throw new CustomAPIError('legal restictions details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
             }
         }
 
+        if (!propertyImagesUrl.length) {
+            throw new CustomAPIError('No property images provided', StatusCodes.BAD_REQUEST)
+        }
+
+        const evaluatorId = await assignPropertyEvaluatorForProperty(location.name.district, location.name.state)//id of evaluator to whom the property will be assigned for evaluation
+
         //The if statement below is run when we get some evaluators from the database
-        if (propertyEvaluators && propertyEvaluators.length > 0) {
-            const randomIndex = Math.floor(Math.random() * propertyEvaluators.length) // Generate a random index
-            const randomPropertyEvaluator = propertyEvaluators[randomIndex] // Retrieve the random evaluator
-            req.body.propertyEvaluator = randomPropertyEvaluator._id //we add the ID of the evaluator to the body of the residential property
+        if (evaluatorId) {
+            if (evaluatorId === 'not-found') {
+                throw new CustomAPIError('No evaluator found', StatusCodes.BAD_REQUEST)
+            }
 
             const currentDate = new Date();
             const currentYear = currentDate.getFullYear();
@@ -356,7 +458,8 @@ const addResidentialProperty = async (req, res, next) => {
                 uniqueId,
                 evaluationRequestDate: Date.now(),
                 stateWherePropertyIsLocated: req.body.location.name.state,
-                yearOfPropertyAddition: currentYear
+                yearOfPropertyAddition: currentYear,
+                propertyEvaluator: evaluatorId
             }) //A new residential proeprty is added to the database
 
             return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Residential property has been added' })

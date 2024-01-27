@@ -27,15 +27,23 @@ const { addPropertyDealer,
 const {
     numberOfPropertyDealersAndPropertiesAddedByFieldAgent,
     propertyDealersAddedByFieldAgent,
-    agriculturalPropertiesAddedByFieldAgent,
     propertyDealerOfaProperty,
-    commercialPropertiesAddedByFieldAgent,
-    residentialPropertiesAddedByFieldAgent,
+    dealerDetails
+} = require('../controllers/field-agent/propertiesAndPropertyDealersAddedByFieldAgent')
+
+const {
     numberOfPendingPropertyReevaluations,
     pendingPropertiesForReevaluationByFieldAgent,
-    getProperty,
     reevaluateProperty
-} = require('../controllers/field-agent/propertiesAndPropertyDealersAddedByFieldAgent')
+} = require('../controllers/field-agent/propertyReevaluations')
+
+const {
+    getProperty,
+} = require('../controllers/field-agent/getPropertyDetails')
+
+const {
+    propertiesAddedByFieldAgent
+} = require('../controllers/field-agent/fetchProperties')
 
 const {
     propertyDealerExists,
@@ -62,9 +70,8 @@ router.get('/propertyDealerReraNumberExists', propertyDealerReraNumberExists) //
 
 router.get('/numberOfPropertyDealersAndPropertiesAddedByFieldAgent', authenticateFieldAgent, numberOfPropertyDealersAndPropertiesAddedByFieldAgent) //to get the number of properties and proerty dealers added by the field agent
 router.get('/propertyDealersAddedByFieldAgent', authenticateFieldAgent, propertyDealersAddedByFieldAgent) //to get the property dealers added by the field agent
-router.get('/agriculturalPropertiesAddedByFieldAgent', authenticateFieldAgent, agriculturalPropertiesAddedByFieldAgent)  //to get the agricultural properties added by the field agent
-router.get('/commercialPropertiesAddedByFieldAgent', authenticateFieldAgent, commercialPropertiesAddedByFieldAgent)  //to get the commercial properties added by the field agent
-router.get('/residentialPropertiesAddedByFieldAgent', authenticateFieldAgent, residentialPropertiesAddedByFieldAgent) //to get the residential properties added by the field agent
+router.get('/getDealerDetails', authenticateFieldAgent, dealerDetails) //to get the property dealer details
+router.get('/propertiesAddedByFieldAgent', authenticateFieldAgent, propertiesAddedByFieldAgent)  //to get the properties added by the field agent
 router.get('/propertyDealerOfaProperty/:id', authenticateFieldAgent, propertyDealerOfaProperty) //to get the firmName of a property dealer of aproeprty
 router.get('/numberOfPendingPequestsForReevaluationOfProperty', authenticateFieldAgent, numberOfPendingPropertyReevaluations) //To get number of property pending for reevaluation by field agent
 router.get('/pendingPropertiesForReevaluationByFieldAgent', authenticateFieldAgent, pendingPropertiesForReevaluationByFieldAgent) //fetches properties pending for reevaluation by field agent

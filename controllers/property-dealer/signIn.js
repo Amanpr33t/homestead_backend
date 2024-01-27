@@ -3,7 +3,7 @@ const { StatusCodes } = require('http-status-codes')
 const PropertyDealer = require('../../models/propertyDealer')
 const CustomAPIError = require('../../errors/custom-error')
 
-//The function is used to signIn a field agent
+//The function is used to signIn a property dealer
 const signIn = async (req, res, next) => {
     try {
         const { email, password } = req.body
@@ -32,19 +32,25 @@ const signIn = async (req, res, next) => {
                 authTokenExpiration: Date.now() + oneDay
             },
             { new: true, runValidators: true })
-        return res.status(StatusCodes.OK).json({ status: 'ok', authToken })
+        return res.status(StatusCodes.OK).json({
+            status: 'ok',
+            authToken
+        })
     } catch (error) {
         next(error)
     }
 }
 
-//The function runs when a field agent logs out
+//The function runs when a property dealer logs out
 const logout = async (req, res, next) => {
     try {
         await PropertyDealer.findOneAndUpdate({ _id: req.propertyDealer._id },
             { authTokenExpiration: null },
             { new: true, runValidators: true })
-        return res.status(StatusCodes.OK).json({ status: 'ok', msg: 'Successfully logged out' })
+        return res.status(StatusCodes.OK).json({
+            status: 'ok',
+            msg: 'Successfully logged out'
+        })
     } catch (error) {
         next(error)
     }

@@ -91,14 +91,12 @@ const PropertyDealerSchema = new mongoose.Schema({
         trim: true
     },
     contactNumber: {
-        type: String,
+        type: Number,
         required: [true, 'Please provide a contact number'],
-        trim: true
     },
     password: {
         type: String,
-        trim: true,
-        required: true
+        trim: true
     },
     addedByFieldAgent: {
         type: mongoose.Types.ObjectId,
@@ -170,6 +168,10 @@ const PropertyDealerSchema = new mongoose.Schema({
             requestDate: {
                 type: Date,
                 required: true
+            },
+            createdAt: {
+                type: Date,
+                default: Date.now()
             },
             _id: {
                 type: Schema.Types.ObjectId,

@@ -22,7 +22,7 @@ const addPropertyDealer = async (req, res, next) => {
                 throw new CustomAPIError('Postal code should be a 6 digit number', 204)
             }
         })
-        if (!addressArray.length || !emailValidator.validate(email.trim()) || about.trim().length > 400) {
+        if (!addressArray.length || !emailValidator.validate(email.trim()) || (about && about.trim().length > 400)) {
             throw new CustomAPIError('Incorrect data', 204)
         }
 
@@ -40,6 +40,7 @@ const addPropertyDealer = async (req, res, next) => {
 
         return res.status(StatusCodes.OK).json({ status: 'ok', message: 'property dealer has been successfully added' })
     } catch (error) {
+        console.log(error)
         next(error)
     }
 }

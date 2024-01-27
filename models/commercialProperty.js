@@ -25,30 +25,35 @@ const LandSizeSchema = new mongoose.Schema({
     },
     details: {
         type: String,
-        trim: true
+        trim: true,
+        default: null
     },
     _id: {
         type: Schema.Types.ObjectId,
         default: undefined,
     },
 })
+
 const PropertyLocationSchema = new mongoose.Schema({
     name: {
         plotNumber: {
-            type: String,
-            trim: true
+            type: Number,
+            default: null
         },
         village: {
             type: String,
-            trim: true
+            trim: true,
+            default: null
         },
         city: {
             type: String,
-            trim: true
+            trim: true,
+            default: null
         },
         tehsil: {
             type: String,
-            trim: true
+            trim: true,
+            default: null
         },
         district: {
             type: String,
@@ -70,11 +75,13 @@ const PropertyLocationSchema = new mongoose.Schema({
 const CommercialPropertySchema = new mongoose.Schema({
     propertyType: {
         type: String,
+        enum: ['commercial'],
+        required: true,
         default: 'commercial'
     },
     commercialPropertyType: {
-        //can be anyone of these: 'shop' , 'industrial'
         type: String,
+        enum: ['shop', 'industrial'],
         required: true,
         trim: true
     },
@@ -88,9 +95,10 @@ const CommercialPropertySchema = new mongoose.Schema({
             required: true
         },
         builtUpPropertyType: {
-            //Can be anyone of these: 'Hotel/Resort', 'Factory', 'Banquet hall', 'Cold Store', 'Warehouse', 'School', 'Hospital/Clinic', 'other'
             type: String,
-            trim: true
+            enum: ['hotel/resort', 'factory', 'banquet hall', 'cold store', 'warehouse', 'school', 'hospital/clinic', 'other', null],
+            trim: true,
+            default: null
         }
     },
     landSize: LandSizeSchema,
@@ -107,19 +115,21 @@ const CommercialPropertySchema = new mongoose.Schema({
     },
     widthOfRoadFacing: {
         feet: {
-            type: Number
+            type: Number,
+            required: true
         },
         metre: {
-            type: Number
+            type: Number,
+            required: true
         }
     },
     propertyImagesUrl: {
-        type: Array,
+        type: [String],
         default: []
     },
     contractImagesUrl: {
-        type: Array,
-        default: []
+        type: [String],
+        default: null
     },
     numberOfOwners: {
         type: Number,
@@ -138,7 +148,8 @@ const CommercialPropertySchema = new mongoose.Schema({
     },
     remarks: {
         type: String,
-        trim: true
+        trim: true,
+        default: null
     },
     lockInPeriod: {
         years: {
@@ -163,7 +174,9 @@ const CommercialPropertySchema = new mongoose.Schema({
     shopPropertyType: {
         //Can be anyone of these: 'Booth', 'Shop', 'Showroom', 'Retail-space', 'other'
         type: String,
-        trim: true
+        enum: ['booth', 'shop', 'showroom', 'retail-space', 'other', null],
+        trim: true,
+        default: null
     },
     legalRestrictions: {
         isLegalRestrictions: {
@@ -172,7 +185,8 @@ const CommercialPropertySchema = new mongoose.Schema({
         },
         details: {
             type: String,
-            trim: true
+            trim: true,
+            default: null
         }
     },
     addedByFieldAgent: {

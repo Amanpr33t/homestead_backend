@@ -60,10 +60,10 @@ router.get('/fetchPropertiesAdded', authenticatePropertyDealer, fetchPropertiesA
 
 router.get('/getPropertyDetails', authenticatePropertyDealer, getPropertyDetails) //fetch details of a property added by a property dealer
 
-router.get('/fetchCustomerRequests', authenticatePropertyDealer, fetchCustomerRequests) //fetch customer requests sent to property dealer for a property
+router.get('/fetchCustomerRequests', authenticatePropertyDealer, fetchCustomerRequests) //fetch customer requests sent to property dealer for properties
 
-router.patch('/updateSeenStatusOfCustomerRequest', authenticatePropertyDealer, updateSeenStatusOfCustomerRequest)
+router.patch('/updateSeenStatusOfCustomerRequest', authenticatePropertyDealer, updateSeenStatusOfCustomerRequest)//used to update 'unseen' status of a customer request to 'seen'
 
-router.get('/numberOfCustomerRequests', authenticatePropertyDealer, fetchNumberOfCustomerRequests)
+router.get('/numberOfCustomerRequests', authenticatePropertyDealer, fetchNumberOfCustomerRequests)//fetch number of customer requests sent to property dealer for properties
 
 module.exports = router

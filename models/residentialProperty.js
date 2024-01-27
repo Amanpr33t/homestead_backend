@@ -3,14 +3,14 @@ const Schema = mongoose.Schema
 require('express-async-errors')
 
 const ResidentialPropertySchema = new mongoose.Schema({
-    //common fields
+    //common fields to flat,house and plot propert type
     propertyType: {
         type: String,
         default: 'residential'
     },
     residentialPropertyType: {
-        //Can be anyone of these: 'Plot', 'Flat', 'House'
         type: String,
+        enum: ['plot', 'flat', 'house'],
         required: true,
         trim: true
     },
@@ -21,20 +21,21 @@ const ResidentialPropertySchema = new mongoose.Schema({
     },
     details: {
         type: String,
-        trim: true
+        trim: true,
+        default: null
     },
     price: {
         fixed: {
-            type: Number || null,
+            type: Number,
             default: null
         },
         range: {
             from: {
-                type: Number || null,
+                type: Number,
                 default: null
             },
             to: {
-                type: Number || null,
+                type: Number,
                 default: null
             }
         }
@@ -45,7 +46,7 @@ const ResidentialPropertySchema = new mongoose.Schema({
             required: true
         },
         twentyFourHours: {
-            type: Boolean || null,
+            type: Boolean,
             default: null
         }
     },
@@ -89,8 +90,8 @@ const ResidentialPropertySchema = new mongoose.Schema({
         }
     },
     areaType: {
-        //Can be anyone of these: 'Rural', 'Urban', 'Sub-Urban
         type: String,
+        enum: ['rural', 'urban', 'sub-urban'],
         required: true,
         trim: true
     },
@@ -128,29 +129,33 @@ const ResidentialPropertySchema = new mongoose.Schema({
         details: {
             type: String,
             trim: true,
+            default: null
         },
     },
     propertyTaxes: {
-        type: Number || null,
+        type: Number,
         default: null
     },
     homeOwnersAssociationFees: {
-        type: Number || null,
+        type: Number,
         default: null
     },
     location: {
         name: {
             village: {
                 type: String,
-                trim: true
+                trim: true,
+                default: null
             },
             city: {
                 type: String,
-                trim: true
+                trim: true,
+                default: null
             },
             tehsil: {
                 type: String,
-                trim: true
+                trim: true,
+                default: null
             },
             district: {
                 type: String,
@@ -179,7 +184,7 @@ const ResidentialPropertySchema = new mongoose.Schema({
         houseForSale: Boolean
     },
 
-    //common fields for house and flat
+    //common fields only for house and flat
     numberOfFloors: Number,
     numberOfLivingRooms: Number,
     numberOfBedrooms: Number,
@@ -193,61 +198,80 @@ const ResidentialPropertySchema = new mongoose.Schema({
         room: Boolean,
         washroom: Boolean
     },
-    /*furnishing: {
+    furnishing: {
         type: {
-            fullyFurnished: Boolean,
-            semiFurnished: Boolean,
-            unfurnished: Boolean
+            type: String,
+            enum: ['fully-furnished', 'semi-furnished', 'unfurnished'],
+            trim: true
         },
         details: {
             type: String,
-            trim: true
+            trim: true,
+            default: null
         }
     },
     kitchenFurnishing: {
         type: {
-            modular: Boolean,
-            semiFurnished: Boolean,
-            unFurnished: Boolean
+            type: String,
+            enum: ['modular' | 'semi-furnished', 'unfurnished'],
+            trim: true
         },
         details: {
             trim: true,
-            type: String
+            type: String,
+            default: null
         }
-    },*/
-    furnishing: Object,
-    kitchenFurnishing: Object,
+    },
     kitchenAppliances: {
         available: Boolean,
         details: {
             type: String,
-            trim: true
+            trim: true,
+            default: null
         }
     },
     washroomFitting: {
-        standard: Boolean,
-        premium: Boolean,
-        luxurious: Boolean
+        type: String,
+        enum: ['standard', 'premium', 'luxurious']
     },
     electricalFitting: {
-        standard: Boolean,
-        premium: Boolean,
-        luxurious: Boolean
+        type: String,
+        enum: ['standard', 'premium', 'luxurious']
     },
-    flooringTypeArray: Array,//Can be any of these: 'Cemented', 'Marble', 'Luxurious Marble', 'Standard tiles', 'Premium tiles', 'Luxurious tiles'
-    roofTypeArray: Array,//Can be any of these: 'Standard', 'POP work', 'Down ceiling'
-    wallTypeArray: Array,//Can be any of these: 'Plaster', 'Paint', 'Premium paint', 'Wall paper', 'PVC panelling', 'Art work'
-    windowTypeArray: Array,//Can be any of these: 'Standard', 'Wood', 'Premium material'
-    safetySystemArray: Array,//Can be any of these: 'CCTV', 'Glass break siren', 'Entry sensor', 'Motion sensor', 'Panic button', 'Keypad', 'Keyfob', 'Smoke detector', 'CO detector', 'Water sprinkler', 'Doorbell camera'
+    flooringTypeArray: {
+        type: [String],
+        enum: ['cemented', 'marble', 'lxurious marble', 'standard tiles', 'premium tiles', 'luxurious tiles']
+    },
+    roofTypeArray: {
+        type: [String],
+        enum: ['standard', 'pop work', 'down ceiling']
+    },
+    wallTypeArray: {
+        type: [String],
+        enum: ['plaster', 'paint', 'premium paint', 'wall paper', 'pvc panelling', 'art work']
+    },
+    windowTypeArray: {
+        type: [String],
+        enum: ['standard', 'wood', 'premium material']
+    },
+    safetySystemArray: {
+        type: [String],
+        enum: ['cctv', 'glass break siren', 'entry sensor', 'motion sensor', 'panic button', 'keypad', 'keyfob', 'smoke detector', 'co detector', 'water sprinkler', 'doorbell camera'],
+        default: null
+    },
     garden: {
         available: Boolean,
         details: {
             type: String,
-            trim: true
+            trim: true,
+            default: null
         }
     },
     ageOfConstruction: Number,
-    conditionOfProperty: String, //Can be anyone of these: 'Exceptionally new', 'Near to new', 'Some signs of agying', 'Need some renovations', 'Needs complete renovation'
+    conditionOfProperty: {
+        type: String,
+        enum: ['exceptionally new', 'near to new', 'some signs of agying', 'need some renovations', 'needs complete renovation']
+    },
 
     //common fields
     addedByFieldAgent: {

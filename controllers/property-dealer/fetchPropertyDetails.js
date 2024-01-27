@@ -1,9 +1,6 @@
 require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
-const PropertyDealer = require('../../models/propertyDealer')
 const CustomAPIError = require('../../errors/custom-error')
-const emailValidator = require("email-validator")
-const { uniqueIdGeneratorForPropertyDealer } = require('../../utils/uniqueIdGenerator')
 const AgriculturalProperty = require('../../models/agriculturalProperty')
 const CommercialProperty = require('../../models/commercialProperty')
 const ResidentialProperty = require('../../models/residentialProperty')
@@ -11,7 +8,6 @@ const ResidentialProperty = require('../../models/residentialProperty')
 //The function is used fetch property details
 const getPropertyDetails = async (req, res, next) => {
     try {
-        console.log(req.query)
         const {
             type,
             id

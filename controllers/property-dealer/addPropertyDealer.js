@@ -40,7 +40,6 @@ const addPropertyDealer = async (req, res, next) => {
 
         return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Property dealer has been successfully added' })
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }

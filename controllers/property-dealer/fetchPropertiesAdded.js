@@ -1,14 +1,10 @@
 require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
-const PropertyDealer = require('../../models/propertyDealer')
-const CustomAPIError = require('../../errors/custom-error')
-const emailValidator = require("email-validator")
-const { uniqueIdGeneratorForPropertyDealer } = require('../../utils/uniqueIdGenerator')
 const AgriculturalProperty = require('../../models/agriculturalProperty')
 const CommercialProperty = require('../../models/commercialProperty')
 const ResidentialProperty = require('../../models/residentialProperty')
 
-//The function is used to add a property dealer
+//The function is used to fetch properties added by a property dealer
 const fetchPropertiesAdded = async (req, res, next) => {
     try {
         const {
@@ -52,7 +48,8 @@ const fetchPropertiesAdded = async (req, res, next) => {
         }).select('location propertyType status createdAt')
 
         return res.status(StatusCodes.OK).json({
-            status: 'ok', properties: [
+            status: 'ok',
+            properties: [
                 ...agriculturalProperties,
                 ...residentialProperties,
                 ...commercialProperties

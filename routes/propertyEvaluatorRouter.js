@@ -17,12 +17,24 @@ const {
 } = require('../controllers/property-evaluator/forgotPassword')
 
 const {
-    propertyEvaluationData,
-    propertiesPendingToBeEvaluated,
-    fetchSelectedProperty,
-    propertyReevaluationOfData,
-    successfulEvaluationOfData
+    propertyEvaluationData
 } = require('../controllers/property-evaluator/propertyEvaluationData')
+
+const {
+    successfulEvaluationOfData
+} = require('../controllers/property-evaluator/successfulEvaluation')
+
+const {
+    reevaluationOfPropertyData
+} = require('../controllers/property-evaluator/reevaluationOfPropertyByFieldAgent')
+
+const {
+    fetchSelectedProperty,
+} = require('../controllers/property-evaluator/fetchSelectedProperty')
+
+const {
+    propertiesPendingToBeEvaluated
+} = require('../controllers/property-evaluator/fetchPropertiesPendingToBeEvaluated')
 
 router.post('/signIn', signIn) //to sign in an evaluator
 router.patch('/logout', authenticatePropertyEvaluator, logout) //to logout an evaluator
@@ -35,7 +47,7 @@ router.patch('/resetPasswordVerificationToken', resetPasswordVerificationToken) 
 router.get('/propertyEvaluationData', authenticatePropertyEvaluator, propertyEvaluationData) //to get data about properties evaluated by the the evaluator
 router.get('/propertiesPendingToBeEvaluated', authenticatePropertyEvaluator, propertiesPendingToBeEvaluated) //fetches some data regarding properties pending to be evaluated
 router.get('/fetch-selected-property', authenticatePropertyEvaluator, fetchSelectedProperty) //fetch details of selected property
-router.post('/property-evaluation-data-update', authenticatePropertyEvaluator, propertyReevaluationOfData) //send a property for reevaluation by field agent
+router.post('/property-evaluation-data-update', authenticatePropertyEvaluator, reevaluationOfPropertyData) //send a property for reevaluation by field agent
 router.post('/successful-evaluation-of-data', authenticatePropertyEvaluator, successfulEvaluationOfData) ////Update a property on successful evaluation of data
 
 module.exports = router

@@ -3,7 +3,7 @@ const { StatusCodes } = require('http-status-codes')
 const PropertyDealer = require('../../models/propertyDealer')
 const { getDaysDifference } = require('../../utils/getDaysDifference')
 
-//The function is used to add a property dealer
+//The function is used to fetch all requests by customers
 const fetchCustomerRequests = async (req, res, next) => {
     try {
         const filteredCustomerRequests = req.propertyDealer.requestsFromCustomer.filter(request => getDaysDifference(request.requestDate) < 30)
@@ -13,16 +13,23 @@ const fetchCustomerRequests = async (req, res, next) => {
             },
             { new: true, runValidators: true })
 
-        return res.status(StatusCodes.OK).json({ status: 'ok', customerRequests: filteredCustomerRequests })
+        return res.status(StatusCodes.OK).json({
+            status: 'ok',
+            customerRequests: filteredCustomerRequests
+        })
     } catch (error) {
         next(error)
     }
 }
 
+////The function is used to fetch number of customer requests
 const fetchNumberOfCustomerRequests = async (req, res, next) => {
     try {
         const filteredCustomerRequests = req.propertyDealer.requestsFromCustomer.filter(request => request.requestSeen === false)
-        return res.status(StatusCodes.OK).json({ status: 'ok', numberOfCustomerRequests: filteredCustomerRequests.length })
+        return res.status(StatusCodes.OK).json({
+            status: 'ok',
+            numberOfCustomerRequests: filteredCustomerRequests.length
+        })
     } catch (error) {
         next(error)
     }

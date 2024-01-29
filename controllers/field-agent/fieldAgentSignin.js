@@ -2,35 +2,43 @@ require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
 const FieldAgent = require('../../models/fieldAgent')
 const CustomAPIError = require('../../errors/custom-error')
+const emailValidator = require("email-validator");
 
 //The function is used to signIn a field agent
 const signIn = async (req, res, next) => {
     try {
         const { email, password } = req.body
+
         if (!email || !password) {
             throw new CustomAPIError('Please enter email and password ', StatusCodes.NO_CONTENT)
         }
-        if (password.length > 10 || password.length < 6) {
+        if (password && (password.length > 10 || password.length < 6)) {
             throw new CustomAPIError('Please enter email and password ', StatusCodes.BAD_REQUEST)
+        }
+        if (!emailValidator.validate(email)) {
+            throw new CustomAPIError('Email not in correct format', StatusCodes.BAD_REQUEST)
         }
 
         const fieldAgent = await FieldAgent.findOne({ email })
         if (!fieldAgent) {
-            return res.status(StatusCodes.OK).json({ status: 'not_found', msg: 'Enter valid credentials' })
-        }
-        
-        const isPasswordCorrect = fieldAgent && await fieldAgent.comparePassword(password)
-        if (!isPasswordCorrect) {
-            return res.status(StatusCodes.OK).json({ status: 'incorrect_password', msg: 'Enter valid credentials' })
+            res.status(StatusCodes.OK).json({ status: 'not_found', msg: 'Enter valid credentials' })
+            return
         }
 
-        const authToken = await fieldAgent.createJWT()
-        const oneDay = 1000 * 60 * 60 * 24
-        
-        await FieldAgent.findOneAndUpdate({ email },
-            { authTokenExpiration: Date.now() + oneDay },
-            { new: true, runValidators: true })
-        return res.status(StatusCodes.OK).json({ status: 'ok', authToken })
+        const isPasswordCorrect = fieldAgent && await fieldAgent.comparePassword(password)
+        if (isPasswordCorrect) {
+            const authToken = await fieldAgent.createJWT()
+            const oneDay = 1000 * 60 * 60 * 24
+
+            await FieldAgent.findOneAndUpdate({ email },
+                { authTokenExpiration: new Date(Date.now() + oneDay) },
+                { new: true, runValidators: true })
+            res.status(StatusCodes.OK).json({ status: 'ok', authToken })
+            return
+        } else if (isPasswordCorrect === false) {
+            res.status(StatusCodes.OK).json({ status: 'incorrect_password', msg: 'Enter valid credentials' })
+            retuen
+        }
 
     } catch (error) {
         next(error)
@@ -43,7 +51,8 @@ const logout = async (req, res, next) => {
         await FieldAgent.findOneAndUpdate({ _id: req.fieldAgent.fieldAgentId },
             { authTokenExpiration: null },
             { new: true, runValidators: true })
-        return res.status(StatusCodes.OK).json({ status: 'ok', msg: 'Successfully logged out' })
+        res.status(StatusCodes.OK).json({ status: 'ok', msg: 'Successfully logged out' })
+        return
     } catch (error) {
         next(error)
     }

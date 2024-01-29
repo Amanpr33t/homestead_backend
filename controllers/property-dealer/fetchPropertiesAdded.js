@@ -19,10 +19,21 @@ const fetchPropertiesAdded = async (req, res, next) => {
             filterData.propertyType = propertyType.toLowerCase()
         }
         if (state) {
-            filterData.stateWherePropertyIsLocated = state
+            filterData = {
+                ...filterData,
+                'location.name.state': state
+            }
         }
         if (year) {
-            filterData.yearOfPropertyAddition = +year
+            // Calculate start and end dates of the year
+            const startDate = new Date(year, 0, 1) // January 1st of the year
+            const endDate = new Date(year, 11, 31, 23, 59, 59, 999) // December 31st of the year
+
+            // Add createdAt filter based on date range
+            filterData.createdAt = {
+                $gte: startDate,
+                $lte: endDate
+            }
         }
         if (status) {
             filterData.status = status
@@ -63,3 +74,4 @@ const fetchPropertiesAdded = async (req, res, next) => {
 module.exports = {
     fetchPropertiesAdded
 }
+

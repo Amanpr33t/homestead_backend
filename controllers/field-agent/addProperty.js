@@ -18,30 +18,32 @@ const propertyDealerExists = async (req, res, next) => {
             dealerId: uniqueId } = req.query
 
         //Out of email, contactNumber and uniqueId only 1 should be received. This if statement throws an error if more than 1 items are available
-        if ((email && !email.trim() && contactNumber && !contactNumber.trim() && uniqueId && !uniqueId.trim()) ||
-            (email && email.trim() && contactNumber && contactNumber.trim()) ||
-            (contactNumber && contactNumber.trim() && uniqueId && uniqueId.trim()) ||
-            (email && email.trim() && uniqueId && uniqueId.trim()) ||
-            (email && email.trim() && contactNumber && contactNumber.trim() && uniqueId && uniqueId.trim())) {
+        if ((!email && !contactNumber && !uniqueId) ||
+            (email && contactNumber) ||
+            (contactNumber && uniqueId) ||
+            (email && uniqueId)) {
             throw new CustomAPIError('Insufficient data', 204)
         }
 
         let dealer //This variable will store the dealers data fetched from database
 
         //The if statements run depending upon the availability of email, uniqueId and contactNumber
-        if (contactNumber && contactNumber.trim()) {
-            dealer = await PropertyDealer.findOne({ contactNumber: contactNumber.trim() })
-        } else if (email && email.trim()) {
-            if (!emailValidator.validate(email.trim())) {
-                throw new CustomAPIError('Email not in correct format', StatusCodes.BAD_GATEWAY)
+        if (contactNumber) {
+            dealer = await PropertyDealer.findOne({ contactNumber })
+        } else if (email) {
+            if (!emailValidator.validate(email)) {
+                throw new CustomAPIError('Email not in correct format', StatusCodes.BAD_REQUEST)
             }
-            dealer = await PropertyDealer.findOne({ email: email.trim() })
-        } else if (uniqueId && uniqueId.trim()) {
-            dealer = await PropertyDealer.findOne({ uniqueId: uniqueId.trim() })
+            dealer = await PropertyDealer.findOne({ email })
+        } else if (uniqueId) {
+            dealer = await PropertyDealer.findOne({ uniqueId })
         }
 
         if (!dealer) {
-            res.status(StatusCodes.OK).json({ status: 'noDealerExists', message: 'No dealer with this email or contact number exists' })
+            res.status(StatusCodes.OK).json({
+                status: 'noDealerExists',
+                message: 'No dealer with this email or contact number exists'
+            })
             return
         }
 
@@ -57,8 +59,11 @@ const sendOtpToEmailForDealerVerification = async (req, res, next) => {
     try {
         const { email } = req.body
 
-        if (!email.trim()) {
+        if (!email) {
             throw new CustomAPIError('Email not provided', StatusCodes.BAD_REQUEST)
+        }
+        if (!emailValidator.validate(email)) {
+            throw new CustomAPIError('Email not in correct format', StatusCodes.BAD_GATEWAY)
         }
 
         //Here we generate a 4 digit OTP
@@ -67,7 +72,7 @@ const sendOtpToEmailForDealerVerification = async (req, res, next) => {
 
         const emailData = {
             from: process.env.ADMIN_EMAIL,
-            to: email.trim(),
+            to: email,
             subject: "OTP for dealer verification",
             msg
         }
@@ -86,10 +91,11 @@ const sendOtpToEmailForDealerVerification = async (req, res, next) => {
             },
             { new: true, runValidators: true })
 
-        return res.status(StatusCodes.OK).json({
+        res.status(StatusCodes.OK).json({
             status: 'ok',
             msg: 'A verification token has been sent to your email'
         })
+        return
     } catch (error) {
         next(error)
     }
@@ -106,27 +112,26 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
         } = req.query
 
         //Out of email, contactNumber and uniqueId only 1 should be received. This if statement throws an error if more than 1 items are available
-        if ((email && !email.trim() && !contactNumber && uniqueId && !uniqueId.trim()) ||
-            (email && email.trim() && contactNumber) ||
-            (contactNumber && uniqueId && uniqueId.trim()) ||
-            (email && email.trim() && uniqueId && uniqueId.trim()) ||
-            (email && email.trim() && contactNumber && uniqueId && uniqueId.trim())) {
+        if ((!email && !contactNumber && !uniqueId) ||
+            (email && contactNumber) ||
+            (contactNumber && uniqueId) ||
+            (email && uniqueId)) {
             throw new CustomAPIError('Insufficient data', StatusCodes.BAD_REQUEST)
         }
 
-        if (otp && !otp.trim()) {
+        if (!otp) {
             throw new CustomAPIError('Insufficient data', StatusCodes.BAD_REQUEST)
         }
 
         let dealer //This variable will store the dealers data fetched from database
 
         //The if statements run depending upon the availability of email, uniqueId and contactNumber
-        if (email && email.trim()) {
-            dealer = await PropertyDealer.findOne({ email: email.trim() })
+        if (email) {
+            dealer = await PropertyDealer.findOne({ email })
         } else if (contactNumber) {
             dealer = await PropertyDealer.findOne({ contactNumber })
-        } else if (uniqueId && uniqueId.trim()) {
-            dealer = await PropertyDealer.findOne({ uniqueId: uniqueId.trim() })
+        } else if (uniqueId) {
+            dealer = await PropertyDealer.findOne({ uniqueId })
         }
 
         if (!dealer) {
@@ -144,12 +149,12 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
         }
 
         let identifier
-        if (email && email.trim()) {
-            identifier = { email: email.trim() }
+        if (email) {
+            identifier = { email }
         } else if (contactNumber) {
             identifier = { contactNumber }
-        } else if (uniqueId && uniqueId.trim()) {
-            identifier = { uniqueId: uniqueId.trim() }
+        } else if (uniqueId) {
+            identifier = { uniqueId }
         }
 
         //The code below is used to update the dealer document in the database once the OTP has been successfully verified
@@ -175,6 +180,7 @@ const confirmOtpForDealerVerification = async (req, res, next) => {
     }
 }
 
+//The function is used to assign a property evaluator to aproeprty
 const assignPropertyEvaluatorForProperty = async (district, state) => {
     //The code below is used to assign the property to an evaluator
     try {
@@ -200,6 +206,7 @@ const assignPropertyEvaluatorForProperty = async (district, state) => {
                 ])
                 if (propertyEvaluator.length) {
                     return propertyEvaluator[0]._id
+
                 } else {
                     return 'not-found'
                 }
@@ -255,7 +262,7 @@ const addAgriculturalProperty = async (req, res, next) => {
         if (legalRestrictions && legalRestrictions.isLegalRestrictions) {
             if (!legalRestrictions.details) {
                 throw new CustomAPIError('legal restictions details not provided', StatusCodes.BAD_REQUEST)
-            } else if (legalRestrictions.details && legalRestrictions.details.trim().length > 500) {
+            } else if (legalRestrictions.details && legalRestrictions.details.length > 500) {
                 throw new CustomAPIError('legal restictions details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
             }
         }
@@ -273,22 +280,21 @@ const addAgriculturalProperty = async (req, res, next) => {
             }
             const uniqueId = await uniqueIdGeneratorForProperty('agricultural', req.body.location.name.state) //The code is used to generate a unique Id for the agricultural property
 
-            const currentDate = new Date();
-            const currentYear = currentDate.getFullYear();
-
             await AgriculturalProperty.create({
                 ...req.body,
                 uniqueId,
-                evaluationRequestDate: new Date(),
-                stateWherePropertyIsLocated: req.body.location.name.state,
-                yearOfPropertyAddition: currentYear,
+                sentToEvaluatorByFieldAgentForEvaluation: {
+                    isSent: true,
+                    date: new Date()
+                },
                 propertyEvaluator: evaluatorId
             }) //A new agricultural proeprty is created
 
-            return res.status(StatusCodes.OK).json({
+            res.status(StatusCodes.OK).json({
                 status: 'ok',
                 message: 'Agricultural property has been added'
             })
+            return
         }
     } catch (error) {
         next(error)
@@ -341,7 +347,7 @@ const addCommercialProperty = async (req, res, next) => {
         if (legalRestrictions && legalRestrictions.isLegalRestrictions) {
             if (!legalRestrictions.details) {
                 throw new CustomAPIError('legal restictions details not provided', StatusCodes.BAD_REQUEST)
-            } else if (legalRestrictions.details && legalRestrictions.details.trim().length > 500) {
+            } else if (legalRestrictions.details && legalRestrictions.details.length > 500) {
                 throw new CustomAPIError('legal restictions details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
             }
         }
@@ -358,20 +364,19 @@ const addCommercialProperty = async (req, res, next) => {
                 throw new CustomAPIError('No evaluator found', StatusCodes.BAD_REQUEST)
             }
 
-            const currentDate = new Date();
-            const currentYear = currentDate.getFullYear();
-
             const uniqueId = await uniqueIdGeneratorForProperty('commercial', req.body.location.name.state) //The code is used to generate a unique Id for the commercial property
             await CommercialProperty.create({
                 ...req.body,
                 uniqueId,
-                evaluationRequestDate: Date.now(),
-                stateWherePropertyIsLocated: req.body.location.name.state,
-                yearOfPropertyAddition: currentYear,
+                sentToEvaluatorByFieldAgentForEvaluation: {
+                    isSent: true,
+                    date: new Date()
+                },
                 propertyEvaluator: evaluatorId
             }) //A new commercial proeprty is added to the database
 
-            return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Commercial property has been added' })
+            res.status(StatusCodes.OK).json({ status: 'ok', message: 'Commercial property has been added' })
+            return
         }
     } catch (error) {
         next(error)
@@ -382,7 +387,6 @@ const addCommercialProperty = async (req, res, next) => {
 const addResidentialProperty = async (req, res, next) => {
     try {
         req.body.addedByFieldAgent = req.fieldAgent._id  //Here we add the ID of field agent to the request body
-
         const {
             propertyImagesUrl,
             price,
@@ -393,7 +397,8 @@ const addResidentialProperty = async (req, res, next) => {
             furnishing,
             kitchenFurnishing,
             kitchenAppliances,
-            garden
+            garden,
+            location
         } = req.body
 
         if (waterSupply && waterSupply.available && waterSupply.twentyFourHours === null) {
@@ -423,16 +428,14 @@ const addResidentialProperty = async (req, res, next) => {
             throw new CustomAPIError('Price not provided', StatusCodes.BAD_REQUEST)
         } else if (price.fixed && (price.range.from || price.range.to)) {
             throw new CustomAPIError('Invalide data', StatusCodes.BAD_REQUEST)
-        } else if (!price.fixed && ((price.range.from && !price.range.to) || (!price.range.from && price.range.to))) {
-            throw new CustomAPIError('Range of price not provided', StatusCodes.BAD_REQUEST)
         } else if (price.range.from && price.range.to && +price.range.from >= +price.range.to) {
-            throw new CustomAPIError('From shouls be smaller value than to', StatusCodes.BAD_REQUEST)
+            throw new CustomAPIError('From should be smaller value than to', StatusCodes.BAD_REQUEST)
         }
 
         if (legalRestrictions && legalRestrictions.isLegalRestrictions) {
             if (!legalRestrictions.details) {
                 throw new CustomAPIError('legal restictions details not provided', StatusCodes.BAD_REQUEST)
-            } else if (legalRestrictions.details && legalRestrictions.details.trim().length > 500) {
+            } else if (legalRestrictions.details && legalRestrictions.details.length > 500) {
                 throw new CustomAPIError('legal restictions details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
             }
         }
@@ -449,20 +452,19 @@ const addResidentialProperty = async (req, res, next) => {
                 throw new CustomAPIError('No evaluator found', StatusCodes.BAD_REQUEST)
             }
 
-            const currentDate = new Date();
-            const currentYear = currentDate.getFullYear();
-
             const uniqueId = await uniqueIdGeneratorForProperty('residential', req.body.location.name.state) //The code is used to generate a unique Id for the residential property
             await ResidentialProperty.create({
                 ...req.body,
                 uniqueId,
-                evaluationRequestDate: Date.now(),
-                stateWherePropertyIsLocated: req.body.location.name.state,
-                yearOfPropertyAddition: currentYear,
+                sentToEvaluatorByFieldAgentForEvaluation: {
+                    isSent: true,
+                    date: new Date()
+                },
                 propertyEvaluator: evaluatorId
             }) //A new residential proeprty is added to the database
 
-            return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Residential property has been added' })
+            res.status(StatusCodes.OK).json({ status: 'ok', message: 'Residential property has been added' })
+            return
         }
     } catch (error) {
         next(error)

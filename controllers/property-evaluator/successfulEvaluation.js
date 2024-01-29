@@ -9,34 +9,30 @@ const successfulEvaluationOfData = async (req, res, next) => {
     try {
         const { propertyType, propertyId } = req.query
 
+        let selectedModel
         if (propertyType === 'residential') {
-            await ResidentialProperty.findOneAndUpdate({ _id: propertyId },
-                {
-                    isEvaluatedSuccessfully: true,
-                    sentBackTofieldAgentForReevaluation: false,
-                    isSentForEvaluation: false,
-                    evaluationData: req.body
-                },
-                { new: true, runValidators: true })
+            selectedModel = ResidentialProperty
         } else if (propertyType === 'agricultural') {
-            await AgriculturalProperty.findOneAndUpdate({ _id: propertyId },
-                {
-                    isEvaluatedSuccessfully: true,
-                    sentBackTofieldAgentForReevaluation: false,
-                    isSentForEvaluation: false,
-                    evaluationData: req.body
-                },
-                { new: true, runValidators: true })
+            selectedModel = AgriculturalProperty
         } else if (propertyType === 'commercial') {
-            await CommercialProperty.findOneAndUpdate({ _id: propertyId },
-                {
-                    isEvaluatedSuccessfully: true,
-                    sentBackTofieldAgentForReevaluation: false,
-                    isSentForEvaluation: false,
-                    evaluationData: req.body
-                },
-                { new: true, runValidators: true })
+            selectedModel = CommercialProperty
+        } else {
+            throw new CustomAPIError('Model name not provided', StatusCodes.BAD_REQUEST)
         }
+
+        await selectedModel.findOneAndUpdate({ _id: propertyId },
+            {
+                sentToEvaluatorByFieldAgentForEvaluation: {
+                    isSent: false,
+                    date: null
+                },
+                isEvaluatedSuccessfullyByEvaluator: {
+                    isEvaluated: true,
+                    date: new Date()
+                },
+                evaluationData: req.body
+            },
+            { new: true, runValidators: true })
         return res.status(StatusCodes.OK).json({ status: 'ok' })
     } catch (error) {
         next(error)

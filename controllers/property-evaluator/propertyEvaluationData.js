@@ -13,45 +13,45 @@ const propertyEvaluationData = async (req, res, next) => {
     try {
         const agriculturalPropertiesSuccessfullyEvaluated = await AgriculturalProperty.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            isEvaluatedSuccessfully: true
+            'isEvaluatedSuccessfullyByEvaluator.isEvaluated': true
         })
         const commercialPropertiesSuccessfullyEvaluated = await CommercialProperty.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            isEvaluatedSuccessfully: true
+            'isEvaluatedSuccessfullyByEvaluator.isEvaluated': true
         })
         const residentialPropertiesSuccessfullyEvaluated = await ResidentialProperty.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            isEvaluatedSuccessfully: true
+            'isEvaluatedSuccessfullyByEvaluator.isEvaluated': true
         })
         const propertiesSuccessfullyEvaluated = agriculturalPropertiesSuccessfullyEvaluated + residentialPropertiesSuccessfullyEvaluated + commercialPropertiesSuccessfullyEvaluated
 
 
         const agriculturalPropertiesSentToFieldAgentForReconsideration = await AgriculturalProperty.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            sentBackTofieldAgentForReevaluation: true
+            'sentBackTofieldAgentForReevaluationByEvaluator.isSent': true
         })
         const commercialPropertiesSentToFieldAgentForReconsideration = await CommercialProperty.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            sentBackTofieldAgentForReevaluation: true
+            'sentBackTofieldAgentForReevaluationByEvaluator.isSent': true
         })
         const residentialPropertiesSentToFieldAgentForReconsideration = await ResidentialProperty.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            sentBackTofieldAgentForReevaluation: true
+            'sentBackTofieldAgentForReevaluationByEvaluator.isSent': true
         })
         const propertiesSentToFieldAgentForReconsideration = residentialPropertiesSentToFieldAgentForReconsideration + agriculturalPropertiesSentToFieldAgentForReconsideration + commercialPropertiesSentToFieldAgentForReconsideration
 
 
         const agriculturalPropertiesPendingForEvaluation = await AgriculturalProperty.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            isSentForEvaluation: true
+            'sentToEvaluatorByFieldAgentForEvaluation.isSent': true
         })
         const commercialPropertiesPendingForEvaluation = await CommercialProperty.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            isSentForEvaluation: true
+            'sentToEvaluatorByFieldAgentForEvaluation.isSent': true
         })
         const residentialPropertiesPendingForEvaluation = await ResidentialProperty.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            isSentForEvaluation: true
+            'sentToEvaluatorByFieldAgentForEvaluation.isSent': true
         })
         const pendingPropertyEvaluations = residentialPropertiesPendingForEvaluation + agriculturalPropertiesPendingForEvaluation + commercialPropertiesPendingForEvaluation
 

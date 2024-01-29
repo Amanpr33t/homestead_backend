@@ -48,6 +48,54 @@ const AddressSchema = new mongoose.Schema({
     }
 })
 
+const CustomerRequestSchema = new mongoose.Schema({
+    propertyType: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    propertyId: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    customerId: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    customerName: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    customerEmail: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    customerContactNumber: {
+        type: Number,
+        required: true
+    },
+    requestSeen: {
+        type: Boolean,
+        default: false
+    },
+    requestDate: {
+        type: Date,
+        required: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now()
+    },
+    _id: {
+        type: Schema.Types.ObjectId,
+        default: undefined,
+    }
+})
+
 const PropertyDealerSchema = new mongoose.Schema({
     firmName: {
         type: String,
@@ -60,11 +108,13 @@ const PropertyDealerSchema = new mongoose.Schema({
         trim: true
     },
     firmLogoUrl: {
-        type: String
+        type: String,
+        trim: true
     },
     about: {
         type: String,
-        trim: true
+        trim: true,
+        default: null
     },
     experience: {
         type: Number,
@@ -84,10 +134,6 @@ const PropertyDealerSchema = new mongoose.Schema({
     email: {
         type: String,
         required: [true, 'Please provide email'],
-        validate: {
-            validator: validator.isEmail,
-            message: 'Please provide valid email'
-        },
         trim: true
     },
     contactNumber: {
@@ -112,6 +158,7 @@ const PropertyDealerSchema = new mongoose.Schema({
     },
     uniqueId: {
         type: String,
+        trim: true,
         required: true
     },
     isActive: {
@@ -124,61 +171,15 @@ const PropertyDealerSchema = new mongoose.Schema({
     },
     passwordVerificationToken: {
         type: String,
+        trim: true,
         default: null
     },
     passwordVerificationTokenExpirationDate: {
         type: Date,
+        trim: true,
         default: null
     },
-    requestsFromCustomer: [
-        {
-            propertyType: {
-                type: String,
-                required: true,
-                trim: true
-            },
-            propertyId: {
-                type: String,
-                required: true,
-                trim: true
-            },
-            customerId: {
-                type: String,
-                required: true,
-                trim: true
-            },
-            customerName: {
-                type: String,
-                required: true,
-                trim: true
-            },
-            customerEmail: {
-                type: String,
-                required: true,
-                trim: true
-            },
-            customerContactNumber: {
-                type: Number,
-                required: true
-            },
-            requestSeen: {
-                type: Boolean,
-                default: false
-            },
-            requestDate: {
-                type: Date,
-                required: true
-            },
-            createdAt: {
-                type: Date,
-                default: Date.now()
-            },
-            _id: {
-                type: Schema.Types.ObjectId,
-                default: undefined,
-            }
-        }
-    ]
+    requestsFromCustomer: [CustomerRequestSchema]
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 
 PropertyDealerSchema.pre('save', async function (next) {

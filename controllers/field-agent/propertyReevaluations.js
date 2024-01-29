@@ -9,20 +9,21 @@ const numberOfPendingPropertyReevaluations = async (req, res, next) => {
     try {
         const agriculturalPropertiesPendingForReevaluation = await AgriculturalProperty.countDocuments({
             addedByFieldAgent: req.fieldAgent._id,
-            sentBackTofieldAgentForReevaluation: true
+            'sentBackTofieldAgentForReevaluationByEvaluator.isSent': true
         })
         const residentialPropertiesPendingForReevaluation = await ResidentialProperty.countDocuments({
             addedByFieldAgent: req.fieldAgent._id,
-            sentBackTofieldAgentForReevaluation: true
+            'sentBackTofieldAgentForReevaluationByEvaluator.isSent': true
         })
         const commercialPropertiesPendingForReevaluation = await CommercialProperty.countDocuments({
             addedByFieldAgent: req.fieldAgent._id,
-            sentBackTofieldAgentForReevaluation: true
+            'sentBackTofieldAgentForReevaluationByEvaluator.isSent': true
         })
 
         const numberOfPendingPropertyReevaluations = agriculturalPropertiesPendingForReevaluation + residentialPropertiesPendingForReevaluation + commercialPropertiesPendingForReevaluation
 
-        return res.status(StatusCodes.OK).json({ status: 'ok', numberOfPendingPropertyReevaluations })
+        res.status(StatusCodes.OK).json({ status: 'ok', numberOfPendingPropertyReevaluations })
+        return
     } catch (error) {
         next(error)
     }
@@ -32,24 +33,28 @@ const numberOfPendingPropertyReevaluations = async (req, res, next) => {
 const pendingPropertiesForReevaluationByFieldAgent = async (req, res, next) => {
     try {
         const agriculturalProperties = await AgriculturalProperty.find({
-            sentBackTofieldAgentForReevaluation: true,
+            'sentBackTofieldAgentForReevaluationByEvaluator.isSent': true,
             addedByFieldAgent: req.fieldAgent._id
         }).select('propertyType location evaluationData')
 
         const commercialProperties = await CommercialProperty.find({
-            sentBackTofieldAgentForReevaluation: true,
+            'sentBackTofieldAgentForReevaluationByEvaluator.isSent': true,
             addedByFieldAgent: req.fieldAgent._id
         }).select('propertyType location evaluationData')
 
         const residentialProperties = await ResidentialProperty.find({
-            sentBackTofieldAgentForReevaluation: true,
+            'sentBackTofieldAgentForReevaluationByEvaluator.isSent': true,
             addedByFieldAgent: req.fieldAgent._id
         }).select('propertyType location evaluationData')
 
-        const pendingPropertyReevaluations = [...agriculturalProperties, ...residentialProperties, ...commercialProperties]
+        const pendingPropertyReevaluations = [
+            ...agriculturalProperties,
+            ...residentialProperties,
+            ...commercialProperties
+        ]
 
-        return res.status(StatusCodes.OK).json({ status: 'ok', pendingPropertyReevaluations })
-
+        res.status(StatusCodes.OK).json({ status: 'ok', pendingPropertyReevaluations })
+        return
     } catch (error) {
         next(error)
     }
@@ -60,26 +65,34 @@ const reevaluateProperty = async (req, res, next) => {
     try {
         const { id, type } = req.query
         const updatedData = {
-            isSentForEvaluation: true,
-            sentBackTofieldAgentForReevaluation: false,
+            sentBackTofieldAgentForReevaluationByEvaluator: {
+                isSent: false,
+                date: null
+            },
             propertyImagesUrl: req.body.imagesUrl,
-            evaluationRequestDate: Date.now()
-        }
-        if (type === 'agricultural') {
-            await AgriculturalProperty.findOneAndUpdate({ _id: id },
-                updatedData,
-                { new: true, runValidators: true })
-        } else if (type === 'residential') {
-            await ResidentialProperty.findOneAndUpdate({ _id: id },
-                updatedData,
-                { new: true, runValidators: true })
-        } else if (type === 'commercial') {
-            await CommercialProperty.findOneAndUpdate({ _id: id },
-                updatedData,
-                { new: true, runValidators: true })
+            sentToEvaluatorByFieldAgentForEvaluation: {
+                isSent: true,
+                date: new Date()
+            }
         }
 
-        return res.status(StatusCodes.OK).json({ status: 'ok' })
+        let selectedModel
+        if (type === 'residential') {
+            selectedModel = ResidentialProperty
+        } else if (type === 'agricultural') {
+            selectedModel = AgriculturalProperty
+        } else if (type === 'commercial') {
+            selectedModel = CommercialProperty
+        } else {
+            throw new CustomAPIError('Model name not provided', StatusCodes.BAD_REQUEST)
+        }
+
+        await selectedModel.findOneAndUpdate({ _id: id },
+            updatedData,
+            { new: true, runValidators: true })
+
+        res.status(StatusCodes.OK).json({ status: 'ok' })
+        return
     } catch (error) {
         next(error)
     }

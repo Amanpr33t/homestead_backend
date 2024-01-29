@@ -16,15 +16,21 @@ const addPropertyDealer = async (req, res, next) => {
         } = req.body
 
         //The if statements below are used to verify the request body data
-        addressArray.forEach(address => {
+        if (!addressArray || (addressArray && !addressArray.length)) {
+            throw new CustomAPIError('No address provided', 204)
+        }
+        if (!emailValidator.validate(email)) {
+            throw new CustomAPIError('Email not valid', 204)
+        }
+        if (about && about.trim().length > 500) {
+            throw new CustomAPIError('About cannot be greater than 500 characters', 204)
+        }
+        addressArray && addressArray.forEach(address => {
             const { postalCode } = address
             if (postalCode && postalCode.toString().length !== 6) {
                 throw new CustomAPIError('Postal code should be a 6 digit number', 204)
             }
         })
-        if (!addressArray.length || !emailValidator.validate(email.trim()) || (about && about.trim().length > 400)) {
-            throw new CustomAPIError('Incorrect data', 204)
-        }
 
         const propertyDealerGstNumberExists = await PropertyDealer.findOne({ gstNumber: req.body.gstNumber }) //Checks whether another property dealer with same gst number exists
         const propertyDealerReraNumberExists = await PropertyDealer.findOne({ reraNumber: req.body.reraNumber }) //Checks whether another property dealer with same RERA number exists
@@ -38,9 +44,9 @@ const addPropertyDealer = async (req, res, next) => {
         const uniqueId = await uniqueIdGeneratorForPropertyDealer() //generates a unique ID for the proeprty dealer
         await PropertyDealer.create({ ...req.body, uniqueId }) //Creates a new proeprty dealer in the database
 
-        return res.status(StatusCodes.OK).json({ status: 'ok', message: 'property dealer has been successfully added' })
+        res.status(StatusCodes.OK).json({ status: 'ok', message: 'property dealer has been successfully added' })
+        return
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }
@@ -51,9 +57,17 @@ const propertyDealerEmailExists = async (req, res, next) => {
         const { email } = req.query
         const propertyDealerEmailExists = await PropertyDealer.findOne({ email })
         if (propertyDealerEmailExists) {
-            return res.status(StatusCodes.OK).json({ status: 'emailExists', message: 'Email already exist' })
+            res.status(StatusCodes.OK).json({
+                status: 'emailExists',
+                message: 'Email already exist'
+            })
+            return
         }
-        res.status(StatusCodes.OK).json({ status: 'ok', message: 'Valid email' })
+        res.status(StatusCodes.OK).json({
+            status: 'ok',
+            message: 'Valid email'
+        })
+        return
     } catch (error) {
         next(error)
     }
@@ -65,9 +79,17 @@ const propertyDealerContactNumberExists = async (req, res, next) => {
         const { contactNumber } = req.query
         const propertyDealerContactNumberExists = await PropertyDealer.findOne({ contactNumber })
         if (propertyDealerContactNumberExists) {
-            return res.status(StatusCodes.OK).json({ status: 'contactNumberExists', message: 'Contact number already exist' })
+            res.status(StatusCodes.OK).json({
+                status: 'contactNumberExists',
+                message: 'Contact number already exist'
+            })
+            return
         }
-        res.status(StatusCodes.OK).json({ status: 'ok', message: 'Valid contact number' })
+        res.status(StatusCodes.OK).json({
+            status: 'ok',
+            message: 'Valid contact number'
+        })
+        return
     } catch (error) {
         next(error)
     }
@@ -79,7 +101,11 @@ const propertyDealerGstNumberExists = async (req, res, next) => {
         const { gstNumber } = req.query
         const propertyDealerGstNumberExists = await PropertyDealer.findOne({ gstNumber })
         if (propertyDealerGstNumberExists) {
-            return res.status(StatusCodes.OK).json({ status: 'gstNumberExists', message: 'GST number already exist' })
+            res.status(StatusCodes.OK).json({
+                status: 'gstNumberExists',
+                message: 'GST number already exist'
+            })
+            return
         }
         res.status(StatusCodes.OK).json({ status: 'ok', message: 'Valid gst number' })
     } catch (error) {
@@ -93,9 +119,16 @@ const propertyDealerReraNumberExists = async (req, res, next) => {
         const { reraNumber } = req.query
         const propertyDealerReraNumberExists = await PropertyDealer.findOne({ reraNumber })
         if (propertyDealerReraNumberExists) {
-            return res.status(StatusCodes.OK).json({ status: 'reraNumberExists', message: 'RERA number already exist' })
+            res.status(StatusCodes.OK).json({
+                status: 'reraNumberExists',
+                message: 'RERA number already exist'
+            })
+            return
         }
-        res.status(StatusCodes.OK).json({ status: 'ok', message: 'Valid RERA number' })
+        res.status(StatusCodes.OK).json({
+            status: 'ok',
+            message: 'Valid RERA number'
+        })
     } catch (error) {
         next(error)
     }

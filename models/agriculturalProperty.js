@@ -204,15 +204,39 @@ const AgriculturalPropertySchema = new Schema({
         type: String,
         required: true,
     },
-    sentBackTofieldAgentForReevaluation: { type: Boolean, default: false },
-    isEvaluatedSuccessfully: { type: Boolean, default: false },
-    isSentForEvaluation: { type: Boolean, default: true },
-    evaluationRequestDate: { type: Date },
-    evaluationData: {
-        photographs: {
-            arePhotographsComplete: { type: Boolean, default: null },
-            details: { type: String, default: null },
+    sentBackTofieldAgentForReevaluationByEvaluator: {
+        isSent: {
+            type: Boolean,
+            default: false
         },
+        date: {
+            type: Date,
+            default: null
+        }
+    },
+    isEvaluatedSuccessfullyByEvaluator: {
+        isEvaluated: {
+            type: Boolean,
+            default: false
+        },
+        date: {
+            type: Date,
+            default: null
+        }
+    },
+    sentToEvaluatorByFieldAgentForEvaluation: {
+        isSent: {
+            type: Boolean,
+            default: false
+        },
+        date: {
+            type: Date,
+            default: null
+        }
+    },
+    evaluationData: {
+        areDetailsComplete: { type: Boolean },
+        incompletePropertyDetails: { type: [String], default: null },
         typeOfLocation: { type: String, default: null },
         locationStatus: { type: String, default: null },
         fairValueOfProperty: { type: Number, default: null },
@@ -225,10 +249,13 @@ const AgriculturalPropertySchema = new Schema({
         qualityOfConstructionRating: { type: Number, default: null },
         evaluatedAt: { type: Date },
     },
-    numberOfReevaluationsReceived: { type: Number, default: 0 },
-    stateWherePropertyIsLocated: { type: String, required: true, trim: true },
-    yearOfPropertyAddition: { type: Number, required: true },
-    status: { type: String, required: true, default: 'active' },
+    numberOfReevaluationsReceivedByFieldAgent: {
+        fromEvaluator: {
+            type: Number,
+            default: 0
+        }
+    },
+    status: { type: String, default: 'active' },
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
 module.exports = mongoose.model('AgriculturalProperty', AgriculturalPropertySchema);

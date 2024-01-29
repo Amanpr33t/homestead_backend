@@ -8,9 +8,8 @@ const ResidentialProperty = require('../../models/residentialProperty')
 //The function provides the number of property dealers added by the field agent
 const propertyDealersAddedByFieldAgent = async (req, res, next) => {
     try {
-        console.log(req.query.page)
         const page = req.query.page ? parseInt(req.query.page) : 1;  // Current page, default is 1
-        const pageSize = 1;  // Number of items per page, default is 10
+        const pageSize = 10;  // Number of items per page, default is 10
         const skip = (page - 1) * pageSize;
 
         const numberOfPropertyDealers = await PropertyDealer.countDocuments({
@@ -27,14 +26,14 @@ const propertyDealersAddedByFieldAgent = async (req, res, next) => {
 
         const totalPages = Math.ceil(numberOfPropertyDealers / pageSize);
 
-        return res.status(StatusCodes.OK).json({
+        res.status(StatusCodes.OK).json({
             status: 'ok',
             propertyDealers,
             numberOfPropertyDealers,
             totalPages
         })
+        return
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }
@@ -47,7 +46,8 @@ const dealerDetails = async (req, res, next) => {
             _id: dealerId,
             addedByFieldAgent: req.fieldAgent._id
         }).select('-password -addedByFieldAgent -otpForVerification -otpForVerificationExpirationDate -authTokenExpiration -passwordVerificationToken -isActive -passwordVerificationTokenExpirationDate -requestsFromCustomer')
-        return res.status(StatusCodes.OK).json({ status: 'ok', dealer })
+        res.status(StatusCodes.OK).json({ status: 'ok', dealer })
+        return
     } catch (error) {
         next(error)
     }
@@ -57,9 +57,9 @@ const dealerDetails = async (req, res, next) => {
 const propertyDealerOfaProperty = async (req, res, next) => {
     try {
         const dealer = await PropertyDealer.findOne({ _id: req.params.id }).select('firmName')
-        return res.status(StatusCodes.OK).json({ status: 'ok', firmName: dealer.firmName })
+        res.status(StatusCodes.OK).json({ status: 'ok', firmName: dealer.firmName })
+        return
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }
@@ -82,7 +82,8 @@ const numberOfPropertyDealersAndPropertiesAddedByFieldAgent = async (req, res, n
             addedByFieldAgent: req.fieldAgent._id
         })
 
-        return res.status(StatusCodes.OK).json({ status: 'ok', propertyDealersAddedByFieldAgent, propertiesAddedByfieldAgent })
+        res.status(StatusCodes.OK).json({ status: 'ok', propertyDealersAddedByFieldAgent, propertiesAddedByfieldAgent })
+        return
     } catch (error) {
         next(error)
     }

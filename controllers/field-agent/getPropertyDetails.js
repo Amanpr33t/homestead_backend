@@ -17,7 +17,8 @@ const getProperty = async (req, res, next) => {
             propertyData = await CommercialProperty.findOne({ _id: id })
         }
 
-        return res.status(StatusCodes.OK).json({ status: 'ok', propertyData })
+        res.status(StatusCodes.OK).json({ status: 'ok', propertyData })
+        return
     } catch (error) {
         next(error)
     }

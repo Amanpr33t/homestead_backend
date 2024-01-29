@@ -208,91 +208,52 @@ const CommercialPropertySchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    sentBackTofieldAgentForReevaluation: {
-        type: Boolean,
-        default: false
+    sentBackTofieldAgentForReevaluationByEvaluator: {
+        isSent: {
+            type: Boolean,
+            default: false
+        },
+        date: {
+            type: Date,
+            default: null
+        }
     },
-    isEvaluatedSuccessfully: {
-        type: Boolean,
-        default: false
+    isEvaluatedSuccessfullyByEvaluator: {
+        type: Date,
+        default: null
     },
-    isSentForEvaluation: {
-        type: Boolean,
-        default: true
-    },
-    evaluationRequestDate: {
-        type: Date
+    sentToEvaluatorByFieldAgentForEvaluation: {
+        isSent: {
+            type: Boolean,
+            default: false
+        },
+        date: {
+            type: Date,
+            default: null
+        }
     },
     evaluationData: {
-        photographs: {
-            arePhotographsComplete: {
-                type: Boolean,
-                default: null
-            },
-            details: {
-                type: String,
-                default: null
-            }
-        },
-        typeOfLocation: {
-            //Can be any one of these: 'Rural', 'Sub-urban', 'Urban', 'Mixed-use', 'Industrial'
-            type: String,
-            default: null
-        },
-        locationStatus: {
-            //Can be any of these: 'Posh', 'Premium', 'Popular', 'Ordinary', 'Low Income'
-            type: String,
-            default: null
-        },
-        fairValueOfProperty: {
-            type: Number,
-            default: null
-        },
+        areDetailsComplete: { type: Boolean },
+        incompletePropertyDetails: { type: [String], default: null },
+        typeOfLocation: { type: String, default: null },
+        locationStatus: { type: String, default: null },
+        fairValueOfProperty: { type: Number, default: null },
         fiveYearProjectionOfPrices: {
-            increase: {
-                type: Boolean,
-                default: null
-            },
-            decrease: {
-                type: Boolean,
-                default: null
-            },
-            percentageIncreaseOrDecrease: {
-                //Number from 0 to 100
-                type: Number,
-                default: null
-            }
+            increase: { type: Boolean, default: null },
+            decrease: { type: Boolean, default: null },
+            percentageIncreaseOrDecrease: { type: Number, default: null },
         },
-        conditionOfConstruction: {
-            //Can be anyone of these values: 'Newly built', 'Ready to move', 'Needs renovation', 'Needs repair'
-            type: String,
-            default: null
-        },
-        qualityOfConstructionRating: {
-            //A number from 1 to 5
-            type: Number,
-            default: null
-        },
-        evaluatedAt: Date
+        conditionOfConstruction: { type: String, default: null },
+        qualityOfConstructionRating: { type: Number, default: null },
+        evaluatedAt: { type: Date },
     },
-    numberOfReevaluationsReceived: {
-        type: Number,
-        default: 0
+    numberOfReevaluationsReceivedByFieldAgent:{
+        fromEvaluator:{
+            type:Number,
+            default:0
+        }
     },
-    stateWherePropertyIsLocated: {
-        type: String,
-        trim: true,
-        required: true
-    },
-    yearOfPropertyAddition: {
-        type: Number,
-        required: true
-    },
-    status: {
-        type: String,
-        required: true,
-        default: 'active'
-    }
+    status: { type: String, required: true, default: 'active' },
 
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 

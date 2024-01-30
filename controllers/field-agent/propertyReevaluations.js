@@ -3,6 +3,7 @@ const { StatusCodes } = require('http-status-codes')
 const AgriculturalProperty = require('../../models/agriculturalProperty')
 const CommercialProperty = require('../../models/commercialProperty')
 const ResidentialProperty = require('../../models/residentialProperty')
+const CustomAPIError = require('../../errors/custom-error')
 
 //The function fetches number of property pending for reevaluation by field agent
 const numberOfPendingPropertyReevaluations = async (req, res, next) => {
@@ -20,42 +21,60 @@ const numberOfPendingPropertyReevaluations = async (req, res, next) => {
             'sentBackTofieldAgentForReevaluationByEvaluator.isSent': true
         })
 
-        const numberOfPendingPropertyReevaluations = agriculturalPropertiesPendingForReevaluation + residentialPropertiesPendingForReevaluation + commercialPropertiesPendingForReevaluation
-
-        res.status(StatusCodes.OK).json({ status: 'ok', numberOfPendingPropertyReevaluations })
+        res.status(StatusCodes.OK).json({
+            status: 'ok',
+            agricultural: agriculturalPropertiesPendingForReevaluation,
+            residential: residentialPropertiesPendingForReevaluation,
+            commercial: commercialPropertiesPendingForReevaluation
+        })
         return
     } catch (error) {
+        console.log(error)
         next(error)
     }
 }
 
 //The function fetches properties pending for reevaluation by field agent
-const pendingPropertiesForReevaluationByFieldAgent = async (req, res, next) => {
+const pendingPropertiesForReevaluation = async (req, res, next) => {
     try {
-        const agriculturalProperties = await AgriculturalProperty.find({
-            'sentBackTofieldAgentForReevaluationByEvaluator.isSent': true,
-            addedByFieldAgent: req.fieldAgent._id
-        }).select('propertyType location evaluationData')
+        console.log(req.query)
+        const { type } = req.query
+        const page = req.query.page ? parseInt(req.query.page) : 1;  // Current page, default is 1
+        const pageSize = 10;  // Number of items per page, default is 10
+        const skip = (page - 1) * pageSize;
 
-        const commercialProperties = await CommercialProperty.find({
-            'sentBackTofieldAgentForReevaluationByEvaluator.isSent': true,
-            addedByFieldAgent: req.fieldAgent._id
-        }).select('propertyType location evaluationData')
+        let pendingPropertyEvaluations = []
+        let numberOfProperties
 
-        const residentialProperties = await ResidentialProperty.find({
-            'sentBackTofieldAgentForReevaluationByEvaluator.isSent': true,
-            addedByFieldAgent: req.fieldAgent._id
-        }).select('propertyType location evaluationData')
+        let selectedModel
+        if (type === 'residential') {
+            selectedModel = ResidentialProperty
+        } else if (type === 'agricultural') {
+            selectedModel = AgriculturalProperty
+        } else if (type === 'commercial') {
+            selectedModel = CommercialProperty
+        } else {
+            throw new CustomAPIError('Model name not provided', StatusCodes.BAD_REQUEST)
+        }
 
-        const pendingPropertyReevaluations = [
-            ...agriculturalProperties,
-            ...residentialProperties,
-            ...commercialProperties
-        ]
+        pendingPropertyEvaluations = await selectedModel.find({
+            addedByFieldAgent: req.fieldAgent._id,
+            'sentBackTofieldAgentForReevaluationByEvaluator.isSent': true
+        }).select('_id propertyType location sentBackTofieldAgentForReevaluationByEvaluator.date')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(pageSize)
 
-        res.status(StatusCodes.OK).json({ status: 'ok', pendingPropertyReevaluations })
-        return
+        numberOfProperties = await selectedModel.countDocuments({
+            addedByFieldAgent: req.fieldAgent._id,
+            'sentBackTofieldAgentForReevaluationByEvaluator.isSent': true
+        })
+
+        const totalPages = Math.ceil(numberOfProperties / pageSize)
+
+        return res.status(StatusCodes.OK).json({ status: 'ok', pendingPropertyEvaluations, totalPages })
     } catch (error) {
+        console.log(error)
         next(error)
     }
 }
@@ -64,13 +83,16 @@ const pendingPropertiesForReevaluationByFieldAgent = async (req, res, next) => {
 const reevaluateProperty = async (req, res, next) => {
     try {
         const { id, type } = req.query
+        if (!id) {
+            throw new CustomAPIError('property id not provided', StatusCodes.BAD_REQUEST)
+        }
         const updatedData = {
             sentBackTofieldAgentForReevaluationByEvaluator: {
                 isSent: false,
                 date: null
             },
             propertyImagesUrl: req.body.imagesUrl,
-            sentToEvaluatorByFieldAgentForEvaluation: {
+            sentBackTofieldAgentForReevaluationByEvaluator: {
                 isSent: true,
                 date: new Date()
             }
@@ -84,7 +106,7 @@ const reevaluateProperty = async (req, res, next) => {
         } else if (type === 'commercial') {
             selectedModel = CommercialProperty
         } else {
-            throw new CustomAPIError('Model name not provided', StatusCodes.BAD_REQUEST)
+            throw new CustomAPIError('property type not provided', StatusCodes.BAD_REQUEST)
         }
 
         await selectedModel.findOneAndUpdate({ _id: id },
@@ -100,6 +122,6 @@ const reevaluateProperty = async (req, res, next) => {
 
 module.exports = {
     numberOfPendingPropertyReevaluations,
-    pendingPropertiesForReevaluationByFieldAgent,
+    pendingPropertiesForReevaluation,
     reevaluateProperty
 }

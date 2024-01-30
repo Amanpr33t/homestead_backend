@@ -33,7 +33,7 @@ const {
 
 const {
     numberOfPendingPropertyReevaluations,
-    pendingPropertiesForReevaluationByFieldAgent,
+    pendingPropertiesForReevaluation,
     reevaluateProperty
 } = require('../controllers/field-agent/propertyReevaluations')
 
@@ -73,8 +73,8 @@ router.get('/propertyDealersAddedByFieldAgent', authenticateFieldAgent, property
 router.get('/getDealerDetails', authenticateFieldAgent, dealerDetails) //to get the property dealer details
 router.get('/propertiesAddedByFieldAgent', authenticateFieldAgent, propertiesAddedByFieldAgent)  //to get the properties added by the field agent
 router.get('/propertyDealerOfaProperty/:id', authenticateFieldAgent, propertyDealerOfaProperty) //to get the firmName of a property dealer of aproeprty
-router.get('/numberOfPendingPequestsForReevaluationOfProperty', authenticateFieldAgent, numberOfPendingPropertyReevaluations) //To get number of property pending for reevaluation by field agent
-router.get('/pendingPropertiesForReevaluationByFieldAgent', authenticateFieldAgent, pendingPropertiesForReevaluationByFieldAgent) //fetches properties pending for reevaluation by field agent
+router.get('/numberOfPropertiesPendingToBeReevaluated', authenticateFieldAgent, numberOfPendingPropertyReevaluations) //To get number of property pending for reevaluation by field agent
+router.get('/pendingPropertiesForReevaluation', authenticateFieldAgent, pendingPropertiesForReevaluation) //fetches properties pending for reevaluation by field agent
 router.get('/getPropertyData', authenticateFieldAgent, getProperty) //To get details about a property
 router.post('/reevaluatePropertyData', authenticateFieldAgent, reevaluateProperty) //To update property data after reevaluation
 

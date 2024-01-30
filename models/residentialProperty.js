@@ -318,7 +318,7 @@ const ResidentialPropertySchema = new mongoose.Schema({
         }
     },
     evaluationData: {
-        areDetailsComplete: { type: Boolean, required:true },
+        areDetailsComplete: { type: Boolean },
         incompletePropertyDetails: { type: [String], default: null },
         typeOfLocation: { type: String, default: null },
         locationStatus: { type: String, default: null },
@@ -330,7 +330,7 @@ const ResidentialPropertySchema = new mongoose.Schema({
         },
         conditionOfConstruction: { type: String, default: null },
         qualityOfConstructionRating: { type: Number, default: null },
-        evaluatedAt: { type: Date, required:true },
+        evaluatedAt: { type: Date },
     },
     numberOfReevaluationsReceivedByFieldAgent:{
         fromEvaluator:{

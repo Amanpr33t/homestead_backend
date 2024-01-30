@@ -9,9 +9,6 @@ const CustomAPIError = require('../../errors/custom-error')
 const propertiesPendingToBeEvaluated = async (req, res, next) => {
     try {
         const { type } = req.query
-        if (!type || !req.query.page) {
-            throw new CustomAPIError('type and page information not provided', StatusCodes.BAD_REQUEST)
-        }
         const page = req.query.page ? parseInt(req.query.page) : 1;  // Current page, default is 1
         const pageSize = 10;  // Number of items per page, default is 10
         const skip = (page - 1) * pageSize;

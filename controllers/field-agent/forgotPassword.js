@@ -52,6 +52,9 @@ const forgotPassword = async (req, res, next) => {
 const confirmPasswordVerificationToken = async (req, res) => {
     try {
         const { email, passwordVerificationToken } = req.body
+        if (!email || !passwordVerificationToken) {
+            throw new CustomAPIError('Insufficient data', StatusCodes.BAD_REQUEST)
+        }
         if (!emailValidator.validate(email)) {
             throw new CustomAPIError('Email not in correct format', StatusCodes.BAD_REQUEST)
         }
@@ -82,6 +85,9 @@ const confirmPasswordVerificationToken = async (req, res) => {
 const updatePassword = async (req, res) => {
     try {
         const { email, newPassword, passwordVerificationToken } = req.body
+        if (!email || !passwordVerificationToken || !newPassword) {
+            throw new CustomAPIError('Insufficient data', StatusCodes.BAD_REQUEST)
+        }
         if (!emailValidator.validate(email)) {
             throw new CustomAPIError('Email not in correct format', StatusCodes.BAD_REQUEST)
         }
@@ -119,6 +125,9 @@ const updatePassword = async (req, res) => {
 const resetPasswordVerificationToken = async (req, res) => {
     try {
         const { email } = req.body
+        if (!email) {
+            throw new CustomAPIError('Insufficient data', StatusCodes.BAD_REQUEST)
+        }
         if (!emailValidator.validate(email)) {
             throw new CustomAPIError('Email not in correct format', StatusCodes.BAD_REQUEST)
         }

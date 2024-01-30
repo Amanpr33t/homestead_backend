@@ -46,6 +46,9 @@ const forgotPassword = async (req, res, next) => {
 const confirmPasswordVerificationToken = async (req, res) => {
     try {
         const { email, passwordVerificationToken } = req.body
+        if (!email || !passwordVerificationToken) {
+            throw new CustomAPIError('insufficient data', 204)
+        }
         const propertyEvaluator = await PropertyEvaluator.findOne({ email })
 
         if (!propertyEvaluator) {
@@ -70,6 +73,9 @@ const confirmPasswordVerificationToken = async (req, res) => {
 const updatePassword = async (req, res) => {
     try {
         const { email, newPassword, passwordVerificationToken } = req.body
+        if (!email || !passwordVerificationToken || !newPassword) {
+            throw new CustomAPIError('insufficient data', 204)
+        }
         const propertyEvaluator = await PropertyEvaluator.findOne({ email })
         if (!propertyEvaluator) {
             throw new CustomAPIError('No property evaluator exists', StatusCodes.NO_CONTENT)
@@ -103,7 +109,9 @@ const updatePassword = async (req, res) => {
 const resetPasswordVerificationToken = async (req, res) => {
     try {
         const { email } = req.body
-
+        if (!email) {
+            throw new CustomAPIError('insufficient data', 204)
+        }
         await PropertyEvaluator.findOneAndUpdate({ email },
             {
                 passwordVerificationToken: null,

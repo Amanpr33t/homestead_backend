@@ -4,6 +4,7 @@ const PropertyDealer = require('../../models/propertyDealer')
 const AgriculturalProperty = require('../../models/agriculturalProperty')
 const CommercialProperty = require('../../models/commercialProperty')
 const ResidentialProperty = require('../../models/residentialProperty')
+const CustomAPIError = require('../../errors/custom-error')
 
 //The function provides the number of property dealers added by the field agent
 const propertyDealersAddedByFieldAgent = async (req, res, next) => {
@@ -42,6 +43,9 @@ const propertyDealersAddedByFieldAgent = async (req, res, next) => {
 const dealerDetails = async (req, res, next) => {
     try {
         const { dealerId } = req.query
+        if (!dealerId) {
+            throw new CustomAPIError('dealer id not provided', StatusCodes.BAD_REQUEST)
+        }
         const dealer = await PropertyDealer.findOne({
             _id: dealerId,
             addedByFieldAgent: req.fieldAgent._id
@@ -56,7 +60,11 @@ const dealerDetails = async (req, res, next) => {
 //The function is used to get the firmName of property dealer of a property
 const propertyDealerOfaProperty = async (req, res, next) => {
     try {
-        const dealer = await PropertyDealer.findOne({ _id: req.params.id }).select('firmName')
+        const { id } = req.params
+         if(!id){
+            throw new CustomAPIError('dealer id not provided', StatusCodes.BAD_REQUEST)
+         }
+        const dealer = await PropertyDealer.findOne({ _id: id }).select('firmName')
         res.status(StatusCodes.OK).json({ status: 'ok', firmName: dealer.firmName })
         return
     } catch (error) {

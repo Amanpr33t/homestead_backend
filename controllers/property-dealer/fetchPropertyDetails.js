@@ -12,6 +12,9 @@ const getPropertyDetails = async (req, res, next) => {
             type,
             id
         } = req.query
+        if(!id){
+            throw new CustomAPIError('proeprty id not provided', 204)
+        }
 
         let property = null
 
@@ -21,6 +24,8 @@ const getPropertyDetails = async (req, res, next) => {
             property = await CommercialProperty.findOne({ _id: id })
         } else if (type === 'residential') {
             property = await ResidentialProperty.findOne({ _id: id })
+        }else{
+            throw new CustomAPIError('proeprty type not provided', 204)
         }
 
         if (property && property.addedByPropertyDealer.toString() !== req.propertyDealer._id.toString()) {

@@ -49,6 +49,9 @@ const forgotPassword = async (req, res, next) => {
 const confirmPasswordVerificationToken = async (req, res) => {
     try {
         const { email, passwordVerificationToken } = req.body
+        if (!email || !passwordVerificationToken) {
+            throw new CustomAPIError('Insufficient data', 204)
+        }
         const propertyDealer = await PropertyDealer.findOne({ email })
 
         if (!propertyDealer) {
@@ -76,6 +79,9 @@ const confirmPasswordVerificationToken = async (req, res) => {
 const updatePassword = async (req, res) => {
     try {
         const { email, newPassword, passwordVerificationToken } = req.body
+        if (!email || !passwordVerificationToken || newPassword) {
+            throw new CustomAPIError('Insufficient data', 204)
+        }
         const propertyDealer = await PropertyDealer.findOne({ email })
         if (!propertyDealer) {
             throw new CustomAPIError('No property dealer exists', StatusCodes.NO_CONTENT)
@@ -112,7 +118,9 @@ const updatePassword = async (req, res) => {
 const resetPasswordVerificationToken = async (req, res) => {
     try {
         const { email } = req.body
-
+        if(!email){
+            throw new CustomAPIError('Insufficient data', 204)
+        }
         await PropertyDealer.findOneAndUpdate({ email },
             {
                 passwordVerificationToken: null,

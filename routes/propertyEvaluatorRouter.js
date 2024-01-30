@@ -21,21 +21,15 @@ const {
 } = require('../controllers/property-evaluator/propertyEvaluationData')
 
 const {
-    successfulEvaluationOfData
-} = require('../controllers/property-evaluator/successfulEvaluation')
-
-const {
-    reevaluationOfPropertyData
-} = require('../controllers/property-evaluator/reevaluationOfPropertyByFieldAgent')
-
-const {
-    fetchSelectedProperty,
-} = require('../controllers/property-evaluator/fetchSelectedProperty')
+    evaluateProperty
+} = require('../controllers/property-evaluator/evaluateProperty')
 
 const {
     propertiesPendingToBeEvaluated,
     numberOfPropertiesPendingToBeEvaluated
 } = require('../controllers/property-evaluator/fetchPropertiesPendingToBeEvaluated')
+
+const { fetchSelectedProperty } = require('../controllers/property-evaluator/fetchSelectedProperty')
 
 router.post('/signIn', signIn) //to sign in an evaluator
 router.patch('/logout', authenticatePropertyEvaluator, logout) //to logout an evaluator
@@ -49,7 +43,6 @@ router.get('/propertyEvaluationData', authenticatePropertyEvaluator, propertyEva
 router.get('/propertiesPendingToBeEvaluated', authenticatePropertyEvaluator, propertiesPendingToBeEvaluated) //fetches some data regarding properties pending to be evaluated
 router.get('/numberOfPropertiesPendingToBeEvaluated', authenticatePropertyEvaluator, numberOfPropertiesPendingToBeEvaluated) //fetches number of properties pending to be evaluated
 router.get('/fetch-selected-property', authenticatePropertyEvaluator, fetchSelectedProperty) //fetch details of selected property
-router.post('/sentToFieldAgentForReevaluation', authenticatePropertyEvaluator, reevaluationOfPropertyData) //send a property for reevaluation by field agent
-router.post('/successfulEvaluationOfData', authenticatePropertyEvaluator, successfulEvaluationOfData) ////Update a property on successful evaluation of data
+router.post('/evaluateProperty', authenticatePropertyEvaluator, evaluateProperty) //evaluate property
 
 module.exports = router

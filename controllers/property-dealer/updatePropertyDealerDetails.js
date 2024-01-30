@@ -12,6 +12,9 @@ const updatePropertyDealerDetails = async (req, res, next) => {
             addressArray,
             about
         } = req.body
+        if (addressArray && !addressArray.length) {
+            throw new CustomAPIError('Insufficient data', 204)
+        }
         //The if statements below are used to verify the request body data
         addressArray.forEach(address => {
             const { postalCode } = address
@@ -19,7 +22,7 @@ const updatePropertyDealerDetails = async (req, res, next) => {
                 throw new CustomAPIError('Postal code should be a 6 digit number', 204)
             }
         })
-        if (!addressArray.length || (about && about.trim().length > 400)) {
+        if (about && about.trim().length > 400) {
             throw new CustomAPIError('Incorrect data', 204)
         }
 
@@ -27,10 +30,10 @@ const updatePropertyDealerDetails = async (req, res, next) => {
             { ...req.body },
             { new: true, runValidators: true })
 
-        return res.status(StatusCodes.OK).json({ 
-            status: 'ok', 
+        return res.status(StatusCodes.OK).json({
+            status: 'ok',
             message: 'Property dealer has been successfully updated'
-         })
+        })
     } catch (error) {
         next(error)
     }

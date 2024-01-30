@@ -204,6 +204,7 @@ const AgriculturalPropertySchema = new Schema({
         type: String,
         required: true,
     },
+    
     sentBackTofieldAgentForReevaluationByEvaluator: {
         isSent: {
             type: Boolean,

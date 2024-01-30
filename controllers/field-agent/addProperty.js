@@ -13,9 +13,11 @@ const emailValidator = require("email-validator");
 //This function is used to check whether a property dealer exists
 const propertyDealerExists = async (req, res, next) => {
     try {
-        const { email,
+        const {
+            email,
             contactNumber,
-            dealerId: uniqueId } = req.query
+            dealerId: uniqueId
+        } = req.query
 
         //Out of email, contactNumber and uniqueId only 1 should be received. This if statement throws an error if more than 1 items are available
         if ((!email && !contactNumber && !uniqueId) ||
@@ -241,7 +243,7 @@ const addAgriculturalProperty = async (req, res, next) => {
         }
 
         //The if statements below are used to verify the content received in the body
-        if (!waterSource || ((waterSource.canal && !waterSource.canal.length) && (waterSource.river && !waterSource.river.length) && (waterSource.tubewells && !waterSource.tubewells.numberOfTubewells))) {
+        if (!waterSource || (waterSource && (waterSource.canal && !waterSource.canal.length) && (waterSource.river && !waterSource.river.length) && (waterSource.tubewells && !waterSource.tubewells.numberOfTubewells))) {
             throw new CustomAPIError('Water source information not provided', StatusCodes.BAD_REQUEST)
         }
 
@@ -267,7 +269,7 @@ const addAgriculturalProperty = async (req, res, next) => {
             }
         }
 
-        if (!propertyImagesUrl.length) {
+        if (propertyImagesUrl && !propertyImagesUrl.length) {
             throw new CustomAPIError('No land images provided', StatusCodes.BAD_REQUEST)
         }
 
@@ -352,7 +354,7 @@ const addCommercialProperty = async (req, res, next) => {
             }
         }
 
-        if (!propertyImagesUrl.length) {
+        if (propertyImagesUrl && !propertyImagesUrl.length) {
             throw new CustomAPIError('No property images provided', StatusCodes.BAD_REQUEST)
         }
 
@@ -440,7 +442,7 @@ const addResidentialProperty = async (req, res, next) => {
             }
         }
 
-        if (!propertyImagesUrl.length) {
+        if (propertyImagesUrl && !propertyImagesUrl.length) {
             throw new CustomAPIError('No property images provided', StatusCodes.BAD_REQUEST)
         }
 

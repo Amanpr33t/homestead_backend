@@ -240,7 +240,7 @@ const ResidentialPropertySchema = new mongoose.Schema({
     },
     flooringTypeArray: {
         type: [String],
-        enum: ['cemented', 'marble', 'lxurious marble', 'standard tiles', 'premium tiles', 'luxurious tiles']
+        enum: ['cemented', 'marble', 'luxurious marble', 'standard tiles', 'premium tiles', 'luxurious tiles']
     },
     roofTypeArray: {
         type: [String],

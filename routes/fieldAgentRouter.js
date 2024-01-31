@@ -33,9 +33,10 @@ const {
 
 const {
     numberOfPendingPropertyReevaluations,
-    pendingPropertiesForReevaluation,
-    reevaluateProperty
+    pendingPropertiesForReevaluation
 } = require('../controllers/field-agent/propertyReevaluations')
+
+const {updateReevaluatedPropertyData}=require('../controllers/field-agent/updateReevaluatedPropertyData')
 
 const {
     getProperty,
@@ -75,8 +76,8 @@ router.get('/propertiesAddedByFieldAgent', authenticateFieldAgent, propertiesAdd
 router.get('/propertyDealerOfaProperty/:id', authenticateFieldAgent, propertyDealerOfaProperty) //to get the firmName of a property dealer of aproeprty
 router.get('/numberOfPropertiesPendingToBeReevaluated', authenticateFieldAgent, numberOfPendingPropertyReevaluations) //To get number of property pending for reevaluation by field agent
 router.get('/pendingPropertiesForReevaluation', authenticateFieldAgent, pendingPropertiesForReevaluation) //fetches properties pending for reevaluation by field agent
+router.patch('/updateReevaluatedPropertyData', authenticateFieldAgent, updateReevaluatedPropertyData) //fetches properties pending for reevaluation by field agent
 router.get('/getPropertyData', authenticateFieldAgent, getProperty) //To get details about a property
-router.post('/reevaluatePropertyData', authenticateFieldAgent, reevaluateProperty) //To update property data after reevaluation
 
 router.get('/propertyDealerOtpGeneration', authenticateFieldAgent, propertyDealerExists, sendOtpToEmailForDealerVerification) //To send an OTP to property dealer before a field agent can add a proeprty
 router.get('/propertyDealerOtpVerification', authenticateFieldAgent, confirmOtpForDealerVerification) //to confirm the OTP sent to property dealer before adding a property

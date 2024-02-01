@@ -194,10 +194,7 @@ const ResidentialPropertySchema = new mongoose.Schema({
     numberOfCarParkingSpaces: Number,
     numberOfBalconies: Number,
     storeRoom: Boolean,
-    servantRoom: {
-        room: Boolean,
-        washroom: Boolean
-    },
+    servantRoom: Boolean,
     furnishing: {
         type: {
             type: String,

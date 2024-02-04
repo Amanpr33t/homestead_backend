@@ -72,33 +72,7 @@ const propertyDealerOfaProperty = async (req, res, next) => {
     }
 }
 
-////The function provides the number of proeprties and property dealers added by the field agent
-const numberOfPropertyDealersAndPropertiesAddedByFieldAgent = async (req, res, next) => {
-    try {
-        const agriculturalPropertiesAdded = await AgriculturalProperty.countDocuments({
-            addedByFieldAgent: req.fieldAgent._id
-        })
-        const residentialPropertiesAdded = await ResidentialProperty.countDocuments({
-            addedByFieldAgent: req.fieldAgent._id
-        })
-        const commercialPropertiesAdded = await CommercialProperty.countDocuments({
-            addedByFieldAgent: req.fieldAgent._id
-        })
-        const propertiesAddedByfieldAgent = agriculturalPropertiesAdded + residentialPropertiesAdded + commercialPropertiesAdded
-
-        const propertyDealersAddedByFieldAgent = await PropertyDealer.countDocuments({
-            addedByFieldAgent: req.fieldAgent._id
-        })
-
-        res.status(StatusCodes.OK).json({ status: 'ok', propertyDealersAddedByFieldAgent, propertiesAddedByfieldAgent })
-        return
-    } catch (error) {
-        next(error)
-    }
-}
-
 module.exports = {
-    numberOfPropertyDealersAndPropertiesAddedByFieldAgent,
     propertyDealersAddedByFieldAgent,
     propertyDealerOfaProperty,
     dealerDetails

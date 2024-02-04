@@ -3,12 +3,13 @@ const { StatusCodes } = require('http-status-codes')
 const AgriculturalProperty = require('../../models/agriculturalProperty')
 const CommercialProperty = require('../../models/commercialProperty')
 const ResidentialProperty = require('../../models/residentialProperty')
+const PropertyDealer = require('../../models/propertyDealer')
 const CustomAPIError = require('../../errors/custom-error')
 
 //To get details about a property
 const getProperty = async (req, res, next) => {
     try {
-        const { id, type } = req.query
+        const { id, type, dealerInfo } = req.query
         if (!id) {
             throw new CustomAPIError('property id not provided', StatusCodes.BAD_REQUEST)
         }
@@ -23,7 +24,12 @@ const getProperty = async (req, res, next) => {
             throw new CustomAPIError('property type not provided', StatusCodes.BAD_REQUEST)
         }
 
-        res.status(StatusCodes.OK).json({ status: 'ok', propertyData })
+        let dealer
+        if (dealerInfo && propertyData) {
+            dealer = await PropertyDealer.findOne({ _id: propertyData.addedByPropertyDealer }).select('propertyDealerName  firmName email contactNumber')
+        }
+
+        res.status(StatusCodes.OK).json({ status: 'ok', propertyData, dealerInfo:dealer })
         return
     } catch (error) {
         next(error)

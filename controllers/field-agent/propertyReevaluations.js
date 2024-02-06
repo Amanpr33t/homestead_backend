@@ -8,7 +8,6 @@ const CustomAPIError = require('../../errors/custom-error')
 //The function fetches properties pending for reevaluation by field agent
 const pendingPropertiesForReevaluation = async (req, res, next) => {
     try {
-        console.log(req.query)
         const { type } = req.query
         const page = req.query.page ? parseInt(req.query.page) : 1;  // Current page, default is 1
         const pageSize = 10;  // Number of items per page, default is 10
@@ -30,15 +29,15 @@ const pendingPropertiesForReevaluation = async (req, res, next) => {
 
         pendingPropertyEvaluations = await selectedModel.find({
             addedByFieldAgent: req.fieldAgent._id,
-            'sentBackTofieldAgentForReevaluationByEvaluator.isSent': true
-        }).select('_id propertyType location sentBackTofieldAgentForReevaluationByEvaluator.date')
+            'sentBackTofieldAgentForReevaluation.isSent': true
+        }).select('_id propertyType location sentBackTofieldAgentForReevaluation.date')
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(pageSize)
 
         numberOfProperties = await selectedModel.countDocuments({
             addedByFieldAgent: req.fieldAgent._id,
-            'sentBackTofieldAgentForReevaluationByEvaluator.isSent': true
+            'sentBackTofieldAgentForReevaluation.isSent': true
         })
 
         const totalPages = Math.ceil(numberOfProperties / pageSize)

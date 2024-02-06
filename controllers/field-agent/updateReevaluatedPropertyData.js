@@ -13,18 +13,6 @@ const updateReevaluatedPropertyData = async (req, res, next) => {
             throw new CustomAPIError('property id not provided', StatusCodes.BAD_REQUEST)
         }
 
-        const updatedData = {
-            ...req.body,
-            sentBackTofieldAgentForReevaluationByEvaluator: {
-                isSent: false,
-                date: null
-            },
-            sentToEvaluatorByFieldAgentForEvaluation: {
-                isSent: true,
-                date: new Date()
-            }
-        }
-
         let selectedModel
         if (type === 'residential') {
             selectedModel = ResidentialProperty
@@ -36,13 +24,47 @@ const updateReevaluatedPropertyData = async (req, res, next) => {
             throw new CustomAPIError('property type not provided', StatusCodes.BAD_REQUEST)
         }
 
-        await selectedModel.findOneAndUpdate({ _id: id },
-            updatedData,
-            { new: true, runValidators: true })
+        let updatedData = {
+            ...req.body,
+            sentBackTofieldAgentForReevaluation: {
+                isSent: false,
+                date: null
+            }
+        }
 
-        res.status(StatusCodes.OK).json({ status: 'ok' })
+        const whoRequestedReevaluation = await selectedModel.findOne({ _id: id }).select('sentBackTofieldAgentForReevaluation.by')
+
+        if (whoRequestedReevaluation) {
+            if (whoRequestedReevaluation.sentBackTofieldAgentForReevaluation.by === 'evaluator') {
+                updatedData = {
+                    ...updatedData,
+                    sentToEvaluatorByFieldAgentForEvaluation: {
+                        isSent: true,
+                        date: new Date()
+                    }
+                }
+            } else if (whoRequestedReevaluation.sentBackTofieldAgentForReevaluation.by === 'city-manager') {
+                updatedData = {
+                    ...updatedData,
+                    sentToCityManagerForApproval: {
+                        by: 'field-agent',
+                        isSent: true,
+                        date: new Date()
+                    }
+                }
+            }
+
+            await selectedModel.findOneAndUpdate({ _id: id },
+                updatedData,
+                { new: true, runValidators: true })
+
+            res.status(StatusCodes.OK).json({ status: 'ok' })
+        } else {
+            throw new Error('some error occured')
+        }
         return
     } catch (error) {
+        console.log(error)
         next(error)
     }
 }

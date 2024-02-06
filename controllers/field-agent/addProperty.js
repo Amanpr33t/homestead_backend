@@ -234,12 +234,21 @@ const addAgriculturalProperty = async (req, res, next) => {
             crops,
             legalRestrictions,
             propertyImagesUrl,
+            contractImagesUrl,
             landSize,
             location
         } = req.body
 
         if (landSize && landSize.details && landSize.details.length > 500) {
             throw new CustomAPIError('Land size details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
+        }
+
+        if (propertyImagesUrl && propertyImagesUrl.length >= 20) {
+            throw new CustomAPIError('Number of property images should be less than 20', StatusCodes.BAD_REQUEST)
+        }
+
+        if (contractImagesUrl && contractImagesUrl.length >= 20) {
+            throw new CustomAPIError('Number of contract images should be less than 20', StatusCodes.BAD_REQUEST)
         }
 
         //The if statements below are used to verify the content received in the body
@@ -285,10 +294,7 @@ const addAgriculturalProperty = async (req, res, next) => {
             await AgriculturalProperty.create({
                 ...req.body,
                 uniqueId,
-                sentToEvaluatorByFieldAgentForEvaluation: {
-                    isSent: true,
-                    date: new Date()
-                },
+                'sentToEvaluatorByFieldAgentForEvaluation.date': new Date(),
                 propertyEvaluator: evaluatorId
             }) //A new agricultural proeprty is created
 
@@ -314,11 +320,20 @@ const addCommercialProperty = async (req, res, next) => {
             commercialPropertyType,
             legalRestrictions,
             propertyImagesUrl,
+            contractImagesUrl,
             shopPropertyType,
             landSize,
             remarks,
             location
         } = req.body
+
+        if (propertyImagesUrl && propertyImagesUrl.length >= 20) {
+            throw new CustomAPIError('Number of property images should be less than 20', StatusCodes.BAD_REQUEST)
+        }
+
+        if (contractImagesUrl && contractImagesUrl.length >= 20) {
+            throw new CustomAPIError('Number of contract images should be less than 20', StatusCodes.BAD_REQUEST)
+        }
 
         if (landSize && landSize.details && landSize.details.length > 500) {
             throw new CustomAPIError('land size details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
@@ -370,10 +385,7 @@ const addCommercialProperty = async (req, res, next) => {
             await CommercialProperty.create({
                 ...req.body,
                 uniqueId,
-                sentToEvaluatorByFieldAgentForEvaluation: {
-                    isSent: true,
-                    date: new Date()
-                },
+                'sentToEvaluatorByFieldAgentForEvaluation.date': new Date(),
                 propertyEvaluator: evaluatorId
             }) //A new commercial proeprty is added to the database
 
@@ -391,6 +403,7 @@ const addResidentialProperty = async (req, res, next) => {
         req.body.addedByFieldAgent = req.fieldAgent._id  //Here we add the ID of field agent to the request body
         const {
             propertyImagesUrl,
+            contractImagesUrl,
             price,
             legalRestrictions,
             title,
@@ -402,6 +415,14 @@ const addResidentialProperty = async (req, res, next) => {
             garden,
             location
         } = req.body
+
+        if (propertyImagesUrl && propertyImagesUrl.length >= 20) {
+            throw new CustomAPIError('Number of property images should be less than 20', StatusCodes.BAD_REQUEST)
+        }
+
+        if (contractImagesUrl && contractImagesUrl.length >= 20) {
+            throw new CustomAPIError('Number of contract images should be less than 20', StatusCodes.BAD_REQUEST)
+        }
 
         if (waterSupply && waterSupply.available && waterSupply.twentyFourHours === null) {
             throw new CustomAPIError('data regarding 24 hours water supply not provided', StatusCodes.BAD_REQUEST)
@@ -458,10 +479,7 @@ const addResidentialProperty = async (req, res, next) => {
             await ResidentialProperty.create({
                 ...req.body,
                 uniqueId,
-                sentToEvaluatorByFieldAgentForEvaluation: {
-                    isSent: true,
-                    date: new Date()
-                },
+                'sentToEvaluatorByFieldAgentForEvaluation.date': new Date(),
                 propertyEvaluator: evaluatorId
             }) //A new residential proeprty is added to the database
 

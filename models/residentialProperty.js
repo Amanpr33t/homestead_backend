@@ -290,10 +290,15 @@ const ResidentialPropertySchema = new mongoose.Schema({
         ref: 'PropertyEvaluator',
         required: [true, 'Please provide a property evaluator id']
     },
-    sentBackTofieldAgentForReevaluationByEvaluator: {
+    cityManager: {
+        type: mongoose.Types.ObjectId,
+        ref: 'CityManager',
+        required: [true, 'Please provide a city manager id'],
+    },
+    sentToEvaluatorByFieldAgentForEvaluation: {
         isSent: {
             type: Boolean,
-            default: false
+            default: true
         },
         date: {
             type: Date,
@@ -301,10 +306,21 @@ const ResidentialPropertySchema = new mongoose.Schema({
         }
     },
     isEvaluatedSuccessfullyByEvaluator: {
-        type: Date,
-        default: null
+        isEvaluated: {
+            type: Boolean,
+            default: false
+        },
+        date: {
+            type: Date,
+            default: null
+        }
     },
-    sentToEvaluatorByFieldAgentForEvaluation: {
+    sentBackTofieldAgentForReevaluation: {
+        by: {
+            type: String,
+            enum: ['evaluator', 'city-manager'],
+            trim: true,
+        },
         isSent: {
             type: Boolean,
             default: false
@@ -313,6 +329,50 @@ const ResidentialPropertySchema = new mongoose.Schema({
             type: Date,
             default: null
         }
+    },
+    isApprovedByCityManager: {
+        isApproved: {
+            type: Boolean,
+            default: false
+        },
+        date: {
+            type: Date,
+            default: null
+        }
+    },
+    sentToEvaluatorByCityManagerForReevaluation: {
+        isSent: {
+            type: Boolean,
+            default: false
+        },
+        date: {
+            type: Date,
+            default: null
+        }
+    },
+    sentToCityManagerForApproval: {
+        by: {
+            type: String,
+            enum: ['evaluator', 'field-agent'],
+            trim: true
+        },
+        date: {
+            type: Date,
+            default: null
+        },
+        isSent: {
+            type: Boolean,
+            default: false
+        }
+    },
+
+    numberOfReevaluationsReceivedByFieldAgent: {
+        type: Number,
+        default: 0
+    },
+    numberOfReevaluationsReceivedByEvaluator: {
+        type: Number,
+        default: 0
     },
     evaluationData: {
         areDetailsComplete: { type: Boolean },
@@ -329,13 +389,10 @@ const ResidentialPropertySchema = new mongoose.Schema({
         qualityOfConstructionRating: { type: Number, default: null },
         evaluatedAt: { type: Date },
     },
-    numberOfReevaluationsReceivedByFieldAgent:{
-        fromEvaluator:{
-            type:Number,
-            default:0
-        }
+    isLive: {
+        type: Boolean,
+        default: false
     },
-    status: { type: String, required: true, default: 'active' },
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 
 module.exports = mongoose.model('ResidentialProperty', ResidentialPropertySchema)

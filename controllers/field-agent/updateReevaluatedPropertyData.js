@@ -32,10 +32,11 @@ const updateReevaluatedPropertyData = async (req, res, next) => {
             }
         }
 
-        const whoRequestedReevaluation = await selectedModel.findOne({ _id: id }).select('sentBackTofieldAgentForReevaluation.by')
+        const reevaluationRequestedBy = await selectedModel.findOne({ _id: id }).select('sentBackTofieldAgentForReevaluation.by')
 
-        if (whoRequestedReevaluation) {
-            if (whoRequestedReevaluation.sentBackTofieldAgentForReevaluation.by === 'evaluator') {
+        console.log(reevaluationRequestedBy)
+        if (reevaluationRequestedBy && reevaluationRequestedBy.sentBackTofieldAgentForReevaluation.by) {
+            if (reevaluationRequestedBy.sentBackTofieldAgentForReevaluation.by === 'evaluator') {
                 updatedData = {
                     ...updatedData,
                     sentToEvaluatorByFieldAgentForEvaluation: {
@@ -43,24 +44,26 @@ const updateReevaluatedPropertyData = async (req, res, next) => {
                         date: new Date()
                     }
                 }
-            } else if (whoRequestedReevaluation.sentBackTofieldAgentForReevaluation.by === 'city-manager') {
+            } else if (reevaluationRequestedBy.sentBackTofieldAgentForReevaluation.by === 'city-manager') {
                 updatedData = {
                     ...updatedData,
                     sentToCityManagerForApproval: {
-                        by: 'field-agent',
                         isSent: true,
                         date: new Date()
                     }
                 }
             }
+        }
 
-            await selectedModel.findOneAndUpdate({ _id: id },
-                updatedData,
-                { new: true, runValidators: true })
 
-            res.status(StatusCodes.OK).json({ status: 'ok' })
-        } else {
-            throw new Error('some error occured')
+        if (reevaluationRequestedBy) {
+            if (reevaluationRequestedBy.sentBackTofieldAgentForReevaluation.by) {
+                await selectedModel.findOneAndUpdate({ _id: id },
+                    updatedData,
+                    { new: true, runValidators: true })
+
+                res.status(StatusCodes.OK).json({ status: 'ok' })
+            }
         }
         return
     } catch (error) {

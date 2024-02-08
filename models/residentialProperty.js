@@ -292,48 +292,13 @@ const ResidentialPropertySchema = new mongoose.Schema({
     },
     cityManager: {
         type: mongoose.Types.ObjectId,
-        ref: 'CityManager',
-        required: [true, 'Please provide a city manager id'],
+        ref: 'CityManager'
     },
+
     sentToEvaluatorByFieldAgentForEvaluation: {
         isSent: {
             type: Boolean,
             default: true
-        },
-        date: {
-            type: Date,
-            default: null
-        }
-    },
-    isEvaluatedSuccessfullyByEvaluator: {
-        isEvaluated: {
-            type: Boolean,
-            default: false
-        },
-        date: {
-            type: Date,
-            default: null
-        }
-    },
-    sentBackTofieldAgentForReevaluation: {
-        by: {
-            type: String,
-            enum: ['evaluator', 'city-manager'],
-            trim: true,
-        },
-        isSent: {
-            type: Boolean,
-            default: false
-        },
-        date: {
-            type: Date,
-            default: null
-        }
-    },
-    isApprovedByCityManager: {
-        isApproved: {
-            type: Boolean,
-            default: false
         },
         date: {
             type: Date,
@@ -348,14 +313,50 @@ const ResidentialPropertySchema = new mongoose.Schema({
         date: {
             type: Date,
             default: null
+        },
+        details:{
+            type: [String] 
+        }
+    },
+    isEvaluatedSuccessfullyByEvaluator: {
+        isEvaluated: {
+            type: Boolean,
+            default: false
+        },
+        date: {
+            type: Date,
+            default: null
+        }
+    },
+    sentBackTofieldAgentForReevaluation: {
+        isSent: {
+            type: Boolean,
+            default: false
+        },
+        date: {
+            type: Date,
+            default: null
+        },
+        details: {
+            type: [String]
+        },
+        by: {
+            type: String,
+            enum: ['city-manager', 'evaluator'],
+            trim: true,
+        }
+    },
+    isApprovedByCityManager: {
+        isApproved: {
+            type: Boolean,
+            default: false
+        },
+        date: {
+            type: Date,
+            default: null
         }
     },
     sentToCityManagerForApproval: {
-        by: {
-            type: String,
-            enum: ['evaluator', 'field-agent'],
-            trim: true
-        },
         date: {
             type: Date,
             default: null
@@ -365,7 +366,6 @@ const ResidentialPropertySchema = new mongoose.Schema({
             default: false
         }
     },
-
     numberOfReevaluationsReceivedByFieldAgent: {
         type: Number,
         default: 0
@@ -375,8 +375,6 @@ const ResidentialPropertySchema = new mongoose.Schema({
         default: 0
     },
     evaluationData: {
-        areDetailsComplete: { type: Boolean },
-        incompletePropertyDetails: { type: [String], default: null },
         typeOfLocation: { type: String, default: null },
         locationStatus: { type: String, default: null },
         fairValueOfProperty: { type: Number, default: null },

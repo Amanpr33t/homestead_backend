@@ -72,60 +72,60 @@ const evaluateProperty = async (req, res, next) => {
         let updatedData
 
         if (isInformationComplete === 'true') {
-            //evaluate data
-            updatedData = {
-                sentToEvaluatorByFieldAgentForEvaluation: {
-                    isSent: false,
-                    date: null
-                },
-                isEvaluatedSuccessfullyByEvaluator: {
-                    isEvaluated: true,
-                    date: new Date()
-                },
-                sentToCityManagerForApproval: {
-                    by: 'evaluator',
-                    isSent: true,
-                    date: new Date()
-                },
-                evaluationData: req.body
+            const propertyLocation = await selectedModel.findOne({ _id: propertyId }).select('location.name.state location.name.district')
+
+            let cityManagerId
+            if (propertyLocation) {
+                cityManagerId = await assignCityManagerForProperty(propertyLocation.location.name.district, propertyLocation.location.name.state)//id of evaluator to whom the property will be assigned for evaluation
+            }
+
+            //The if statement below is run when we get some evaluator from the database
+            if (cityManagerId && cityManagerId === 'not-found') {
+                throw new CustomAPIError('No city manager found', StatusCodes.BAD_REQUEST)
+            } else if (cityManagerId) {
+                //evaluate data 
+                updatedData = {
+                    cityManager: cityManagerId,
+                    sentToEvaluatorByFieldAgentForEvaluation: {
+                        isSent: false,
+                        date: null
+                    },
+                    isEvaluatedSuccessfullyByEvaluator: {
+                        isEvaluated: true,
+                        date: new Date()
+                    },
+                    sentToCityManagerForApproval: {
+                        isSent: true,
+                        date: new Date()
+                    },
+                    evaluationData: req.body
+                }
             }
         } else if (isInformationComplete === 'false') {
             //send back to field agent for reevaluation
             updatedData = {
                 $inc: { "numberOfReevaluationsReceivedByFieldAgent": 1 },
                 sentBackTofieldAgentForReevaluation: {
-                    by: 'evaluator',
                     isSent: true,
-                    date: new Date()
+                    date: new Date(),
+                    details: req.body.incompletePropertyDetails,
+                    by:'evaluator'
                 },
                 sentToEvaluatorByFieldAgentForEvaluation: {
                     isSent: false,
                     date: null
-                },
-                evaluationData: req.body
+                }
             }
         }
 
-        const propertyLocation = await selectedModel.findOne({ _id: propertyId }).select('location.name.state location.name.district')
-        console.log(propertyLocation)
-        let cityManagerId
-        if(propertyLocation){
-            cityManagerId = await assignPropertyEvaluatorForProperty(propertyLocation.district, propertyLocation.state)//id of evaluator to whom the property will be assigned for evaluation
-        }
+        await selectedModel.findOneAndUpdate({ _id: propertyId },
+            updatedData,
+            { new: true, runValidators: true })
 
-        //The if statement below is run when we get some evaluator from the database
-        if (cityManagerId) {
-            if (cityManagerId === 'not-found') {
-                throw new CustomAPIError('No city manager found', StatusCodes.BAD_REQUEST)
-            }
+        res.status(StatusCodes.OK).json({ status: 'ok' })
 
-            await selectedModel.findOneAndUpdate({ _id: propertyId },
-                updatedData,
-                { new: true, runValidators: true })
 
-            res.status(StatusCodes.OK).json({ status: 'ok' })
-            return
-        }
+        return
     } catch (error) {
         console.log(error)
         next(error)

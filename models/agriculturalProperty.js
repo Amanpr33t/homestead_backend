@@ -202,8 +202,7 @@ const AgriculturalPropertySchema = new Schema({
     },
     cityManager: {
         type: mongoose.Types.ObjectId,
-        ref: 'CityManager',
-        required: [true, 'Please provide a city manager id'],
+        ref: 'CityManager'
     },
     uniqueId: {
         type: String,
@@ -220,6 +219,19 @@ const AgriculturalPropertySchema = new Schema({
             default: null
         }
     },
+    sentToEvaluatorByCityManagerForReevaluation: {
+        isSent: {
+            type: Boolean,
+            default: false
+        },
+        date: {
+            type: Date,
+            default: null
+        },
+        details: {
+            type: [String]
+        }
+    },
     isEvaluatedSuccessfullyByEvaluator: {
         isEvaluated: {
             type: Boolean,
@@ -231,11 +243,6 @@ const AgriculturalPropertySchema = new Schema({
         }
     },
     sentBackTofieldAgentForReevaluation: {
-        by: {
-            type: String,
-            enum: ['evaluator', 'city-manager'],
-            trim: true,
-        },
         isSent: {
             type: Boolean,
             default: false
@@ -243,6 +250,14 @@ const AgriculturalPropertySchema = new Schema({
         date: {
             type: Date,
             default: null
+        },
+        details: {
+            type: [String]
+        },
+        by: {
+            type: String,
+            enum: ['city-manager', 'evaluator'],
+            trim: true,
         }
     },
     isApprovedByCityManager: {
@@ -255,22 +270,7 @@ const AgriculturalPropertySchema = new Schema({
             default: null
         }
     },
-    sentToEvaluatorByCityManagerForReevaluation: {
-        isSent: {
-            type: Boolean,
-            default: false
-        },
-        date: {
-            type: Date,
-            default: null
-        }
-    },
     sentToCityManagerForApproval: {
-        by: {
-            type: String,
-            enum: ['evaluator', 'field-agent'],
-            trim: true
-        },
         date: {
             type: Date,
             default: null
@@ -280,7 +280,6 @@ const AgriculturalPropertySchema = new Schema({
             default: false
         }
     },
-
     numberOfReevaluationsReceivedByFieldAgent: {
         type: Number,
         default: 0
@@ -290,8 +289,6 @@ const AgriculturalPropertySchema = new Schema({
         default: 0
     },
     evaluationData: {
-        areDetailsComplete: { type: Boolean },
-        incompletePropertyDetails: { type: [String], default: null },
         typeOfLocation: { type: String, default: null },
         locationStatus: { type: String, default: null },
         fairValueOfProperty: { type: Number, default: null },

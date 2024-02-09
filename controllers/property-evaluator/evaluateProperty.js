@@ -69,7 +69,13 @@ const evaluateProperty = async (req, res, next) => {
             throw new CustomAPIError('Model name not provided', StatusCodes.BAD_REQUEST)
         }
 
-        let updatedData
+        let updatedData = {
+            //This is done to reset tthe value to null if the property is sent back to evaluator by city manager
+            sentToEvaluatorByCityManagerForReevaluation: {
+                isSent: false,
+                date: null
+            }
+        }
 
         if (isInformationComplete === 'true') {
             const propertyLocation = await selectedModel.findOne({ _id: propertyId }).select('location.name.state location.name.district')
@@ -85,6 +91,7 @@ const evaluateProperty = async (req, res, next) => {
             } else if (cityManagerId) {
                 //evaluate data 
                 updatedData = {
+                    ...updatedData,
                     cityManager: cityManagerId,
                     sentToEvaluatorByFieldAgentForEvaluation: {
                         isSent: false,
@@ -104,12 +111,13 @@ const evaluateProperty = async (req, res, next) => {
         } else if (isInformationComplete === 'false') {
             //send back to field agent for reevaluation
             updatedData = {
+                ...updatedData,
                 $inc: { "numberOfReevaluationsReceivedByFieldAgent": 1 },
                 sentBackTofieldAgentForReevaluation: {
                     isSent: true,
                     date: new Date(),
                     details: req.body.incompletePropertyDetails,
-                    by:'evaluator'
+                    by: 'evaluator'
                 },
                 sentToEvaluatorByFieldAgentForEvaluation: {
                     isSent: false,

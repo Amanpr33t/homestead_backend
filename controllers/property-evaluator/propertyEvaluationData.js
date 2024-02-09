@@ -25,19 +25,19 @@ const propertyEvaluationData = async (req, res, next) => {
         })
         const propertiesApprovedByCityManager = agriculturalPropertiesApprovedByCityManager + residentialPropertiesApprovedByCityManager + commercialPropertiesApprovedByCityManager
 
-        const agriculturalPropertiesEvaluated = await AgriculturalProperty.countDocuments({
+        const agriculturalPropertiesSentToCityManagerForApproval = await AgriculturalProperty.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            'isEvaluatedSuccessfullyByEvaluator.isEvaluated': true
+            'sentToCityManagerForApproval.isSent': true
         })
-        const commercialPropertiesEvaluated = await CommercialProperty.countDocuments({
+        const commercialPropertiesSentToCityManagerForApproval = await CommercialProperty.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            'isEvaluatedSuccessfullyByEvaluator.isEvaluated': true
+            'sentToCityManagerForApproval.isSent': true
         })
-        const residentialPropertiesEvaluated = await ResidentialProperty.countDocuments({
+        const residentialPropertiesSentToCityManagerForApproval = await ResidentialProperty.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            'isEvaluatedSuccessfullyByEvaluator.isEvaluated': true
+            'sentToCityManagerForApproval.isSent': true
         })
-        const numberOfPropertiesEvaluated = residentialPropertiesEvaluated + agriculturalPropertiesEvaluated + commercialPropertiesEvaluated
+        const propertiesSentToCityManagerForApproval = residentialPropertiesSentToCityManagerForApproval + agriculturalPropertiesSentToCityManagerForApproval + commercialPropertiesSentToCityManagerForApproval
 
 
         const agriculturalPropertiesPendingForEvaluation = await AgriculturalProperty.countDocuments({
@@ -54,11 +54,26 @@ const propertyEvaluationData = async (req, res, next) => {
         })
         const pendingPropertyEvaluations = residentialPropertiesPendingForEvaluation + agriculturalPropertiesPendingForEvaluation + commercialPropertiesPendingForEvaluation
 
+        const agriculturalPropertiesReceivedForReevaluation = await AgriculturalProperty.countDocuments({
+            propertyEvaluator: req.propertyEvaluator._id,
+            'sentToEvaluatorByCityManagerForReevaluation.isSent': true
+        })
+        const commercialPropertiesReceivedForReevaluation = await CommercialProperty.countDocuments({
+            propertyEvaluator: req.propertyEvaluator._id,
+            'sentToEvaluatorByCityManagerForReevaluation.isSent': true
+        })
+        const residentialPropertiesReceivedForReevaluation = await ResidentialProperty.countDocuments({
+            propertyEvaluator: req.propertyEvaluator._id,
+            'sentToEvaluatorByCityManagerForReevaluation.isSent': true
+        })
+        const pendingPropertiesReceivedForReevaluation = residentialPropertiesReceivedForReevaluation + agriculturalPropertiesReceivedForReevaluation + commercialPropertiesReceivedForReevaluation
+
         return res.status(StatusCodes.OK).json({
             status: 'ok',
             propertiesApprovedByCityManager,
-            numberOfPropertiesEvaluated,
-            pendingPropertyEvaluations
+            propertiesSentToCityManagerForApproval,
+            pendingPropertyEvaluations,
+            pendingPropertiesReceivedForReevaluation
         })
     } catch (error) {
         next(error)

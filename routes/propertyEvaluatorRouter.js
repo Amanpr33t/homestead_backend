@@ -29,6 +29,11 @@ const {
     numberOfPropertiesPendingToBeEvaluated
 } = require('../controllers/property-evaluator/fetchPropertiesPendingToBeEvaluated')
 
+const {
+    propertiesPendingToBeReevaluated,
+    numberOfPropertiesPendingToBeReevaluated
+} = require('../controllers/property-evaluator/fetchPropertiesPendingToBeReevaluated')
+
 const { fetchSelectedProperty } = require('../controllers/property-evaluator/fetchSelectedProperty')
 
 router.post('/signIn', signIn) //to sign in an evaluator
@@ -40,8 +45,13 @@ router.post('/confirmPasswordVerificationToken', confirmPasswordVerificationToke
 router.patch('/resetPasswordVerificationToken', resetPasswordVerificationToken) //to reset the password verification token
 
 router.get('/propertyEvaluationData', authenticatePropertyEvaluator, propertyEvaluationData) //to get data about properties evaluated by the the evaluator
+
 router.get('/propertiesPendingToBeEvaluated', authenticatePropertyEvaluator, propertiesPendingToBeEvaluated) //fetches some data regarding properties pending to be evaluated
 router.get('/numberOfPropertiesPendingToBeEvaluated', authenticatePropertyEvaluator, numberOfPropertiesPendingToBeEvaluated) //fetches number of properties pending to be evaluated
+
+router.get('/propertiesPendingToBeReevaluated', authenticatePropertyEvaluator, propertiesPendingToBeReevaluated) //fetches some data regarding properties pending to be evaluated
+router.get('/numberOfPropertiesPendingToBeReevaluated', authenticatePropertyEvaluator, numberOfPropertiesPendingToBeReevaluated) //fetches number of properties pending to be evaluated
+
 router.get('/fetch-selected-property', authenticatePropertyEvaluator, fetchSelectedProperty) //fetch details of selected property
 router.post('/evaluateProperty', authenticatePropertyEvaluator, evaluateProperty) //evaluate property
 

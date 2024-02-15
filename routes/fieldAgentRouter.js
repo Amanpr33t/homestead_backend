@@ -17,6 +17,8 @@ const {
     resetPasswordVerificationToken
 } = require('../controllers/field-agent/forgotPassword')
 
+
+
 const { addPropertyDealer,
     propertyDealerEmailExists,
     propertyDealerContactNumberExists,
@@ -25,24 +27,10 @@ const { addPropertyDealer,
 } = require('../controllers/field-agent/addPropertyDealer')
 
 const {
-    propertyDealersAddedByFieldAgent,
-    propertyDealerOfaProperty,
-    dealerDetails
-} = require('../controllers/field-agent/propertiesAndPropertyDealersAddedByFieldAgent')
-
-const {
     pendingPropertiesForReevaluation
 } = require('../controllers/field-agent/propertyReevaluations')
 
 const {updateReevaluatedPropertyData}=require('../controllers/field-agent/updateReevaluatedPropertyData')
-
-const {
-    getProperty,
-} = require('../controllers/field-agent/getPropertyDetails')
-
-const {
-    propertiesAddedByFieldAgent
-} = require('../controllers/field-agent/fetchProperties')
 
 const {
     propertyDealerExists,
@@ -54,6 +42,10 @@ const {
 } = require('../controllers/field-agent/addProperty')
 
 const {dataForFieldAgentHomePage}=require('../controllers/field-agent/dataForFieldAgentHomePage')
+
+const {
+    getProperty,
+} = require('../controllers/field-agent/getPropertyDetails')
 
 router.post('/signIn', signIn) //to sign in a field agent
 router.patch('/logout', authenticateFieldAgent, logout) //to logout a field agent
@@ -69,19 +61,18 @@ router.get('/propertyDealerContactNumberExists', propertyDealerContactNumberExis
 router.get('/propertyDealerGstNumberExists', propertyDealerGstNumberExists) //to check if a property dealer with similar GST number exists
 router.get('/propertyDealerReraNumberExists', propertyDealerReraNumberExists) //to check if a property dealer with similar email exists
 
-router.get('/dataForFieldAgentHomePage', authenticateFieldAgent, dataForFieldAgentHomePage)
-router.get('/propertyDealersAddedByFieldAgent', authenticateFieldAgent, propertyDealersAddedByFieldAgent) //to get the property dealers added by the field agent
-router.get('/getDealerDetails', authenticateFieldAgent, dealerDetails) //to get the property dealer details
-router.get('/propertiesAddedByFieldAgent', authenticateFieldAgent, propertiesAddedByFieldAgent)  //to get the properties added by the field agent
-router.get('/propertyDealerOfaProperty/:id', authenticateFieldAgent, propertyDealerOfaProperty) //to get the firmName of a property dealer of aproeprty
+router.get('/dataForFieldAgentHomePage', authenticateFieldAgent, dataForFieldAgentHomePage) //to fetch data for field agent home page
 router.get('/pendingPropertiesForReevaluation', authenticateFieldAgent, pendingPropertiesForReevaluation) //fetches properties pending for reevaluation by field agent
-router.patch('/updateReevaluatedPropertyData', authenticateFieldAgent, updateReevaluatedPropertyData) //fetches properties pending for reevaluation by field agent
-router.get('/getPropertyData', authenticateFieldAgent, getProperty) //To get details about a property
+
+router.patch('/updateReevaluatedPropertyData', authenticateFieldAgent, updateReevaluatedPropertyData) //to update property data
 
 router.get('/propertyDealerOtpGeneration', authenticateFieldAgent, propertyDealerExists, sendOtpToEmailForDealerVerification) //To send an OTP to property dealer before a field agent can add a proeprty
 router.get('/propertyDealerOtpVerification', authenticateFieldAgent, confirmOtpForDealerVerification) //to confirm the OTP sent to property dealer before adding a property
+
 router.post('/addAgriculturalProperty', authenticateFieldAgent, addAgriculturalProperty) //to add an agricultural property
 router.post('/addCommercialProperty', authenticateFieldAgent, addCommercialProperty) //to add a commercial property
 router.post('/addResidentialProperty', authenticateFieldAgent, addResidentialProperty) //to add an residential property
+
+router.get('/getPropertyData', authenticateFieldAgent, getProperty) //To get details about a property
 
 module.exports = router

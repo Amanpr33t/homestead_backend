@@ -65,7 +65,6 @@ const dataForFieldAgentHomePage = async (req, res, next) => {
         })
         return
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }

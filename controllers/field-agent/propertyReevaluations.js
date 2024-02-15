@@ -44,7 +44,6 @@ const pendingPropertiesForReevaluation = async (req, res, next) => {
 
         return res.status(StatusCodes.OK).json({ status: 'ok', pendingPropertyEvaluations, totalPages })
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }

@@ -20,6 +20,7 @@ const propertyEvaluatorRouter = require('./routes/propertyEvaluatorRouter')
 const propertyDealerRouter = require('./routes/propertyDealerRouter')
 const customerRouter = require('./routes/customerRouter')
 const cityManagerRouter = require('./routes/cityManagerRouter')
+const fetchPropertyData = require('./routes/fetchPropertyData')
 
 const cloudinary = require('cloudinary').v2
 cloudinary.config({
@@ -46,8 +47,9 @@ app.use((req, res, next) => {
 app.use('/field-agent', fieldAgentRouter)
 app.use('/property-evaluator', propertyEvaluatorRouter)
 app.use('/property-dealer', propertyDealerRouter)
-app.use('/city-manager',cityManagerRouter)
+app.use('/city-manager', cityManagerRouter)
 app.use('/customer', customerRouter)
+app.use('/property', fetchPropertyData)
 app.use(notFound) //this middleware runs when no other route is matched
 app.use(errorHandlerMiddleware) //the error handling middleware
 

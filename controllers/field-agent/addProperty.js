@@ -193,14 +193,14 @@ const assignPropertyEvaluatorForProperty = async (district, state) => {
             { $project: { _id: 1 } }
         ])
         if (propertyEvaluator && propertyEvaluator.length === 0) {
-            //The if statement is run when we get no evaluators with the same district
+            //The if statement is run when we get no evaluator with the same district
             propertyEvaluator = await PropertyEvaluator.aggregate([
                 { $match: { state, isActive: true } },
                 { $sample: { size: 1 } },
                 { $project: { _id: 1 } }
-            ]); //We get all the evaluators with the same state and who are active
+            ]); //We get evaluator with the same state and who are active
             if (propertyEvaluator.length === 0) {
-                //The if statement is run when we get no evaluators with the same district and state
+                //The if statement is run when we get no evaluator with the same district and state
                 propertyEvaluator = await PropertyEvaluator.aggregate([
                     { $match: { isActive: true } },
                     { $sample: { size: 1 } },
@@ -208,7 +208,6 @@ const assignPropertyEvaluatorForProperty = async (district, state) => {
                 ])
                 if (propertyEvaluator.length) {
                     return propertyEvaluator[0]._id
-
                 } else {
                     return 'not-found'
                 }
@@ -305,7 +304,6 @@ const addAgriculturalProperty = async (req, res, next) => {
             return
         }
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }
@@ -488,7 +486,6 @@ const addResidentialProperty = async (req, res, next) => {
             return
         }
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }

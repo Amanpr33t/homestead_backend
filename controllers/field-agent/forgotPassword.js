@@ -17,7 +17,6 @@ const forgotPassword = async (req, res, next) => {
         if (!emailValidator.validate(email)) {
             throw new CustomAPIError('Email not in correct format', StatusCodes.BAD_REQUEST)
         }
-
         const fieldAgent = await FieldAgent.findOne({ email })
         if (!fieldAgent) {
             res.status(StatusCodes.OK).json({ status: 'not_found', msg: 'No field agent exists' })
@@ -41,7 +40,8 @@ const forgotPassword = async (req, res, next) => {
             { passwordVerificationToken, passwordVerificationTokenExpirationDate },
             { new: true, runValidators: true })
 
-        res.status(StatusCodes.OK).json({ status: 'ok', msg: 'A verification token has been sent to your email' })
+        console.log('here')    
+        res.status(StatusCodes.OK).json({ status: 'ok' })
         return
     } catch (error) {
         next(error)

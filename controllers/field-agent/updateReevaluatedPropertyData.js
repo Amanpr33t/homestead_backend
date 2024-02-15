@@ -34,7 +34,6 @@ const updateReevaluatedPropertyData = async (req, res, next) => {
 
         const reevaluationRequestedBy = await selectedModel.findOne({ _id: id }).select('sentBackTofieldAgentForReevaluation.by')
 
-        console.log(reevaluationRequestedBy)
         if (reevaluationRequestedBy && reevaluationRequestedBy.sentBackTofieldAgentForReevaluation.by) {
             if (reevaluationRequestedBy.sentBackTofieldAgentForReevaluation.by === 'evaluator') {
                 updatedData = {
@@ -55,7 +54,6 @@ const updateReevaluatedPropertyData = async (req, res, next) => {
             }
         }
 
-
         if (reevaluationRequestedBy) {
             if (reevaluationRequestedBy.sentBackTofieldAgentForReevaluation.by) {
                 await selectedModel.findOneAndUpdate({ _id: id },
@@ -67,7 +65,6 @@ const updateReevaluatedPropertyData = async (req, res, next) => {
         }
         return
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }

@@ -16,7 +16,7 @@ const addPropertyDealer = async (req, res, next) => {
         } = req.body
 
         //The if statements below are used to verify the request body data
-        if (!addressArray || (addressArray && !addressArray.length)) {
+        if (!addressArray || (addressArray && !addressArray.length) || addressArray.length > 10) {
             throw new CustomAPIError('No address provided', 204)
         }
         if (!emailValidator.validate(email)) {
@@ -55,8 +55,8 @@ const addPropertyDealer = async (req, res, next) => {
 const propertyDealerEmailExists = async (req, res, next) => {
     try {
         const { email } = req.query
-        if(!email){
-            throw new CustomAPIError('Email not provided',StatusCodes.BAD_REQUEST)
+        if (!email) {
+            throw new CustomAPIError('Email not provided', StatusCodes.BAD_REQUEST)
         }
         const propertyDealerEmailExists = await PropertyDealer.findOne({ email })
         if (propertyDealerEmailExists) {
@@ -80,8 +80,8 @@ const propertyDealerEmailExists = async (req, res, next) => {
 const propertyDealerContactNumberExists = async (req, res, next) => {
     try {
         const { contactNumber } = req.query
-        if(!contactNumber){
-            throw new CustomAPIError('contact not provided',StatusCodes.BAD_REQUEST)
+        if (!contactNumber) {
+            throw new CustomAPIError('contact not provided', StatusCodes.BAD_REQUEST)
         }
         const propertyDealerContactNumberExists = await PropertyDealer.findOne({ contactNumber })
         if (propertyDealerContactNumberExists) {
@@ -105,8 +105,8 @@ const propertyDealerContactNumberExists = async (req, res, next) => {
 const propertyDealerGstNumberExists = async (req, res, next) => {
     try {
         const { gstNumber } = req.query
-        if(!gstNumber){
-            throw new CustomAPIError('gst number not provided',StatusCodes.BAD_REQUEST)
+        if (!gstNumber) {
+            throw new CustomAPIError('gst number not provided', StatusCodes.BAD_REQUEST)
         }
         const propertyDealerGstNumberExists = await PropertyDealer.findOne({ gstNumber })
         if (propertyDealerGstNumberExists) {
@@ -126,8 +126,8 @@ const propertyDealerGstNumberExists = async (req, res, next) => {
 const propertyDealerReraNumberExists = async (req, res, next) => {
     try {
         const { reraNumber } = req.query
-        if(!reraNumber){
-            throw new CustomAPIError('RERA number not provided',StatusCodes.BAD_REQUEST)
+        if (!reraNumber) {
+            throw new CustomAPIError('RERA number not provided', StatusCodes.BAD_REQUEST)
         }
         const propertyDealerReraNumberExists = await PropertyDealer.findOne({ reraNumber })
         if (propertyDealerReraNumberExists) {

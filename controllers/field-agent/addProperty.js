@@ -5,6 +5,7 @@ const CommercialProperty = require('../../models/commercialProperty')
 const AgriculturalProperty = require('../../models/agriculturalProperty')
 const ResidentialProperty = require('../../models/residentialProperty')
 const PropertyEvaluator = require('../../models/propertyEvaluator')
+const FieldAgent = require('../../models/fieldAgent')
 const { uniqueIdGeneratorForProperty } = require('../../utils/uniqueIdGenerator')
 const sendEmail = require('../../utils/sendEmail')
 const CustomAPIError = require('../../errors/custom-error')
@@ -297,6 +298,13 @@ const addAgriculturalProperty = async (req, res, next) => {
                 propertyEvaluator: evaluatorId
             }) //A new agricultural proeprty is created
 
+            if (req.query.requestId) {
+                await FieldAgent.updateOne(
+                    { _id: req.fieldAgent._id },
+                    { $pull: { requestsToAddProperty: { _id: req.query.requestId } } }
+                );
+            }
+
             res.status(StatusCodes.OK).json({
                 status: 'ok',
                 message: 'Agricultural property has been added'
@@ -387,6 +395,13 @@ const addCommercialProperty = async (req, res, next) => {
                 'sentToEvaluatorByFieldAgentForEvaluation.date': new Date(),
                 propertyEvaluator: evaluatorId
             }) //A new commercial proeprty is added to the database
+
+            if (req.query.requestId) {
+                await FieldAgent.updateOne(
+                    { _id: req.fieldAgent._id },
+                    { $pull: { requestsToAddProperty: { _id: req.query.requestId } } }
+                );
+            }
 
             res.status(StatusCodes.OK).json({ status: 'ok', message: 'Commercial property has been added' })
             return
@@ -481,6 +496,13 @@ const addResidentialProperty = async (req, res, next) => {
                 'sentToEvaluatorByFieldAgentForEvaluation.date': new Date(),
                 propertyEvaluator: evaluatorId
             }) //A new residential proeprty is added to the database
+
+            if (req.query.requestId) {
+                await FieldAgent.updateOne(
+                    { _id: req.fieldAgent._id },
+                    { $pull: { requestsToAddProperty: { _id: req.query.requestId } } }
+                );
+            }
 
             res.status(StatusCodes.OK).json({ status: 'ok', message: 'Residential property has been added' })
             return

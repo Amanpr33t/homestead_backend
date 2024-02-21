@@ -4,6 +4,51 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
 require('express-async-errors')
 
+const RequestToAddPropertySchema = new mongoose.Schema({
+    dealerId: {
+        type: String,
+        trim: true,
+    },
+    propertyType: {
+        type: String,
+        enum: ['agricultural', 'residential', 'commercial'],
+        trim: true,
+    },
+    location: {
+        plotNumber: {
+            type: String,
+            trim: true,
+            default: null
+        },
+        village: {
+            type: String,
+            trim: true,
+            default: null
+        },
+        city: {
+            type: String,
+            trim: true,
+            default: null
+        },
+        tehsil: {
+            type: String,
+            trim: true,
+            default: null
+        },
+        district: {
+            type: String,
+            trim: true,
+        },
+        state: {
+            type: String,
+            trim: true
+        }
+    },
+    requestDate: {
+        type: Date
+    }
+});
+
 const FieldAgentSchema = new mongoose.Schema({
     email: {
         type: String,
@@ -29,7 +74,20 @@ const FieldAgentSchema = new mongoose.Schema({
     passwordVerificationTokenExpirationDate: {
         type: Date,
         default: null
-    }
+    },
+    district: {
+        type: String,
+        trim: true
+    },
+    state: {
+        type: String,
+        trim: true
+    },
+    isActive: {
+        type: Boolean,
+        default: true
+    },
+    requestsToAddProperty: [RequestToAddPropertySchema]
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 
 

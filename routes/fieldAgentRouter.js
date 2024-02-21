@@ -47,6 +47,11 @@ const {
     getProperty,
 } = require('../controllers/field-agent/getPropertyDetails')
 
+const {
+    requestsToAddNewProperty,
+    dealerDetailsForAddProperty
+}=require('../controllers/field-agent/requestsToAddNewProperty')
+
 router.post('/signIn', signIn) //to sign in a field agent
 router.patch('/logout', authenticateFieldAgent, logout) //to logout a field agent
 router.post('/signUp', signup)
@@ -74,5 +79,9 @@ router.post('/addCommercialProperty', authenticateFieldAgent, addCommercialPrope
 router.post('/addResidentialProperty', authenticateFieldAgent, addResidentialProperty) //to add an residential property
 
 router.get('/getPropertyData', authenticateFieldAgent, getProperty) //To get details about a property
+
+router.get('/requestsToAddNewProperty', authenticateFieldAgent, requestsToAddNewProperty) 
+
+router.get('/dealerDetailsForAddProperty', authenticateFieldAgent, dealerDetailsForAddProperty) 
 
 module.exports = router

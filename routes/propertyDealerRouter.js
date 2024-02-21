@@ -33,9 +33,11 @@ const { fetchPropertiesAdded } = require('../controllers/property-dealer/fetchPr
 const { getPropertyDetails } = require('../controllers/property-dealer/fetchPropertyDetails')
 
 const {
-    fetchCustomerRequests,
-    fetchNumberOfCustomerRequests
-} = require('../controllers/property-dealer/fetchCustomerRequests')
+    homePageData,
+    fetchAllProperties
+} = require('../controllers/property-dealer/homePageData')
+
+const { assignFieldAgentForPropertyAddition } = require('../controllers/property-dealer/assignFieldAgentForProperty')
 
 const { updateSeenStatusOfCustomerRequest } = require('../controllers/property-dealer/updateSeenStatusOfCustomerRequest')
 
@@ -60,10 +62,12 @@ router.get('/fetchPropertiesAdded', authenticatePropertyDealer, fetchPropertiesA
 
 router.get('/getPropertyDetails', authenticatePropertyDealer, getPropertyDetails) //fetch details of a property added by a property dealer
 
-router.get('/fetchCustomerRequests', authenticatePropertyDealer, fetchCustomerRequests) //fetch customer requests sent to property dealer for properties
+router.get('/homePageData', authenticatePropertyDealer, homePageData) //fetch date for home page
 
 router.patch('/updateSeenStatusOfCustomerRequest', authenticatePropertyDealer, updateSeenStatusOfCustomerRequest)//used to update 'unseen' status of a customer request to 'seen'
 
-router.get('/numberOfCustomerRequests', authenticatePropertyDealer, fetchNumberOfCustomerRequests)//fetch number of customer requests sent to property dealer for properties
+router.get('/fetchAllProperties', authenticatePropertyDealer, fetchAllProperties) //fetch date for home page
+
+router.post('/assignFieldAgentForPropertyAddition', authenticatePropertyDealer, assignFieldAgentForPropertyAddition)
 
 module.exports = router

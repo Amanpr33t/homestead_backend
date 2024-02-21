@@ -9,23 +9,21 @@ const updateSeenStatusOfCustomerRequest = async (req, res, next) => {
     try {
         const { customerId, propertyId } = req.query
 
-        const customerRequests = req.propertyDealer.requestsFromCustomer
-
-        for (let i = 0; i < customerRequests.length; i++) {
-            if (customerRequests[i].customerId === customerId && customerRequests[i].propertyId === propertyId) {
-                // Update the specific key with the new value
-                customerRequests[i].requestSeen = true;
-                break; // Stop the loop once the update is done
-            }
-        }
-
-        await PropertyDealer.findOneAndUpdate({ _id: req.propertyDealer._id },
+        await PropertyDealer.findOneAndUpdate(
             {
-                requestsFromCustomer: customerRequests
+                _id: req.propertyDealer._id,
+                'requestsFromCustomer.customerId': customerId,
+                'requestsFromCustomer.propertyId': propertyId
             },
-            { new: true, runValidators: true })
+            { $set: { 'requestsFromCustomer.$.requestSeen': true } },
+            { new: true })
 
-        return res.status(StatusCodes.OK).json({ status: 'ok' })
+        const customerRequests = await PropertyDealer.findOne({ _id: req.propertyDealer._id }).select('requestsFromCustomer')
+
+        return res.status(StatusCodes.OK).json({
+            status: 'ok',
+            customerRequests:customerRequests.requestsFromCustomer
+        })
     } catch (error) {
         next(error)
     }

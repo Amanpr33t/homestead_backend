@@ -4,11 +4,13 @@ const PropertyDealer = require('../../models/propertyDealer')
 const AgriculturalProperty = require('../../models/agriculturalProperty')
 const CommercialProperty = require('../../models/commercialProperty')
 const ResidentialProperty = require('../../models/residentialProperty')
+const FieldAgent = require('../../models/fieldAgent')
 const CustomAPIError = require('../../errors/custom-error')
 
 ////The function provides the number of proeprties and property dealers added by the field agent
 const dataForFieldAgentHomePage = async (req, res, next) => {
     try {
+        console.log('here')
         const agriculturalPropertiesApprovedByCityManager = await AgriculturalProperty.countDocuments({
             addedByFieldAgent: req.fieldAgent._id,
             'isApprovedByCityManager.isApproved': true
@@ -50,21 +52,31 @@ const dataForFieldAgentHomePage = async (req, res, next) => {
             addedByFieldAgent: req.fieldAgent._id,
             'sentBackTofieldAgentForReevaluation.isSent': true
         })
-        const pendingPropertyReevaluations={
+        const pendingPropertyReevaluations = {
             agricultural: agriculturalPropertiesPendingForReevaluation,
             residential: residentialPropertiesPendingForReevaluation,
             commercial: commercialPropertiesPendingForReevaluation
         }
+
+        const requestsToAddProperty = await FieldAgent.aggregate([
+            {
+                $project: {
+                    arrayLength: { $size: "$requestsToAddProperty" }
+                }
+            }
+        ])
 
         res.status(StatusCodes.OK).json({
             status: 'ok',
             numberOfPropertiesApprovedByCityManager,
             numberOfPropertiesAdded,
             numberOfPropertyDealersAdded,
-            pendingPropertyReevaluations
+            pendingPropertyReevaluations,
+            requestsToAddProperty: requestsToAddProperty[0].arrayLength
         })
         return
     } catch (error) {
+        console.log(error)
         next(error)
     }
 }

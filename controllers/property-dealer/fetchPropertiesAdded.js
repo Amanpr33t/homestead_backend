@@ -1,8 +1,6 @@
 require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
-const AgriculturalProperty = require('../../models/agriculturalProperty')
-const CommercialProperty = require('../../models/commercialProperty')
-const ResidentialProperty = require('../../models/residentialProperty')
+const Property = require('../../models/property')
 
 //The function is used to fetch properties added by a property dealer
 const fetchPropertiesAdded = async (req, res, next) => {
@@ -43,19 +41,22 @@ const fetchPropertiesAdded = async (req, res, next) => {
         let commercialProperties = []
         let residentialProperties = []
 
-        agriculturalProperties = await AgriculturalProperty.find({
+        agriculturalProperties = await Property.find({
             addedByPropertyDealer: req.propertyDealer._id,
-            ...filterData
+            ...filterData,
+            propertyType: 'agricultural'
         }).select('location propertyType status createdAt')
 
-        commercialProperties = await CommercialProperty.find({
+        commercialProperties = await Property.find({
             addedByPropertyDealer: req.propertyDealer._id,
-            ...filterData
+            ...filterData,
+            propertyType: 'commercial'
         }).select('location propertyType status createdAt')
 
         residentialProperties = await ResidentialProperty.find({
             addedByPropertyDealer: req.propertyDealer._id,
-            ...filterData
+            ...filterData,
+            propertyType: 'residential'
         }).select('location propertyType status createdAt')
 
         return res.status(StatusCodes.OK).json({

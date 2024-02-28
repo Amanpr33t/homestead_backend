@@ -49,11 +49,6 @@ const AddressSchema = new mongoose.Schema({
 })
 
 const CustomerRequestSchema = new mongoose.Schema({
-    propertyType: {
-        type: String,
-        required: true,
-        trim: true
-    },
     propertyId: {
         type: String,
         required: true,
@@ -66,29 +61,15 @@ const CustomerRequestSchema = new mongoose.Schema({
     },
     customerName: {
         type: String,
-        required: true,
         trim: true
-    },
-    customerEmail: {
-        type: String,
-        required: true,
-        trim: true
-    },
-    customerContactNumber: {
-        type: Number,
-        required: true
     },
     requestSeen: {
         type: Boolean,
         default: false
     },
-    requestDate: {
+    date: {
         type: Date,
         required: true
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now()
     },
     _id: {
         type: Schema.Types.ObjectId,
@@ -179,7 +160,29 @@ const PropertyDealerSchema = new mongoose.Schema({
         trim: true,
         default: null
     },
-    requestsFromCustomer: [CustomerRequestSchema]
+    requestsFromCustomer: [CustomerRequestSchema],
+    reviewsFromCustomer: [
+        {
+            review: {
+                type: String,
+                trim: true
+            },
+            rating: {
+                type: Number
+            },
+            customerName: {
+                type: String,
+                trim: true
+            },
+            customerId: {
+                type: mongoose.Types.ObjectId,
+                ref: 'Customer',
+            },
+            date: {
+                type: Date
+            }
+        },
+    ]
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 
 PropertyDealerSchema.pre('save', async function (next) {

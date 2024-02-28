@@ -1,23 +1,24 @@
 require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
-const CommercialProperty = require('../../models/commercialProperty')
-const AgriculturalProperty = require('../../models/agriculturalProperty')
-const ResidentialProperty = require('../../models/residentialProperty')
+const Property = require('../../models/property')
 
 const numberOfPropertiesPendingForApproval = async (req, res, next) => {
     try {
-        const agriculturalPropertiesPendingForApproval = await AgriculturalProperty.countDocuments({
+        const agriculturalPropertiesPendingForApproval = await Property.countDocuments({
             cityManager: req.cityManager._id,
-            'sentToCityManagerForApproval.isSent': true
+            'sentToCityManagerForApproval.isSent': true,
+            propertyType: 'agricultural'
         })
 
-        const commercialPropertiesPendingForApproval = await CommercialProperty.countDocuments({
+        const commercialPropertiesPendingForApproval = await Property.countDocuments({
             cityManager: req.cityManager._id,
-            'sentToCityManagerForApproval.isSent': true
+            'sentToCityManagerForApproval.isSent': true,
+            propertyType: 'commercial'
         })
-        const residentialPropertiesPendingForApproval = await ResidentialProperty.countDocuments({
+        const residentialPropertiesPendingForApproval = await Property.countDocuments({
             cityManager: req.cityManager._id,
-            'sentToCityManagerForApproval.isSent': true
+            'sentToCityManagerForApproval.isSent': true,
+            propertyType: 'residential'
         })
         const numberOfPropertiesPendingForApproval = {
             agricultural: agriculturalPropertiesPendingForApproval,

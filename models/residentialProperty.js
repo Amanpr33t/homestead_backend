@@ -391,6 +391,10 @@ const ResidentialPropertySchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    isSold: {
+        type: Boolean,
+        default: false
+    }
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 
 module.exports = mongoose.model('ResidentialProperty', ResidentialPropertySchema)

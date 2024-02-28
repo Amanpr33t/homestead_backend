@@ -1,38 +1,41 @@
 require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
 const PropertyDealer = require('../../models/propertyDealer')
-const AgriculturalProperty = require('../../models/agriculturalProperty')
-const CommercialProperty = require('../../models/commercialProperty')
-const ResidentialProperty = require('../../models/residentialProperty')
+const Property = require('../../models/property')
 const FieldAgent = require('../../models/fieldAgent')
 const CustomAPIError = require('../../errors/custom-error')
 
 ////The function provides the number of proeprties and property dealers added by the field agent
 const dataForFieldAgentHomePage = async (req, res, next) => {
     try {
-        console.log('here')
-        const agriculturalPropertiesApprovedByCityManager = await AgriculturalProperty.countDocuments({
+        const agriculturalPropertiesApprovedByCityManager = await Property.countDocuments({
             addedByFieldAgent: req.fieldAgent._id,
-            'isApprovedByCityManager.isApproved': true
+            'isApprovedByCityManager.isApproved': true,
+            propertyType: 'agricultural'
         })
-        const commercialPropertiesApprovedByCityManager = await CommercialProperty.countDocuments({
+        const commercialPropertiesApprovedByCityManager = await Property.countDocuments({
             addedByFieldAgent: req.fieldAgent._id,
-            'isApprovedByCityManager.isApproved': true
+            'isApprovedByCityManager.isApproved': true,
+            propertyType: 'commercial'
         })
-        const residentialPropertiesApprovedByCityManager = await ResidentialProperty.countDocuments({
+        const residentialPropertiesApprovedByCityManager = await Property.countDocuments({
             addedByFieldAgent: req.fieldAgent._id,
-            'isApprovedByCityManager.isApproved': true
+            'isApprovedByCityManager.isApproved': true,
+            propertyType: 'residential'
         })
         const numberOfPropertiesApprovedByCityManager = agriculturalPropertiesApprovedByCityManager + commercialPropertiesApprovedByCityManager + residentialPropertiesApprovedByCityManager
 
-        const agriculturalPropertiesAdded = await AgriculturalProperty.countDocuments({
-            addedByFieldAgent: req.fieldAgent._id
+        const agriculturalPropertiesAdded = await Property.countDocuments({
+            addedByFieldAgent: req.fieldAgent._id,
+            propertyType: 'agricultural'
         })
-        const residentialPropertiesAdded = await ResidentialProperty.countDocuments({
-            addedByFieldAgent: req.fieldAgent._id
+        const residentialPropertiesAdded = await Property.countDocuments({
+            addedByFieldAgent: req.fieldAgent._id,
+            propertyType: 'residential'
         })
-        const commercialPropertiesAdded = await CommercialProperty.countDocuments({
-            addedByFieldAgent: req.fieldAgent._id
+        const commercialPropertiesAdded = await Property.countDocuments({
+            addedByFieldAgent: req.fieldAgent._id,
+            propertyType: 'commercial'
         })
         const numberOfPropertiesAdded = agriculturalPropertiesAdded + residentialPropertiesAdded + commercialPropertiesAdded
 
@@ -40,17 +43,20 @@ const dataForFieldAgentHomePage = async (req, res, next) => {
             addedByFieldAgent: req.fieldAgent._id
         })
 
-        const agriculturalPropertiesPendingForReevaluation = await AgriculturalProperty.countDocuments({
+        const agriculturalPropertiesPendingForReevaluation = await Property.countDocuments({
             addedByFieldAgent: req.fieldAgent._id,
-            'sentBackTofieldAgentForReevaluation.isSent': true
+            'sentBackTofieldAgentForReevaluation.isSent': true,
+            propertyType: 'agricultural'
         })
-        const residentialPropertiesPendingForReevaluation = await ResidentialProperty.countDocuments({
+        const residentialPropertiesPendingForReevaluation = await Property.countDocuments({
             addedByFieldAgent: req.fieldAgent._id,
-            'sentBackTofieldAgentForReevaluation.isSent': true
+            'sentBackTofieldAgentForReevaluation.isSent': true,
+            propertyType: 'residential'
         })
-        const commercialPropertiesPendingForReevaluation = await CommercialProperty.countDocuments({
+        const commercialPropertiesPendingForReevaluation = await Property.countDocuments({
             addedByFieldAgent: req.fieldAgent._id,
-            'sentBackTofieldAgentForReevaluation.isSent': true
+            'sentBackTofieldAgentForReevaluation.isSent': true,
+            propertyType: 'commercial'
         })
         const pendingPropertyReevaluations = {
             agricultural: agriculturalPropertiesPendingForReevaluation,
@@ -76,7 +82,6 @@ const dataForFieldAgentHomePage = async (req, res, next) => {
         })
         return
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }

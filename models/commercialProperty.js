@@ -146,11 +146,6 @@ const CommercialPropertySchema = new mongoose.Schema({
             trim: true
         }
     },
-    remarks: {
-        type: String,
-        trim: true,
-        default: null
-    },
     lockInPeriod: {
         years: {
             type: Number,
@@ -309,7 +304,10 @@ const CommercialPropertySchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-
+    isSold: {
+        type: Boolean,
+        default: false
+    }
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 
 module.exports = mongoose.model('CommercialProperty', CommercialPropertySchema)

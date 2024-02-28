@@ -1,8 +1,6 @@
 require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
-const CommercialProperty = require('../../models/commercialProperty')
-const AgriculturalProperty = require('../../models/agriculturalProperty')
-const ResidentialProperty = require('../../models/residentialProperty')
+const Property = require('../../models/property')
 const CityManager = require('../../models/cityManager')
 
 //The function is used to assign a city manager to aproeprty
@@ -58,17 +56,6 @@ const evaluateProperty = async (req, res, next) => {
             throw new CustomAPIError('Insufficient data', 204)
         }
 
-        let selectedModel
-        if (propertyType === 'residential') {
-            selectedModel = ResidentialProperty
-        } else if (propertyType === 'agricultural') {
-            selectedModel = AgriculturalProperty
-        } else if (propertyType === 'commercial') {
-            selectedModel = CommercialProperty
-        } else {
-            throw new CustomAPIError('Model name not provided', StatusCodes.BAD_REQUEST)
-        }
-
         let updatedData = {
             //This is done to reset tthe value to null if the property is sent back to evaluator by city manager
             sentToEvaluatorByCityManagerForReevaluation: {
@@ -78,7 +65,7 @@ const evaluateProperty = async (req, res, next) => {
         }
 
         if (isInformationComplete === 'true') {
-            const propertyLocation = await selectedModel.findOne({ _id: propertyId }).select('location.name.state location.name.district')
+            const propertyLocation = await Property.findOne({ _id: propertyId }).select('location.name.state location.name.district')
 
             let cityManagerId
             if (propertyLocation) {
@@ -126,16 +113,14 @@ const evaluateProperty = async (req, res, next) => {
             }
         }
 
-        await selectedModel.findOneAndUpdate({ _id: propertyId },
+        await Property.findOneAndUpdate({ _id: propertyId },
             updatedData,
             { new: true, runValidators: true })
 
         res.status(StatusCodes.OK).json({ status: 'ok' })
 
-
         return
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }

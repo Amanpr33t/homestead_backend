@@ -1,8 +1,6 @@
 require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
-const CommercialProperty = require('../../models/commercialProperty')
-const AgriculturalProperty = require('../../models/agriculturalProperty')
-const ResidentialProperty = require('../../models/residentialProperty')
+const Property = require('../../models/property')
 const CustomAPIError = require('../../errors/custom-error')
 
 //The function fetches some data regarding properties pending to be evaluated by the evaluator
@@ -16,28 +14,23 @@ const propertiesPendingForApproval = async (req, res, next) => {
         let pendingPropertyApprovals = []
         let numberOfProperties
 
-        let selectedModel
-        if (type === 'residential') {
-            selectedModel = ResidentialProperty
-        } else if (type === 'agricultural') {
-            selectedModel = AgriculturalProperty
-        } else if (type === 'commercial') {
-            selectedModel = CommercialProperty
-        } else {
-            throw new CustomAPIError('Model name not provided', StatusCodes.BAD_REQUEST)
+        if (type !== 'residential' && type !== 'agricultural' && type !== 'commercial') {
+            throw new CustomAPIError('property type not provided', StatusCodes.BAD_REQUEST)
         }
 
-        pendingPropertyApprovals = await selectedModel.find({
+        pendingPropertyApprovals = await Property.find({
             cityManager: req.cityManager._id,
-            'sentToCityManagerForApproval.isSent': true
+            'sentToCityManagerForApproval.isSent': true,
+            propertyType: type
         }).select('_id propertyType location sentToCityManagerForApproval.date')
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(pageSize)
 
-        numberOfProperties = await selectedModel.countDocuments({
+        numberOfProperties = await Property.countDocuments({
             cityManager: req.cityManager._id,
-            'sentToCityManagerForApproval.isSent': true
+            'sentToCityManagerForApproval.isSent': true,
+            propertyType: type
         })
 
         const totalPages = Math.ceil(numberOfProperties / pageSize)

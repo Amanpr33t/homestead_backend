@@ -1,15 +1,12 @@
 require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
-const CommercialProperty = require('../../models/commercialProperty')
-const AgriculturalProperty = require('../../models/agriculturalProperty')
-const ResidentialProperty = require('../../models/residentialProperty')
+const Property = require('../../models/property')
 const CityManager = require('../../models/cityManager')
 
 //Update a property on successful evaluation of data
 const approveProperty = async (req, res, next) => {
     try {
         const {
-            propertyType,
             propertyId
         } = req.query
 
@@ -28,17 +25,6 @@ const approveProperty = async (req, res, next) => {
             throw new CustomAPIError('Insufficient data', 204)
         }
 
-        let selectedModel
-        if (propertyType === 'residential') {
-            selectedModel = ResidentialProperty
-        } else if (propertyType === 'agricultural') {
-            selectedModel = AgriculturalProperty
-        } else if (propertyType === 'commercial') {
-            selectedModel = CommercialProperty
-        } else {
-            throw new CustomAPIError('Model name not provided', StatusCodes.BAD_REQUEST)
-        }
-
         let updatedData
         if (sendBackToFieldAgent) {
             updatedData = {
@@ -50,8 +36,8 @@ const approveProperty = async (req, res, next) => {
                 sentBackTofieldAgentForReevaluation: {
                     isSent: true,
                     date: new Date(),
-                    details:incompleteDetailsArray,
-                    by:'city-manager'
+                    details: incompleteDetailsArray,
+                    by: 'city-manager'
                 }
             }
         } else if (sendBackToPropertyEvaluator) {
@@ -77,11 +63,15 @@ const approveProperty = async (req, res, next) => {
                     isApproved: true,
                     date: new Date()
                 },
-                isLive: true
+                isLive: true,
+                sentToCityManagerForApproval: {
+                    isSent: false,
+                    date: null
+                }
             }
         }
 
-        await selectedModel.findOneAndUpdate({ _id: propertyId },
+        await Property.findOneAndUpdate({ _id: propertyId },
             updatedData,
             { new: true, runValidators: true })
 

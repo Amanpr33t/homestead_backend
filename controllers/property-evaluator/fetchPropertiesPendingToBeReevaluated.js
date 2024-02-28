@@ -1,8 +1,6 @@
 require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
-const CommercialProperty = require('../../models/commercialProperty')
-const AgriculturalProperty = require('../../models/agriculturalProperty')
-const ResidentialProperty = require('../../models/residentialProperty')
+const Property = require('../../models/property')
 const CustomAPIError = require('../../errors/custom-error')
 
 //The function fetches some data regarding properties pending to be evaluated by the evaluator
@@ -16,28 +14,23 @@ const propertiesPendingToBeReevaluated = async (req, res, next) => {
         let pendingPropertyReevaluations = []
         let numberOfProperties
 
-        let selectedModel
-        if (type === 'residential') {
-            selectedModel = ResidentialProperty
-        } else if (type === 'agricultural') {
-            selectedModel = AgriculturalProperty
-        } else if (type === 'commercial') {
-            selectedModel = CommercialProperty
-        } else {
-            throw new CustomAPIError('Model name not provided', StatusCodes.BAD_REQUEST)
+        if (type !== 'residential' && type !== 'agricultural' && type !== 'commercial') {
+            throw new CustomAPIError('Property type not provided', StatusCodes.BAD_REQUEST)
         }
 
-        pendingPropertyReevaluations = await selectedModel.find({
+        pendingPropertyReevaluations = await Property.find({
             propertyEvaluator: req.propertyEvaluator._id,
-            'sentToEvaluatorByCityManagerForReevaluation.isSent': true
+            'sentToEvaluatorByCityManagerForReevaluation.isSent': true,
+            propertyType: type
         }).select('_id propertyType location sentToEvaluatorByCityManagerForReevaluation.date')
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(pageSize)
 
-        numberOfProperties = await selectedModel.countDocuments({
+        numberOfProperties = await Property.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            'sentToEvaluatorByCityManagerForReevaluation.isSent': true
+            'sentToEvaluatorByCityManagerForReevaluation.isSent': true,
+            propertyType: type
         })
 
         const totalPages = Math.ceil(numberOfProperties / pageSize)
@@ -51,19 +44,22 @@ const propertiesPendingToBeReevaluated = async (req, res, next) => {
 //The function is used to tell the number of properties pending for evaluation
 const numberOfPropertiesPendingToBeReevaluated = async (req, res, next) => {
     try {
-        const numberOfAgriculturalProperties = await AgriculturalProperty.countDocuments({
+        const numberOfAgriculturalProperties = await Property.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            'sentToEvaluatorByCityManagerForReevaluation.isSent': true
+            'sentToEvaluatorByCityManagerForReevaluation.isSent': true,
+            propertyType: 'agricultural'
         })
 
-        const numberOfCommercialProperties = await CommercialProperty.countDocuments({
+        const numberOfCommercialProperties = await Property.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            'sentToEvaluatorByCityManagerForReevaluation.isSent': true
+            'sentToEvaluatorByCityManagerForReevaluation.isSent': true,
+            propertyType: 'commercial'
         })
 
-        const numberOfResidentialProperties = await ResidentialProperty.countDocuments({
+        const numberOfResidentialProperties = await Property.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            'sentToEvaluatorByCityManagerForReevaluation.isSent': true
+            'sentToEvaluatorByCityManagerForReevaluation.isSent': true,
+            propertyType: 'residential'
         })
 
         return res.status(StatusCodes.OK).json({

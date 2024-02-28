@@ -1,8 +1,6 @@
 require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
-const AgriculturalProperty = require('../../models/agriculturalProperty')
-const CommercialProperty = require('../../models/commercialProperty')
-const ResidentialProperty = require('../../models/residentialProperty')
+const Property = require('../../models/property')
 const CustomAPIError = require('../../errors/custom-error')
 
 //To update property data after reevaluation
@@ -13,17 +11,6 @@ const updateReevaluatedPropertyData = async (req, res, next) => {
             throw new CustomAPIError('property id not provided', StatusCodes.BAD_REQUEST)
         }
 
-        let selectedModel
-        if (type === 'residential') {
-            selectedModel = ResidentialProperty
-        } else if (type === 'agricultural') {
-            selectedModel = AgriculturalProperty
-        } else if (type === 'commercial') {
-            selectedModel = CommercialProperty
-        } else {
-            throw new CustomAPIError('property type not provided', StatusCodes.BAD_REQUEST)
-        }
-
         let updatedData = {
             ...req.body,
             sentBackTofieldAgentForReevaluation: {
@@ -32,7 +19,7 @@ const updateReevaluatedPropertyData = async (req, res, next) => {
             }
         }
 
-        const reevaluationRequestedBy = await selectedModel.findOne({ _id: id }).select('sentBackTofieldAgentForReevaluation.by')
+        const reevaluationRequestedBy = await Property.findOne({ _id: id }).select('sentBackTofieldAgentForReevaluation.by')
 
         if (reevaluationRequestedBy && reevaluationRequestedBy.sentBackTofieldAgentForReevaluation.by) {
             if (reevaluationRequestedBy.sentBackTofieldAgentForReevaluation.by === 'evaluator') {
@@ -56,7 +43,7 @@ const updateReevaluatedPropertyData = async (req, res, next) => {
 
         if (reevaluationRequestedBy) {
             if (reevaluationRequestedBy.sentBackTofieldAgentForReevaluation.by) {
-                await selectedModel.findOneAndUpdate({ _id: id },
+                await Property.findOneAndUpdate({ _id: id },
                     updatedData,
                     { new: true, runValidators: true })
 

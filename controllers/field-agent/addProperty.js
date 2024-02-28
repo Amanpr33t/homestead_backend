@@ -1,9 +1,7 @@
 require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
 const PropertyDealer = require('../../models/propertyDealer')
-const CommercialProperty = require('../../models/commercialProperty')
-const AgriculturalProperty = require('../../models/agriculturalProperty')
-const ResidentialProperty = require('../../models/residentialProperty')
+const Property = require('../../models/property')
 const PropertyEvaluator = require('../../models/propertyEvaluator')
 const FieldAgent = require('../../models/fieldAgent')
 const { uniqueIdGeneratorForProperty } = require('../../utils/uniqueIdGenerator')
@@ -239,10 +237,6 @@ const addAgriculturalProperty = async (req, res, next) => {
             location
         } = req.body
 
-        if (landSize && landSize.details && landSize.details.length > 500) {
-            throw new CustomAPIError('Land size details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
-        }
-
         if (propertyImagesUrl && propertyImagesUrl.length >= 20) {
             throw new CustomAPIError('Number of property images should be less than 20', StatusCodes.BAD_REQUEST)
         }
@@ -273,8 +267,6 @@ const addAgriculturalProperty = async (req, res, next) => {
         if (legalRestrictions && legalRestrictions.isLegalRestrictions) {
             if (!legalRestrictions.details) {
                 throw new CustomAPIError('legal restictions details not provided', StatusCodes.BAD_REQUEST)
-            } else if (legalRestrictions.details && legalRestrictions.details.length > 500) {
-                throw new CustomAPIError('legal restictions details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
             }
         }
 
@@ -291,14 +283,16 @@ const addAgriculturalProperty = async (req, res, next) => {
             }
             const uniqueId = await uniqueIdGeneratorForProperty('agricultural', req.body.location.name.state) //The code is used to generate a unique Id for the agricultural property
 
-            await AgriculturalProperty.create({
+            const property = await Property.create({
                 ...req.body,
                 uniqueId,
                 'sentToEvaluatorByFieldAgentForEvaluation.date': new Date(),
-                propertyEvaluator: evaluatorId
+                propertyEvaluator: evaluatorId,
+                propertyType: 'agricultural'
             }) //A new agricultural proeprty is created
-
-            if (req.query.requestId) {
+            console.log(property)
+            if (req.query.requestId && property) {
+                console.log('herer')
                 await FieldAgent.updateOne(
                     { _id: req.fieldAgent._id },
                     { $pull: { requestsToAddProperty: { _id: req.query.requestId } } }
@@ -312,6 +306,7 @@ const addAgriculturalProperty = async (req, res, next) => {
             return
         }
     } catch (error) {
+        console.log(error)
         next(error)
     }
 }
@@ -330,7 +325,6 @@ const addCommercialProperty = async (req, res, next) => {
             contractImagesUrl,
             shopPropertyType,
             landSize,
-            remarks,
             location
         } = req.body
 
@@ -340,14 +334,6 @@ const addCommercialProperty = async (req, res, next) => {
 
         if (contractImagesUrl && contractImagesUrl.length >= 20) {
             throw new CustomAPIError('Number of contract images should be less than 20', StatusCodes.BAD_REQUEST)
-        }
-
-        if (landSize && landSize.details && landSize.details.length > 500) {
-            throw new CustomAPIError('land size details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
-        }
-
-        if (remarks && remarks.length > 500) {
-            throw new CustomAPIError('remarks cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
         }
 
         //The if statements below are used to verify the data received in request body
@@ -371,8 +357,6 @@ const addCommercialProperty = async (req, res, next) => {
         if (legalRestrictions && legalRestrictions.isLegalRestrictions) {
             if (!legalRestrictions.details) {
                 throw new CustomAPIError('legal restictions details not provided', StatusCodes.BAD_REQUEST)
-            } else if (legalRestrictions.details && legalRestrictions.details.length > 500) {
-                throw new CustomAPIError('legal restictions details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
             }
         }
 
@@ -389,14 +373,18 @@ const addCommercialProperty = async (req, res, next) => {
             }
 
             const uniqueId = await uniqueIdGeneratorForProperty('commercial', req.body.location.name.state) //The code is used to generate a unique Id for the commercial property
-            await CommercialProperty.create({
+
+            const property = await Property.create({
                 ...req.body,
                 uniqueId,
                 'sentToEvaluatorByFieldAgentForEvaluation.date': new Date(),
-                propertyEvaluator: evaluatorId
+                propertyEvaluator: evaluatorId,
+                propertyType: 'commercial'
             }) //A new commercial proeprty is added to the database
-
-            if (req.query.requestId) {
+            console.log(req.query)
+            if (req.query.requestId !== null && property) {
+                console.log(req.query.requestId, 'hello')
+                console.log(req.fieldAgent._id)
                 await FieldAgent.updateOne(
                     { _id: req.fieldAgent._id },
                     { $pull: { requestsToAddProperty: { _id: req.query.requestId } } }
@@ -407,6 +395,7 @@ const addCommercialProperty = async (req, res, next) => {
             return
         }
     } catch (error) {
+        console.log(error)
         next(error)
     }
 }
@@ -418,7 +407,7 @@ const addResidentialProperty = async (req, res, next) => {
         const {
             propertyImagesUrl,
             contractImagesUrl,
-            price,
+            priceData,
             legalRestrictions,
             title,
             details,
@@ -442,38 +431,20 @@ const addResidentialProperty = async (req, res, next) => {
             throw new CustomAPIError('data regarding 24 hours water supply not provided', StatusCodes.BAD_REQUEST)
         }
 
-        if ((title && title.length > 500) || (details && details.length > 500)) {
-            throw new CustomAPIError('Title and details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
-        }
-        if (furnishing && furnishing.details && furnishing.details.length > 500) {
-            throw new CustomAPIError('furnishing details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
-        }
-        if (kitchenFurnishing && kitchenFurnishing.details && kitchenFurnishing.details.length > 500) {
-            throw new CustomAPIError('kitchen furnishing details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
-        }
-        if (kitchenAppliances && kitchenAppliances.details && kitchenAppliances.details.length > 500) {
-            throw new CustomAPIError('kitchen appliances details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
-        }
-        if (garden && garden.details && garden.details.length > 500) {
-            throw new CustomAPIError('garden details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
-        }
-
         //The if statements below are used to verify the data received in request body
-        if (!price || (price && !price.range)) {
+        if (!priceData) {
             throw new CustomAPIError('Price not provided', StatusCodes.BAD_REQUEST)
-        } else if (!price.fixed && (!price.range.from || !price.range.to)) {
+        } else if (!priceData.fixed && (!priceData.range || (priceData.range && (!priceData.range.from || !priceData.range.to)))) {
             throw new CustomAPIError('Price not provided', StatusCodes.BAD_REQUEST)
-        } else if (price.fixed && (price.range.from || price.range.to)) {
+        } else if (priceData.fixed && (priceData.range.from || priceData.range.to)) {
             throw new CustomAPIError('Invalide data', StatusCodes.BAD_REQUEST)
-        } else if (price.range.from && price.range.to && +price.range.from >= +price.range.to) {
+        } else if (priceData.range.from && priceData.range.to && +priceData.range.from >= +priceData.range.to) {
             throw new CustomAPIError('From should be smaller value than to', StatusCodes.BAD_REQUEST)
         }
 
         if (legalRestrictions && legalRestrictions.isLegalRestrictions) {
             if (!legalRestrictions.details) {
                 throw new CustomAPIError('legal restictions details not provided', StatusCodes.BAD_REQUEST)
-            } else if (legalRestrictions.details && legalRestrictions.details.length > 500) {
-                throw new CustomAPIError('legal restictions details cannot be more than 500 alphabets', StatusCodes.BAD_REQUEST)
             }
         }
 
@@ -490,11 +461,12 @@ const addResidentialProperty = async (req, res, next) => {
             }
 
             const uniqueId = await uniqueIdGeneratorForProperty('residential', req.body.location.name.state) //The code is used to generate a unique Id for the residential property
-            await ResidentialProperty.create({
+            await Property.create({
                 ...req.body,
                 uniqueId,
                 'sentToEvaluatorByFieldAgentForEvaluation.date': new Date(),
-                propertyEvaluator: evaluatorId
+                propertyEvaluator: evaluatorId,
+                propertyType: 'residential'
             }) //A new residential proeprty is added to the database
 
             if (req.query.requestId) {
@@ -508,6 +480,7 @@ const addResidentialProperty = async (req, res, next) => {
             return
         }
     } catch (error) {
+        console.log(error)
         next(error)
     }
 }

@@ -1,8 +1,6 @@
 require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
-const CommercialProperty = require('../../models/commercialProperty')
-const AgriculturalProperty = require('../../models/agriculturalProperty')
-const ResidentialProperty = require('../../models/residentialProperty')
+const Property = require('../../models/property')
 
 /*The function is used to send to the user the following data:
 1) Number of properties successfully evaluated by the evaluator
@@ -11,60 +9,72 @@ const ResidentialProperty = require('../../models/residentialProperty')
 */
 const propertyEvaluationData = async (req, res, next) => {
     try {
-        const agriculturalPropertiesApprovedByCityManager = await AgriculturalProperty.countDocuments({
+        const agriculturalPropertiesApprovedByCityManager = await Property.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
             'isApprovedByCityManager.isApproved': true,
+            propertyType: 'agricultural'
         })
-        const commercialPropertiesApprovedByCityManager = await CommercialProperty.countDocuments({
+        const commercialPropertiesApprovedByCityManager = await Property.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
             'isApprovedByCityManager.isApproved': true,
+            propertyType: 'commercial'
         })
-        const residentialPropertiesApprovedByCityManager = await ResidentialProperty.countDocuments({
+        const residentialPropertiesApprovedByCityManager = await Property.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
             'isApprovedByCityManager.isApproved': true,
+            propertyType: 'residential'
         })
         const propertiesApprovedByCityManager = agriculturalPropertiesApprovedByCityManager + residentialPropertiesApprovedByCityManager + commercialPropertiesApprovedByCityManager
 
-        const agriculturalPropertiesSentToCityManagerForApproval = await AgriculturalProperty.countDocuments({
+        const agriculturalPropertiesSentToCityManagerForApproval = await Property.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            'sentToCityManagerForApproval.isSent': true
+            'sentToCityManagerForApproval.isSent': true,
+            propertyType: 'agricultural'
         })
-        const commercialPropertiesSentToCityManagerForApproval = await CommercialProperty.countDocuments({
+        const commercialPropertiesSentToCityManagerForApproval = await Property.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            'sentToCityManagerForApproval.isSent': true
+            'sentToCityManagerForApproval.isSent': true,
+            propertyType: 'commercial'
         })
-        const residentialPropertiesSentToCityManagerForApproval = await ResidentialProperty.countDocuments({
+        const residentialPropertiesSentToCityManagerForApproval = await Property.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            'sentToCityManagerForApproval.isSent': true
+            'sentToCityManagerForApproval.isSent': true,
+            propertyType: 'residential'
         })
         const propertiesSentToCityManagerForApproval = residentialPropertiesSentToCityManagerForApproval + agriculturalPropertiesSentToCityManagerForApproval + commercialPropertiesSentToCityManagerForApproval
 
 
-        const agriculturalPropertiesPendingForEvaluation = await AgriculturalProperty.countDocuments({
+        const agriculturalPropertiesPendingForEvaluation = await Property.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            'sentToEvaluatorByFieldAgentForEvaluation.isSent': true
+            'sentToEvaluatorByFieldAgentForEvaluation.isSent': true,
+            propertyType: 'agricultural'
         })
-        const commercialPropertiesPendingForEvaluation = await CommercialProperty.countDocuments({
+        const commercialPropertiesPendingForEvaluation = await Property.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            'sentToEvaluatorByFieldAgentForEvaluation.isSent': true
+            'sentToEvaluatorByFieldAgentForEvaluation.isSent': true,
+            propertyType: 'commercial'
         })
-        const residentialPropertiesPendingForEvaluation = await ResidentialProperty.countDocuments({
+        const residentialPropertiesPendingForEvaluation = await Property.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            'sentToEvaluatorByFieldAgentForEvaluation.isSent': true
+            'sentToEvaluatorByFieldAgentForEvaluation.isSent': true,
+            propertyType: 'residential'
         })
         const pendingPropertyEvaluations = residentialPropertiesPendingForEvaluation + agriculturalPropertiesPendingForEvaluation + commercialPropertiesPendingForEvaluation
 
-        const agriculturalPropertiesReceivedForReevaluation = await AgriculturalProperty.countDocuments({
+        const agriculturalPropertiesReceivedForReevaluation = await Property.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            'sentToEvaluatorByCityManagerForReevaluation.isSent': true
+            'sentToEvaluatorByCityManagerForReevaluation.isSent': true,
+            propertyType: 'agricultural'
         })
-        const commercialPropertiesReceivedForReevaluation = await CommercialProperty.countDocuments({
+        const commercialPropertiesReceivedForReevaluation = await Property.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            'sentToEvaluatorByCityManagerForReevaluation.isSent': true
+            'sentToEvaluatorByCityManagerForReevaluation.isSent': true,
+            propertyType: 'commercial'
         })
-        const residentialPropertiesReceivedForReevaluation = await ResidentialProperty.countDocuments({
+        const residentialPropertiesReceivedForReevaluation = await Property.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
-            'sentToEvaluatorByCityManagerForReevaluation.isSent': true
+            'sentToEvaluatorByCityManagerForReevaluation.isSent': true,
+            propertyType: 'residential'
         })
         const pendingPropertiesReceivedForReevaluation = residentialPropertiesReceivedForReevaluation + agriculturalPropertiesReceivedForReevaluation + commercialPropertiesReceivedForReevaluation
 

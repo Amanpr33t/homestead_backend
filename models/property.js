@@ -2,132 +2,6 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
-/*const LandSizeSchema = new Schema({
-    //agricultural property fieds
-    size: Number,
-    unit: {
-        type: String,
-        enum: ['metre-square', 'acre'],
-        trim: true,
-    },
-
-    //commercial property fields
-    totalArea: {
-        metreSquare: Number,
-        squareFeet: Number
-    },
-    coveredArea: {
-        metreSquare: Number,
-        squareFeet: Number
-    },
-
-    //fields common to agricultural, commercial property
-    details: {
-        type: String,
-        trim: true
-    },
-    _id: {
-        type: Schema.Types.ObjectId,
-        default: undefined,
-    },
-});
-
-const RoadSchema = new Schema({
-    type: {
-        type: String,
-        enum: ['unpaved road', 'village road', 'district road', 'state highway', 'national highway'],
-        trim: true,
-    },
-    details: {
-        type: String,
-        trim: true
-    },
-    _id: {
-        type: Schema.Types.ObjectId,
-        default: undefined,
-    },
-});
-
-const LegalRestrictionsSchema = new Schema({
-    isLegalRestrictions: Boolean,
-    details: {
-        type: String,
-        trim: true,
-    },
-    _id: {
-        type: Schema.Types.ObjectId,
-        default: undefined,
-    },
-});
-
-const PropertyLocationSchema = new Schema({
-    name: {
-        plotNumber: {
-            type: Number,
-            default: null
-        },
-        village: {
-            type: String,
-            trim: true,
-            default: null
-        },
-        city: {
-            type: String,
-            trim: true,
-            default: null
-        },
-        tehsil: {
-            type: String,
-            trim: true,
-            default: null
-        },
-        district: {
-            type: String,
-            trim: true,
-            required: true,
-        },
-        state: {
-            type: String,
-            trim: true,
-            required: true,
-        },
-    },
-    _id: {
-        type: Schema.Types.ObjectId,
-        default: undefined,
-    },
-});
-
-const WaterSourceSchema = new Schema({
-    canal: [String],
-    river: [String],
-    tubewells: {
-        numberOfTubewells: Number,
-        depth: [Number],
-    },
-    _id: {
-        type: Schema.Types.ObjectId,
-        default: undefined,
-    },
-});
-
-const ReservoirSchema = new Schema({
-    isReservoir: Boolean,
-    type: {
-        type: [String],
-        enum: ['public', 'private']
-    },
-    capacityOfPrivateReservoir: Number,
-    unitOfCapacityForPrivateReservoir: {
-        type: String,
-        enum: ['cusec', 'litre', null]
-    },
-    _id: {
-        type: Schema.Types.ObjectId,
-        default: undefined,
-    },
-});*/
-
 const PropertySchema = new Schema({
     //fields common to all property types
     title: {
@@ -319,13 +193,8 @@ const PropertySchema = new Schema({
         type: Boolean,
         default: false
     },
-
-    //fields common to commercial and agricultural property
-    price: Number,
-
-    //agricultural property fields
-    landSize: {
-        //agricultural property fieds
+    area: {
+        //agricultural property fields
         size: Number,
         unit: {
             type: String,
@@ -333,14 +202,16 @@ const PropertySchema = new Schema({
             trim: true,
         },
 
-        //commercial property fields
+        //fields common to commercial and residential property
         totalArea: {
             metreSquare: Number,
-            squareFeet: Number
+            squareFeet: Number,//commercial
+            gajj: Number//residential
         },
         coveredArea: {
             metreSquare: Number,
-            squareFeet: Number
+            squareFeet: Number,//commercial
+            gajj: Number//residential
         },
 
         //fields common to agricultural, commercial property
@@ -349,6 +220,11 @@ const PropertySchema = new Schema({
             trim: true
         }
     },
+
+    //fields common to commercial and agricultural property
+    price: Number,
+
+    //agricultural property fields
     road: {
         type: {
             type: String,
@@ -465,16 +341,6 @@ const PropertySchema = new Schema({
         type: String,
         enum: ['rural', 'urban', 'sub-urban'],
         trim: true
-    },
-    area: {
-        totalArea: {
-            metreSquare: Number,
-            gajj: Number
-        },
-        coveredArea: {
-            metreSquare: Number,
-            gajj: Number
-        }
     },
     propertyTaxes: Number,
     homeOwnersAssociationFees: Number,

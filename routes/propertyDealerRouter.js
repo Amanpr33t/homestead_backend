@@ -5,14 +5,6 @@ require('express-async-errors')
 const authenticatePropertyDealer = require('../middleware/authenticatePropertyDealer')
 
 const {
-    addPropertyDealer,
-    propertyDealerEmailExists,
-    propertyDealerContactNumberExists,
-    propertyDealerGstNumberExists,
-    propertyDealerReraNumberExists
-} = require('../controllers/property-dealer/addPropertyDealer')
-
-const {
     signIn,
     logout
 } = require('../controllers/property-dealer/signIn')
@@ -26,27 +18,16 @@ const {
 
 const { getDealerDetails } = require('../controllers/property-dealer/getPropertyDealerDetails')
 
-const { updatePropertyDealerDetails } = require('../controllers/property-dealer/updatePropertyDealerDetails')
-
-const { fetchPropertiesAdded } = require('../controllers/property-dealer/fetchPropertiesAdded')
-
-const { getPropertyDetails } = require('../controllers/property-dealer/fetchPropertyDetails')
+const {reviewProperty}=require('../controllers/property-dealer/reviewProperty')
 
 const {
     homePageData,
-    fetchAllProperties,
     fetchProperties
 } = require('../controllers/property-dealer/homePageData')
 
 const { assignFieldAgentForPropertyAddition } = require('../controllers/property-dealer/assignFieldAgentForProperty')
 
 const { updateSeenStatusOfCustomerRequest } = require('../controllers/property-dealer/updateSeenStatusOfCustomerRequest')
-
-router.post('/addPropertyDealer', addPropertyDealer) //to add a property dealer
-router.get('/propertyDealerEmailExists', propertyDealerEmailExists) //to check if a property dealer with similar email exists
-router.get('/propertyDealerContactNumberExists', propertyDealerContactNumberExists) //to check if a property dealer with similar contact number exists
-router.get('/propertyDealerGstNumberExists', propertyDealerGstNumberExists) //to check if a property dealer with similar GST number exists
-router.get('/propertyDealerReraNumberExists', propertyDealerReraNumberExists) //to check if a property dealer with similar email exists
 
 router.post('/signIn', signIn) //to sign in a property dealer
 router.patch('/logout', authenticatePropertyDealer, logout) //to logout a property dealer
@@ -57,20 +38,14 @@ router.patch('/resetPasswordVerificationToken', resetPasswordVerificationToken) 
 
 router.get('/getDealerDetails', authenticatePropertyDealer, getDealerDetails) //to get dealer details
 
-router.patch('/updatePropertyDealerDetails', authenticatePropertyDealer, updatePropertyDealerDetails) //to update dealer details
-
-router.get('/fetchPropertiesAdded', authenticatePropertyDealer, fetchPropertiesAdded) //fetch all properties added by a property dealer
-
-router.get('/getPropertyDetails', authenticatePropertyDealer, getPropertyDetails) //fetch details of a property added by a property dealer
-
 router.get('/homePageData', authenticatePropertyDealer, homePageData) //fetch date for home page
 
 router.get('/fetchProperties', authenticatePropertyDealer, fetchProperties) //fetch date for home page
 
 router.patch('/updateSeenStatusOfCustomerRequest', authenticatePropertyDealer, updateSeenStatusOfCustomerRequest)//used to update 'unseen' status of a customer request to 'seen'
 
-router.get('/fetchAllProperties', authenticatePropertyDealer, fetchAllProperties) //fetch date for home page
-
 router.post('/assignFieldAgentForPropertyAddition', authenticatePropertyDealer, assignFieldAgentForPropertyAddition)
+
+router.get('/reviewProperty', authenticatePropertyDealer, reviewProperty)
 
 module.exports = router

@@ -7,13 +7,13 @@ const CustomAPIError = require('../../errors/custom-error');
 //The function is used to fetch all requests by customers
 const homePageData = async (req, res, next) => {
     try {
-        /*const thirtyDaysAgo = new Date();
+        const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
         await PropertyDealer.updateOne(
             { _id: req.propertyDealer._id, 'requestsFromCustomer.requestDate': { $lt: thirtyDaysAgo } }, // Condition to match document by _id and requestDate older than 30 days
             { $pull: { 'requestsFromCustomer': { requestDate: { $lt: thirtyDaysAgo } } } } // Pull elements matching the condition from requestsFromCustomer array
-        );*/
+        )
 
         let averageCustomerRatings = 0
         if (req.propertyDealer.reviewsFromCustomer.length > 0) {
@@ -109,12 +109,12 @@ const fetchProperties = async (req, res, next) => {
             isSold: liveOrSold !== 'live' ? true : false
         }
 
-        if (propertyType) {
+        /*if (propertyType) {
             queryBodyToFetchNumberOfProperties = {
                 ...queryBodyToFetchNumberOfProperties,
                 propertyType
             }
-        }
+        }*/
 
         const numberOfProperties = await Property.countDocuments(queryBodyToFetchNumberOfProperties)
 
@@ -129,48 +129,7 @@ const fetchProperties = async (req, res, next) => {
     }
 }
 
-
-
-////The function is used to fetch number of customer requests
-const fetchAllProperties = async (req, res, next) => {
-    try {
-        const { type } = req.query
-        const page = req.query.page ? parseInt(req.query.page) : 1;  // Current page, default is 1
-        const pageSize = 5 // Number of items per page, default is 10
-        const skip = (page - 1) * pageSize;
-
-        if (type !== 'agricultural' && type !== 'residential' && type !== 'commercial') {
-            throw new CustomAPIError('No property type provided', StatusCodes.BAD_REQUEST)
-        }
-
-        const properties = await Property.find({
-            addedByPropertyDealer: req.propertyDealer._id,
-            propertyType: type
-        })
-            .select('location.name isLive isApprovedByCityManager.isApproved createdAt')
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(pageSize)
-
-        numberOfProperties = await Property.countDocuments({
-            addedByPropertyDealer: req.propertyDealer._id,
-            propertyType: type
-        })
-        const totalPages = Math.ceil(numberOfProperties / pageSize)
-
-        return res.status(StatusCodes.OK).json({
-            status: 'ok',
-            properties,
-            totalPages
-        })
-    } catch (error) {
-        console.log(error)
-        next(error)
-    }
-}
-
 module.exports = {
     homePageData,
-    fetchAllProperties,
     fetchProperties
 }

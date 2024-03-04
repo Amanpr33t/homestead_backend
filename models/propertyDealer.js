@@ -6,9 +6,6 @@ const Schema = mongoose.Schema
 require('express-async-errors')
 
 const AddressSchema = new mongoose.Schema({
-    addressId: {
-        type: Number
-    },
     flatPlotHouseNumber: {
         type: String,
         trim: true,
@@ -94,14 +91,13 @@ const PropertyDealerSchema = new mongoose.Schema({
     },
     about: {
         type: String,
-        trim: true,
-        default: null
+        trim: true
     },
     experience: {
         type: Number,
         required: [true, 'Please add experience']
     },
-    addressArray: [AddressSchema],
+    address: AddressSchema,
     gstNumber: {
         type: String,
         required: [true, 'Please add gst number'],

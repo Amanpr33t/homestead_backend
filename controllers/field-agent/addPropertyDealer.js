@@ -10,27 +10,13 @@ const addPropertyDealer = async (req, res, next) => {
     try {
         req.body.addedByFieldAgent = req.fieldAgent._id //field agent ID is added to the request body
         const {
-            addressArray,
-            about,
-            email,
+            email
         } = req.body
 
         //The if statements below are used to verify the request body data
-        if (!addressArray || (addressArray && !addressArray.length) || addressArray.length > 10) {
-            throw new CustomAPIError('No address provided', 204)
-        }
         if (!emailValidator.validate(email)) {
             throw new CustomAPIError('Email not valid', 204)
         }
-        if (about && about.trim().length > 500) {
-            throw new CustomAPIError('About cannot be greater than 500 characters', 204)
-        }
-        addressArray && addressArray.forEach(address => {
-            const { postalCode } = address
-            if (postalCode && postalCode.toString().length !== 6) {
-                throw new CustomAPIError('Postal code should be a 6 digit number', 204)
-            }
-        })
 
         const propertyDealerGstNumberExists = await PropertyDealer.findOne({ gstNumber: req.body.gstNumber }) //Checks whether another property dealer with same gst number exists
         const propertyDealerReraNumberExists = await PropertyDealer.findOne({ reraNumber: req.body.reraNumber }) //Checks whether another property dealer with same RERA number exists

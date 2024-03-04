@@ -35,6 +35,7 @@ const assignFieldAgentForPropertyAddition = async (req, res, next) => {
         }
 
         const fieldAgent = await findFieldAgent(district)
+        console.log(fieldAgent)
         if (fieldAgent && fieldAgent === 'not-found') {
             res.status(StatusCodes.OK).json({
                 status: 'not_found'
@@ -42,9 +43,11 @@ const assignFieldAgentForPropertyAddition = async (req, res, next) => {
         } else if (fieldAgent) {
             await FieldAgent.findOneAndUpdate({ _id: fieldAgent },
                 {
-                    requestsToAddProperty: {
-                        ...req.body,
-                        requestDate: new Date()
+                    $push: {
+                        requestsToAddProperty: {
+                            ...req.body,
+                            requestDate: new Date()
+                        }
                     }
                 },
                 { new: true, runValidators: true })

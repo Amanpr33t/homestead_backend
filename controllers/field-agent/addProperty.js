@@ -233,7 +233,6 @@ const addAgriculturalProperty = async (req, res, next) => {
             legalRestrictions,
             propertyImagesUrl,
             contractImagesUrl,
-            landSize,
             location
         } = req.body
 
@@ -324,7 +323,6 @@ const addCommercialProperty = async (req, res, next) => {
             propertyImagesUrl,
             contractImagesUrl,
             shopPropertyType,
-            landSize,
             location
         } = req.body
 

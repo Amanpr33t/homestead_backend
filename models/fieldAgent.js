@@ -17,23 +17,19 @@ const RequestToAddPropertySchema = new mongoose.Schema({
     location: {
         plotNumber: {
             type: String,
-            trim: true,
-            default: null
+            trim: true
         },
         village: {
             type: String,
-            trim: true,
-            default: null
+            trim: true
         },
         city: {
             type: String,
-            trim: true,
-            default: null
+            trim: true
         },
         tehsil: {
             type: String,
-            trim: true,
-            default: null
+            trim: true
         },
         district: {
             type: String,

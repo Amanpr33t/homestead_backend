@@ -1,33 +1,12 @@
 require('express-async-errors')
-const CommercialProperty = require('../models/commercialProperty')
-const AgriculturalProperty = require('../models/agriculturalProperty')
-const ResidentialProperty = require('../models/residentialProperty')
+const Property = require('../models/property')
 const PropertyDealer = require('../models/propertyDealer')
-const FieldAgent = require('../models/fieldAgent')
 
 //The function is used to generate a unique ID for a property
 const uniqueIdGeneratorForProperty = async (propertyType, state) => {
 
-    let serialNumber
-    if (propertyType === 'commercial') {
-        const properties = await CommercialProperty.find()
-        serialNumber = properties.length + 1
-    } else if (propertyType === 'agricultural') {
-        const properties = await AgriculturalProperty.find()
-        serialNumber = properties.length + 1
-    } else if (propertyType === 'residential') {
-        const properties = await ResidentialProperty.find()
-        serialNumber = properties.length + 1
-    }
-
-    let type
-    if (propertyType === 'agricultural') {
-        type = 'A'
-    } else if (propertyType === 'commercial') {
-        type = 'C'
-    } else if (propertyType === 'residential') {
-        type = 'R'
-    }
+    const properties = await Property.countDocuments({propertyType})
+    const serialNumber = properties.length + 1
 
     const year = new Date().getFullYear()
 
@@ -38,7 +17,7 @@ const uniqueIdGeneratorForProperty = async (propertyType, state) => {
         stateCode = 'CH'
     }
 
-    return `P${type}${year.toString().slice(-2)}${stateCode}${serialNumber}`
+    return `P${propertyType.charAt(0).toUpperCase()}${year.toString().slice(-2)}${stateCode}${serialNumber}`
 }
 
 //The function is used to generate a unique ID for a property daler

@@ -20,8 +20,6 @@ const { numberOfPropertiesPendingForApproval } = require('../controllers/city-ma
 
 const { propertiesPendingForApproval } = require('../controllers/city-manager/propertiesPendingForApproval')
 
-const { fetchSelectedProperty } = require('../controllers/city-manager/fetchSelectedProperty')
-
 const { approveProperty } = require('../controllers/city-manager/approveProperty')
 
 router.post('/signIn', signIn) //to sign in an city manager
@@ -34,8 +32,6 @@ router.patch('/resetPasswordVerificationToken', resetPasswordVerificationToken) 
 
 router.get('/numberOfPropertiesPendingForApproval', authenticateCityManager, numberOfPropertiesPendingForApproval)
 router.get('/propertiesPendingForApproval', authenticateCityManager, propertiesPendingForApproval)
-
-router.get('/fetch-selected-property', authenticateCityManager, fetchSelectedProperty)
 
 router.patch('/approveProperty', authenticateCityManager, approveProperty)
 

@@ -189,9 +189,15 @@ const PropertySchema = new Schema({
         type: Boolean,
         default: false
     },
-    isSold: {
+    isClosed: {
         type: Boolean,
         default: false
+    },
+    reasonToCloseProperty: {
+        propertySoldByDealer: Boolean,
+        customerRemovesProperty: Boolean,
+        dealerNotInterestedInSelling: Boolean,
+        other: Boolean
     },
     area: {
         //agricultural property fields
@@ -220,9 +226,8 @@ const PropertySchema = new Schema({
             trim: true
         }
     },
-
-    //fields common to commercial and agricultural property
     price: Number,
+    
 
     //agricultural property fields
     road: {
@@ -313,13 +318,6 @@ const PropertySchema = new Schema({
         type: String,
         enum: ['plot', 'flat', 'house'],
         trim: true
-    },
-    priceData: {
-        fixed: Number,
-        range: {
-            from: Number,
-            to: Number
-        }
     },
     waterSupply: {
         available: Boolean,

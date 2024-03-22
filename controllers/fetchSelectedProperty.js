@@ -6,7 +6,7 @@ const CustomAPIError = require('../errors/custom-error')
 //fetch details of a selected property
 const fetchSelectedProperty = async (req, res, next) => {
     try {
-        const { propertyType, propertyId } = req.query
+        const {  propertyId } = req.query
         if (!propertyId) {
             throw new CustomAPIError('property id not provided', 204)
         }

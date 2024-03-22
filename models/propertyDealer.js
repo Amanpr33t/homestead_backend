@@ -204,3 +204,4 @@ PropertyDealerSchema.methods.comparePassword = async function (candidatePassword
 
 
 module.exports = mongoose.model('PropertyDealer', PropertyDealerSchema)
+

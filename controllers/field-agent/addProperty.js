@@ -405,15 +405,8 @@ const addResidentialProperty = async (req, res, next) => {
         const {
             propertyImagesUrl,
             contractImagesUrl,
-            priceData,
             legalRestrictions,
-            title,
-            details,
             waterSupply,
-            furnishing,
-            kitchenFurnishing,
-            kitchenAppliances,
-            garden,
             location
         } = req.body
 
@@ -427,17 +420,6 @@ const addResidentialProperty = async (req, res, next) => {
 
         if (waterSupply && waterSupply.available && waterSupply.twentyFourHours === null) {
             throw new CustomAPIError('data regarding 24 hours water supply not provided', StatusCodes.BAD_REQUEST)
-        }
-
-        //The if statements below are used to verify the data received in request body
-        if (!priceData) {
-            throw new CustomAPIError('Price not provided', StatusCodes.BAD_REQUEST)
-        } else if (!priceData.fixed && (!priceData.range || (priceData.range && (!priceData.range.from || !priceData.range.to)))) {
-            throw new CustomAPIError('Price not provided', StatusCodes.BAD_REQUEST)
-        } else if (priceData.fixed && (priceData.range.from || priceData.range.to)) {
-            throw new CustomAPIError('Invalide data', StatusCodes.BAD_REQUEST)
-        } else if (priceData.range.from && priceData.range.to && +priceData.range.from >= +priceData.range.to) {
-            throw new CustomAPIError('From should be smaller value than to', StatusCodes.BAD_REQUEST)
         }
 
         if (legalRestrictions && legalRestrictions.isLegalRestrictions) {

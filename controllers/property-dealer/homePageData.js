@@ -7,56 +7,65 @@ const CustomAPIError = require('../../errors/custom-error');
 //The function is used to fetch all requests by customers
 const homePageData = async (req, res, next) => {
     try {
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const { dealerId } = req.query
 
-        await PropertyDealer.updateOne(
-            { _id: req.propertyDealer._id, 'requestsFromCustomer.requestDate': { $lt: thirtyDaysAgo } }, // Condition to match document by _id and requestDate older than 30 days
-            { $pull: { 'requestsFromCustomer': { requestDate: { $lt: thirtyDaysAgo } } } } // Pull elements matching the condition from requestsFromCustomer array
-        )
+        let propertyDealer
+        if (dealerId) {
+            propertyDealer = await PropertyDealer.findOne({ _id: dealerId })
+        } else {
+            propertyDealer = req.propertyDealer
+        }
 
         let averageCustomerRatings = 0
-        if (req.propertyDealer.reviewsFromCustomer.length > 0) {
+        if (propertyDealer.reviewsFromCustomer.length > 0) {
             let totalCustomerRatings = 0
-            req.propertyDealer.reviewsFromCustomer.forEach((review) => {
+            propertyDealer.reviewsFromCustomer.forEach((review) => {
                 totalCustomerRatings = totalCustomerRatings + review.rating
             })
-            averageCustomerRatings = totalCustomerRatings / req.propertyDealer.reviewsFromCustomer.length
+            averageCustomerRatings = (totalCustomerRatings / propertyDealer.reviewsFromCustomer.length).toFixed(1)
         }
 
         const liveProperties = await Property.find({
-            addedByPropertyDealer: req.propertyDealer._id,
+            addedByPropertyDealer: propertyDealer._id,
             "isApprovedByCityManager.isApproved": true,
             isLive: true,
-            isSold: false
-        }).select('propertyType location propertyImagesUrl isApprovedByCityManager.date priceData price title')
+            isClosed: false
+        }).select('propertyType location propertyImagesUrl isApprovedByCityManager.date price title')
             .sort({ 'isApprovedByCityManager.date': -1 })
             .skip(0)
             .limit(5)
 
-        const numberOfLiveProperties = await Property.countDocuments({
-            addedByPropertyDealer: req.propertyDealer._id,
+        const numberOfProperties = await Property.countDocuments({
+            addedByPropertyDealer: propertyDealer._id,
             "isApprovedByCityManager.isApproved": true,
             isLive: true,
-            isSold: false
+            isClosed: false
         })
-        console.log(req.propertyDealer)
+
+        const reviewsFromCustomer = propertyDealer.reviewsFromCustomer.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        const requestsFromCustomer = propertyDealer.requestsFromCustomer.sort((a, b) => new Date(b.date) - new Date(a.date));
+
         return res.status(StatusCodes.OK).json({
             status: 'ok',
             dealerInfo: {
-                logoUrl: req.propertyDealer.firmLogoUrl,
-                firmName: req.propertyDealer.firmName,
-                reraNumber: req.propertyDealer.reraNumber,
-                gstNumber: req.propertyDealer.gstNumber,
-                id: req.propertyDealer._id,
-                experience: req.propertyDealer.experience,
-                about: req.propertyDealer.about,
+                logoUrl: propertyDealer.firmLogoUrl,
+                firmName: propertyDealer.firmName,
+                reraNumber: propertyDealer.reraNumber,
+                gstNumber: propertyDealer.gstNumber,
+                id: propertyDealer._id,
+                experience: propertyDealer.experience,
+                about: propertyDealer.about,
+                email: !dealerId ? null : propertyDealer.email,
+                contactNumber: !dealerId ? null : propertyDealer.contactNumber,
+                address: !dealerId ? null : propertyDealer.address,
+                propertyDealerName:!dealerId ? null : propertyDealer.propertyDealerName
             },
             liveProperties,
-            numberOfLiveProperties,
+            numberOfProperties,
             averageCustomerRatings,
-            reviewsFromCustomer: req.propertyDealer.reviewsFromCustomer,
-            requestsFromCustomer: req.propertyDealer.requestsFromCustomer
+            reviewsFromCustomer,
+            requestsFromCustomer: dealerId ? null : requestsFromCustomer
         })
     } catch (error) {
         console.log(error)
@@ -67,6 +76,7 @@ const homePageData = async (req, res, next) => {
 const fetchProperties = async (req, res, next) => {
     try {
         const { skip, liveOrSold, propertyType } = req.query
+        const { dealerId } = req.query
 
         if (skip && isNaN(parseInt(skip))) {
             throw new CustomAPIError('Skip number not provided', StatusCodes.BAD_REQUEST)
@@ -83,11 +93,13 @@ const fetchProperties = async (req, res, next) => {
         const pageSize = 5
 
         let queryBody = {
-            addedByPropertyDealer: req.propertyDealer._id,
+            addedByPropertyDealer: dealerId || req.propertyDealer._id,
             "isApprovedByCityManager.isApproved": true,
             isLive: liveOrSold === 'live' ? true : false,
-            isSold: liveOrSold !== 'live' ? true : false
+            isClosed: liveOrSold !== 'live' ? true : false
         }
+
+        const totalNumberOfProperties = await Property.countDocuments(queryBody)
 
         if (propertyType) {
             queryBody = {
@@ -96,35 +108,28 @@ const fetchProperties = async (req, res, next) => {
             }
         }
 
+        if (liveOrSold === 'sold') {
+            queryBody = {
+                ...queryBody,
+                'reasonToCloseProperty.propertySoldByDealer': true
+            }
+        }
+
         const properties = await Property.find(queryBody)
-            .select('propertyType location propertyImagesUrl isApprovedByCityManager.date priceData price title')
+            .select('propertyType location propertyImagesUrl isApprovedByCityManager.date price title')
             .sort({ 'isApprovedByCityManager.date': -1 })
             .skip(parseInt(skip) || 0)
             .limit(pageSize)
 
-        let queryBodyToFetchNumberOfProperties = {
-            addedByPropertyDealer: req.propertyDealer._id,
-            "isApprovedByCityManager.isApproved": true,
-            isLive: liveOrSold === 'live' ? true : false,
-            isSold: liveOrSold !== 'live' ? true : false
-        }
-
-        /*if (propertyType) {
-            queryBodyToFetchNumberOfProperties = {
-                ...queryBodyToFetchNumberOfProperties,
-                propertyType
-            }
-        }*/
-
-        const numberOfProperties = await Property.countDocuments(queryBodyToFetchNumberOfProperties)
+        const numberOfProperties = await Property.countDocuments(queryBody)
 
         return res.status(StatusCodes.OK).json({
             status: 'ok',
             properties,
-            numberOfProperties
+            numberOfProperties,
+            totalNumberOfProperties
         })
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }

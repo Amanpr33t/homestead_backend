@@ -20,40 +20,24 @@ const CustomerSchema = new mongoose.Schema({
         },
         trim: true
     },
+    password: {
+        type: String,
+        trim: true
+    },
     contactNumber: {
         type: Number,
         required: true
     },
-    agriculturalPropertiesForWhichRequestSentToPropertyDealer: [
-        {
-            propertyId: String,
-            date: Date,
-            _id: {
-                type: Schema.Types.ObjectId,
-                default: undefined,
-            }
-        }
-    ],
-    commercialPropertiesForWhichRequestSentToPropertyDealer: [
-        {
-            propertyId: String,
-            date: Date,
-            _id: {
-                type: Schema.Types.ObjectId,
-                default: undefined,
-            }
-        }
-    ],
-    residentailPropertiesForWhichRequestSentToPropertyDealer: [
-        {
-            propertyId: String,
-            date: Date,
-            _id: {
-                type: Schema.Types.ObjectId,
-                default: undefined,
-            }
-        }
-    ]
+    district: {
+        type: String,
+        trim: true,
+        required: true
+    },
+    state: {
+        type: String,
+        trim: true,
+        required: true
+    }
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 
 

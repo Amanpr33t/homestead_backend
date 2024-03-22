@@ -32,9 +32,7 @@ const {
 const {
     propertiesPendingToBeReevaluated,
     numberOfPropertiesPendingToBeReevaluated
-} = require('../controllers/property-evaluator/fetchPropertiesPendingToBeReevaluated')
-
-const { fetchSelectedProperty } = require('../controllers/property-evaluator/fetchSelectedProperty')
+}=require('../controllers/property-evaluator/fetchPropertiesPendingToBeReevaluated')
 
 router.post('/signIn', signIn) //to sign in an evaluator
 router.patch('/logout', authenticatePropertyEvaluator, logout) //to logout an evaluator
@@ -52,7 +50,6 @@ router.get('/numberOfPropertiesPendingToBeEvaluated', authenticatePropertyEvalua
 router.get('/propertiesPendingToBeReevaluated', authenticatePropertyEvaluator, propertiesPendingToBeReevaluated) //fetches some data regarding properties pending to be evaluated
 router.get('/numberOfPropertiesPendingToBeReevaluated', authenticatePropertyEvaluator, numberOfPropertiesPendingToBeReevaluated) //fetches number of properties pending to be evaluated
 
-router.get('/fetch-selected-property', authenticatePropertyEvaluator, fetchSelectedProperty) //fetch details of selected property
 router.post('/evaluateProperty', authenticatePropertyEvaluator, evaluateProperty) //evaluate property
 
 module.exports = router

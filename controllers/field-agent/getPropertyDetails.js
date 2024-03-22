@@ -7,7 +7,7 @@ const CustomAPIError = require('../../errors/custom-error')
 //To get details about a property
 const getProperty = async (req, res, next) => {
     try {
-        const { id, type, dealerInfo } = req.query
+        const { id,  dealerInfo } = req.query
         if (!id) {
             throw new CustomAPIError('property id not provided', StatusCodes.BAD_REQUEST)
         }
@@ -17,7 +17,6 @@ const getProperty = async (req, res, next) => {
         let dealer
 
         if (dealerInfo && propertyData) {
-            console.log(propertyData.addedByPropertyDealer)
             dealer = await PropertyDealer.findOne({ _id: propertyData.addedByPropertyDealer }).select('propertyDealerName  firmName email contactNumber')
             console.log(dealer)
         }

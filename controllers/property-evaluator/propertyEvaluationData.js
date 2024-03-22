@@ -43,7 +43,6 @@ const propertyEvaluationData = async (req, res, next) => {
         })
         const propertiesSentToCityManagerForApproval = residentialPropertiesSentToCityManagerForApproval + agriculturalPropertiesSentToCityManagerForApproval + commercialPropertiesSentToCityManagerForApproval
 
-
         const agriculturalPropertiesPendingForEvaluation = await Property.countDocuments({
             propertyEvaluator: req.propertyEvaluator._id,
             'sentToEvaluatorByFieldAgentForEvaluation.isSent': true,

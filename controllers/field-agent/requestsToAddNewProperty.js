@@ -17,6 +17,7 @@ const requestsToAddNewProperty = async (req, res, next) => {
     }
 }
 
+//yes
 const dealerDetailsForAddProperty = async (req, res, next) => {
     try {
         const { dealerId } = req.query

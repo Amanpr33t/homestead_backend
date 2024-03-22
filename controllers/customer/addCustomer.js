@@ -6,7 +6,7 @@ const Customer = require('../../models/customer')
 const addCustomer = async (req, res, next) => {
     try {
         await Customer.create(req.body) 
-        return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Property customer has been successfully added' })
+        return res.status(StatusCodes.OK).json({ status: 'ok', message: 'Property user has been successfully added' })
     } catch (error) {
         next(error)
     }

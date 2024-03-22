@@ -18,7 +18,7 @@ const {
 
 const { getDealerDetails } = require('../controllers/property-dealer/getPropertyDealerDetails')
 
-const {reviewProperty}=require('../controllers/property-dealer/reviewProperty')
+const { closeProperty } = require('../controllers/property-dealer/closeProperty')
 
 const {
     homePageData,
@@ -28,6 +28,10 @@ const {
 const { assignFieldAgentForPropertyAddition } = require('../controllers/property-dealer/assignFieldAgentForProperty')
 
 const { updateSeenStatusOfCustomerRequest } = require('../controllers/property-dealer/updateSeenStatusOfCustomerRequest')
+
+const { deleteCustomerRequest } = require('../controllers/property-dealer/deleteCustomerRequest')
+
+const { editDealerDetails } = require('../controllers/property-dealer/editDealerDetails')
 
 router.post('/signIn', signIn) //to sign in a property dealer
 router.patch('/logout', authenticatePropertyDealer, logout) //to logout a property dealer
@@ -46,6 +50,10 @@ router.patch('/updateSeenStatusOfCustomerRequest', authenticatePropertyDealer, u
 
 router.post('/assignFieldAgentForPropertyAddition', authenticatePropertyDealer, assignFieldAgentForPropertyAddition)
 
-router.get('/reviewProperty', authenticatePropertyDealer, reviewProperty)
+router.patch('/closeProperty', authenticatePropertyDealer, closeProperty)
+
+router.patch('/deleteCustomerRequest', authenticatePropertyDealer, deleteCustomerRequest)
+
+router.patch('/editDealerDetails', authenticatePropertyDealer, editDealerDetails)
 
 module.exports = router

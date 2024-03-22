@@ -6,7 +6,7 @@ const CustomAPIError = require('../../errors/custom-error')
 //To update property data after reevaluation
 const updateReevaluatedPropertyData = async (req, res, next) => {
     try {
-        const { id, type } = req.query
+        const { id } = req.query
         if (!id) {
             throw new CustomAPIError('property id not provided', StatusCodes.BAD_REQUEST)
         }

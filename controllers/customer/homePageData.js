@@ -148,7 +148,6 @@ const homePageData = async (req, res, next) => {
         if (req.customer) {
             topDealers = await fetchTopDealersNearCustomer(req.customer.district, req.customer.statel)
         } else {
-            console.log(req.customer)
             topDealers = await fetchTopDealersNearCustomer(null, null)
         }
 
@@ -158,7 +157,6 @@ const homePageData = async (req, res, next) => {
             topDealers
         })
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }
@@ -166,12 +164,12 @@ const homePageData = async (req, res, next) => {
 const fetchProperties = async (req, res, next) => {
     try {
         const { skip, filters } = req.body
-
+        console.log(skip, filters)
         if (!filters) {
             throw new CustomAPIError('filters data not provided', 204)
         }
 
-        const pageSize = 5
+        const pageSize = 1
 
         let queryBody = {
             isLive: true,
@@ -252,15 +250,13 @@ const fetchProperties = async (req, res, next) => {
                 }
             }
         }
-
-        console.log(queryBody)
-
+        //console.log(queryBody)
         const properties = await Property.find(queryBody)
             .select('_id price fairValueOfProperty propertyType location propertyImagesUrl isApprovedByCityManager.date price title addedByPropertyDealer')
             .sort({ 'isApprovedByCityManager.date': -1 })
             .skip(skip || 0)
             .limit(pageSize)
-        console.log(properties)
+        console.log(properties.length)
 
         const totalNumberOfProperties = await Property.countDocuments(queryBody)
 
@@ -270,7 +266,6 @@ const fetchProperties = async (req, res, next) => {
             totalNumberOfProperties
         })
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }

@@ -164,7 +164,7 @@ const homePageData = async (req, res, next) => {
 const fetchProperties = async (req, res, next) => {
     try {
         const { skip, filters } = req.body
-        console.log(skip, filters)
+        console.log(filters)
         if (!filters) {
             throw new CustomAPIError('filters data not provided', 204)
         }
@@ -174,48 +174,6 @@ const fetchProperties = async (req, res, next) => {
         let queryBody = {
             isLive: true,
             isClosed: false,
-        }
-
-        if (filters.propertyType && filters.propertyType.length > 0) {
-            queryBody = {
-                ...queryBody,
-                propertyType: { $in: filters.propertyType }
-            }
-        }
-
-        if (filters.commercialPropertyType && filters.commercialPropertyType.length > 0) {
-            queryBody = {
-                ...queryBody,
-                commercialPropertyType: { $in: filters.commercialPropertyType }
-            }
-        }
-
-        if (filters.builtupOrEmpty && filters.builtupOrEmpty.length > 0 && filters.builtupOrEmpty.includes('empty')) {
-            queryBody = {
-                ...queryBody,
-                'stateOfProperty.empty': true
-            }
-        }
-
-        if (filters.builtupOrEmpty && filters.builtupOrEmpty.length > 0 && filters.builtupOrEmpty.includes('built-up')) {
-            if (filters.builtUpPropertyType && filters.builtUpPropertyType.length > 0) {
-                queryBody = {
-                    ...queryBody,
-                    'stateOfProperty.builtUpPropertyType': { $in: filters.builtUpPropertyType }
-                }
-            } else {
-                queryBody = {
-                    ...queryBody,
-                    'stateOfProperty.builtUp': true
-                }
-            }
-        }
-
-        if (filters.residentialPropertyType && filters.residentialPropertyType.length > 0) {
-            queryBody = {
-                ...queryBody,
-                residentialPropertyType: { $in: filters.residentialPropertyType }
-            }
         }
 
         if (filters.state) {
@@ -250,15 +208,59 @@ const fetchProperties = async (req, res, next) => {
                 }
             }
         }
-        //console.log(queryBody)
-        const properties = await Property.find(queryBody)
+
+        if (filters.propertyType) {
+            queryBody = {
+                ...queryBody,
+                propertyType: filters.propertyType
+            }
+            if (filters.propertyType === 'resdiential') {
+                if (filters.residentialPropertyType) {
+                    queryBody = {
+                        ...queryBody,
+                        residentialPropertyType: filters.residentialPropertyType
+                    }
+                }
+            } else if (filters.propertyType === 'commercial') {
+                if (filters.commercialPropertyType) {
+                    queryBody = {
+                        ...queryBody,
+                        commercialPropertyType: filters.commercialPropertyType
+                    }
+                }
+                if (filters.builtupOrEmpty === 'empty') {
+                    queryBody = {
+                        ...queryBody,
+                        'stateOfProperty.empty': true,
+                        'stateOfProperty.builtUp': false
+                    }
+                } else if (filters.builtupOrEmpty === 'built-up') {
+                    queryBody = {
+                        ...queryBody,
+                        'stateOfProperty.empty': false,
+                        'stateOfProperty.builtUp': true
+                    }
+                }
+                if (filters.builtUpPropertyType) {
+                    queryBody = {
+                        ...queryBody,
+                        'stateOfProperty.empty': false,
+                        'stateOfProperty.builtUp': true,
+                        'stateOfProperty.builtUpPropertyType': filters.builtUpPropertyType
+                    }
+                }
+            }
+        }
+
+        let totalNumberOfProperties
+
+        let properties = await Property.find(queryBody)
             .select('_id price fairValueOfProperty propertyType location propertyImagesUrl isApprovedByCityManager.date price title addedByPropertyDealer')
             .sort({ 'isApprovedByCityManager.date': -1 })
             .skip(skip || 0)
             .limit(pageSize)
-        console.log(properties.length)
 
-        const totalNumberOfProperties = await Property.countDocuments(queryBody)
+        totalNumberOfProperties = await Property.countDocuments(queryBody)
 
         return res.status(StatusCodes.OK).json({
             status: 'ok',

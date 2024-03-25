@@ -14,7 +14,6 @@ const updateSeenStatusOfCustomerRequest = async (req, res, next) => {
         let customerRequests
         let updatedCustomerRequests = []
         if (requestSeen === false) {
-
             req.propertyDealer.requestsFromCustomer && req.propertyDealer.requestsFromCustomer.length > 0 && req.propertyDealer.requestsFromCustomer.forEach(request => {
                 if (request.propertyId === propertyId && request.customerId === customerId && request.requestSeen === false) {
                     updatedCustomerRequests = [

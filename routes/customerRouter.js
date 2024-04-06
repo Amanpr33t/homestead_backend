@@ -26,12 +26,15 @@ const {
     fetchDealerDetails
 } = require('../controllers/customer/fetchDealerDetails')
 
+const { propertyDealerPageData } = require('../controllers/customer/propertDealerPageData')
+
 const {
-    homePageData: propertDealerPageData,
     fetchProperties: fetchPropertiesForDealerPage
 } = require('../controllers/property-dealer/homePageData')
 
 const { reviewProperty } = require('../controllers/customer/reviewProperty')
+
+const { addReviewForDealer } = require('../controllers/customer/addReviewForDealer')
 
 router.post('/signIn', signIn) //to sign in a property dealer
 router.post('/signUp', signUp) //to sign in a property dealer
@@ -48,10 +51,12 @@ router.post('/fetchProperties', fetchProperties)
 
 router.get('/fetchDealerDetails', authenticateCustomer, fetchDealerDetails)
 
-router.get('/dataForPropertyDealerPage', propertDealerPageData) //fetch date for home page
+router.get('/dataForPropertyDealerPage', propertyDealerPageData) //fetch date for home page
 
 router.get('/fetchPropertiesForDealerPage', fetchPropertiesForDealerPage) //fetch date for home page
 
 router.get('/reviewProperty', reviewProperty)
+
+router.patch('/addReviewForPropertyDealer', authenticateCustomer, addReviewForDealer)
 
 module.exports = router

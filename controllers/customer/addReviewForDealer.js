@@ -1,7 +1,6 @@
 require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
 const PropertyDealer = require('../../models/propertyDealer')
-const CustomAPIError = require('../../errors/custom-error')
 
 //The function is used to add a property dealer
 const addReviewForDealer = async (req, res, next) => {
@@ -98,7 +97,6 @@ const addReviewForDealer = async (req, res, next) => {
         })
 
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }

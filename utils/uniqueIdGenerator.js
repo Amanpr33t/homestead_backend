@@ -26,9 +26,9 @@ const uniqueIdGeneratorForPropertyDealer = async () => {
     const serialNumber = propertyDealers.length + 1
 
     const year = new Date().getFullYear()
-    const date = new Date().getMonth()
+    const month = new Date().getMonth()
 
-    return `PD${date + 1}${year.toString().slice(-2)}${serialNumber}`
+    return `PD${month + 1}${year.toString().slice(-2)}${serialNumber}`
 }
 
 module.exports = {

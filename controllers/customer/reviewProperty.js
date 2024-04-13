@@ -9,7 +9,6 @@ const mongoose = require('mongoose');
 const reviewProperty = async (req, res, next) => {
     try {
         const { propertyId } = req.query
-        console.log(propertyId)
         if (!propertyId) {
             throw new CustomAPIError('data not provided', 204)
         }
@@ -58,7 +57,6 @@ const reviewProperty = async (req, res, next) => {
             }
         })
     } catch (error) {
-        console.log(error)
         next(error)
     }
 }

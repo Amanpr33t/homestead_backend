@@ -33,6 +33,15 @@ const { deleteCustomerRequest } = require('../controllers/property-dealer/delete
 
 const { editDealerDetails } = require('../controllers/property-dealer/editDealerDetails')
 
+const {
+    addPropertyDealer
+} = require('../controllers/field-agent/addPropertyDealer')
+
+const {
+    sendVerificationCodeForDealerVerification,
+    confirmVerificationCodeForDealerVerification
+} = require('../controllers/property-dealer/sendVerificationCodeForLogin')
+
 router.post('/signIn', signIn) //to sign in a property dealer
 router.patch('/logout', authenticatePropertyDealer, logout) //to logout a property dealer
 router.patch('/forgotPassword', forgotPassword) //in case the property dealer forgets password
@@ -55,5 +64,11 @@ router.patch('/closeProperty', authenticatePropertyDealer, closeProperty)
 router.patch('/deleteCustomerRequest', authenticatePropertyDealer, deleteCustomerRequest)
 
 router.patch('/editDealerDetails', authenticatePropertyDealer, editDealerDetails)
+
+router.post('/addPropertyDealer', addPropertyDealer) //to add a property dealer
+
+router.post('/sendOtpForVerification', sendVerificationCodeForDealerVerification)
+
+router.post('/confirmVerificationCode', confirmVerificationCodeForDealerVerification)
 
 module.exports = router

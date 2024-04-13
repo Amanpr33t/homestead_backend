@@ -164,7 +164,6 @@ const homePageData = async (req, res, next) => {
 const fetchProperties = async (req, res, next) => {
     try {
         const { skip, filters } = req.body
-        console.log(filters)
         if (!filters) {
             throw new CustomAPIError('filters data not provided', 204)
         }

@@ -37,7 +37,15 @@ const CustomerSchema = new mongoose.Schema({
         type: String,
         trim: true,
         required: true
-    }
+    },
+    password: {
+        type: String,
+        trim: true
+    },
+    otpForVerification: {
+        type: String,
+        default: null
+    },
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 
 

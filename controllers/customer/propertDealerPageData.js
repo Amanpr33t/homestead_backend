@@ -3,7 +3,6 @@ const { StatusCodes } = require('http-status-codes')
 const PropertyDealer = require('../../models/propertyDealer');
 const Customer = require('../../models/customer')
 const Property = require('../../models/property');
-const CustomAPIError = require('../../errors/custom-error');
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
@@ -13,10 +12,14 @@ const propertyDealerPageData = async (req, res, next) => {
         const { dealerId } = req.query
 
         const authHeader = req.headers.authorization
+
         let customerId
         let customersOwnReview
         let reviewsFromOtherCustomers = []
-        if (authHeader && authHeader.startsWith('Bearer')) {
+        console.log(authHeader)
+
+        if (authHeader && authHeader.startsWith('Bearer') ) {
+
             const token = authHeader.split(' ')[1]
             const payload = jwt.verify(token, process.env.JWT_SECRET)
             const customer = await Customer.findOne({ _id: payload.customerId }).select('_id')

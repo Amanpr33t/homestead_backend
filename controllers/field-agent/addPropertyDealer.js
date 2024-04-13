@@ -8,7 +8,10 @@ const { uniqueIdGeneratorForPropertyDealer } = require('../../utils/uniqueIdGene
 //The function is used to add a property dealer
 const addPropertyDealer = async (req, res, next) => {
     try {
-        req.body.addedByFieldAgent = req.fieldAgent._id //field agent ID is added to the request body
+        if (req.fieldAgent && req.fieldAgent._id) {
+            req.body.addedByFieldAgent = req.fieldAgent._id //field agent ID is added to the request body
+        }
+
         const {
             email
         } = req.body
@@ -33,6 +36,7 @@ const addPropertyDealer = async (req, res, next) => {
         res.status(StatusCodes.OK).json({ status: 'ok', message: 'property dealer has been successfully added' })
         return
     } catch (error) {
+        console.log(error)
         next(error)
     }
 }

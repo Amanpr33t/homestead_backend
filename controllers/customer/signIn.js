@@ -10,13 +10,10 @@ const signIn = async (req, res, next) => {
         if (!email || !password) {
             throw new CustomAPIError('Please enter email and password ', StatusCodes.NO_CONTENT)
         }
-        if (password.length > 10 || password.length < 6) {
-            throw new CustomAPIError('Please enter email and password ', StatusCodes.BAD_REQUEST)
-        }
 
         const customer = await Customer.findOne({ email })
         if (!customer) {
-            return res.status(StatusCodes.OK).json({ status: 'not_found', msg: 'Enter valid credentials' })
+            throw new CustomAPIError('No user found ', StatusCodes.BAD_REQUEST)
         }
 
         const isPasswordCorrect = customer && await customer.comparePassword(password)
@@ -25,13 +22,7 @@ const signIn = async (req, res, next) => {
         }
 
         const authToken = await customer.createJWT()
-        const oneDay = 1000 * 60 * 60 * 24
 
-        await Customer.findOneAndUpdate({ email },
-            {
-                authTokenExpiration: Date.now() + oneDay
-            },
-            { new: true, runValidators: true })
         return res.status(StatusCodes.OK).json({
             status: 'ok',
             authToken

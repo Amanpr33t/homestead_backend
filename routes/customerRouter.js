@@ -36,6 +36,25 @@ const { reviewProperty } = require('../controllers/customer/reviewProperty')
 
 const { addReviewForDealer } = require('../controllers/customer/addReviewForDealer')
 
+const {
+    customerContactNumberExists,
+    customerEmailExists,
+    addCustomer
+} = require('../controllers/customer/addCustomer')
+
+const {
+    sendVerificationCodeForVerification,
+    confirmVerificationCodeForCustomer
+} = require('../controllers/customer/sendVerificationCodeForLogin')
+
+const {
+    fetchCustomerDetails
+} = require('../controllers/customer/fetchCustomerDetails')
+
+const {
+    editCustomerDetails
+} = require('../controllers/customer/editCustomerDetails')
+
 router.post('/signIn', signIn) //to sign in a property dealer
 router.post('/signUp', signUp) //to sign in a property dealer
 router.patch('/logout', authenticateCustomer, logout) //to logout a property dealer
@@ -57,6 +76,19 @@ router.get('/fetchPropertiesForDealerPage', fetchPropertiesForDealerPage) //fetc
 
 router.get('/reviewProperty', reviewProperty)
 
+router.get('/fetchUserDetials',authenticateCustomer, fetchCustomerDetails)
+
 router.patch('/addReviewForPropertyDealer', authenticateCustomer, addReviewForDealer)
+
+router.patch('/editCustomerDetails', authenticateCustomer, editCustomerDetails)
+
+router.get('/customerEmailExists',customerEmailExists) //to check if a property dealer with similar email exists
+router.get('/customerContactNumberExists', customerContactNumberExists) //to check if a property dealer with similar contact number exists
+
+router.post('/addCustomer', addCustomer)
+
+router.post('/sendOtpForVerification', sendVerificationCodeForVerification)
+
+router.post('/confirmVerificationCode', confirmVerificationCodeForCustomer)
 
 module.exports = router

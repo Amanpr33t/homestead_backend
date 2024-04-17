@@ -129,10 +129,6 @@ const PropertyDealerSchema = new mongoose.Schema({
         type: String,
         default: null
     },
-    otpForVerificationExpirationDate: {
-        type: Date,
-        default: null
-    },
     uniqueId: {
         type: String,
         trim: true,
@@ -142,10 +138,10 @@ const PropertyDealerSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
-    authTokenExpiration: {
+    /*authTokenExpiration: {
         type: Date,
         default: null
-    },
+    },*/
     passwordVerificationToken: {
         type: String,
         trim: true,

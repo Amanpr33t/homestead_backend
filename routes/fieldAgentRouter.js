@@ -5,9 +5,7 @@ require('express-async-errors')
 const authenticateFieldAgent = require('../middleware/authenticateFieldAgent')
 
 const {
-    signIn,
-    logout,
-    signup
+    signIn
 } = require('../controllers/field-agent/fieldAgentSignin')
 
 const {
@@ -52,9 +50,12 @@ const {
     dealerDetailsForAddProperty
 }=require('../controllers/field-agent/requestsToAddNewProperty')
 
+const {
+    sendVerificationCodeForFieldAgentVerification,
+    confirmVerificationCodeForFieldAgentVerification
+} = require('../controllers/field-agent/sendVerificationCodeForLogin')
+
 router.post('/signIn', signIn) //to sign in a field agent
-router.patch('/logout', authenticateFieldAgent, logout) //to logout a field agent
-router.post('/signUp', signup)
 router.patch('/forgotPassword', forgotPassword) //in case the field agent forgets password
 router.patch('/updatePassword', updatePassword) //to update a new password for field agent
 router.post('/confirmPasswordVerificationToken', confirmPasswordVerificationToken) //to confirm the OTP send by the user for password updation
@@ -83,5 +84,9 @@ router.get('/getPropertyData', authenticateFieldAgent, getProperty) //To get det
 router.get('/requestsToAddNewProperty', authenticateFieldAgent, requestsToAddNewProperty) 
 
 router.get('/dealerDetailsForAddProperty', authenticateFieldAgent, dealerDetailsForAddProperty) 
+
+router.post('/sendOtpForVerification', sendVerificationCodeForFieldAgentVerification)
+
+router.post('/confirmVerificationCode', confirmVerificationCodeForFieldAgentVerification)
 
 module.exports = router

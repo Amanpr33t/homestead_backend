@@ -5,8 +5,7 @@ require('express-async-errors')
 const authenticatePropertyDealer = require('../middleware/authenticatePropertyDealer')
 
 const {
-    signIn,
-    logout
+    signIn
 } = require('../controllers/property-dealer/signIn')
 
 const {
@@ -35,7 +34,7 @@ const { editDealerDetails } = require('../controllers/property-dealer/editDealer
 
 const {
     addPropertyDealer
-} = require('../controllers/field-agent/addPropertyDealer')
+} = require('../controllers/property-dealer/addPropertyDealer')
 
 const {
     sendVerificationCodeForDealerVerification,
@@ -43,7 +42,6 @@ const {
 } = require('../controllers/property-dealer/sendVerificationCodeForLogin')
 
 router.post('/signIn', signIn) //to sign in a property dealer
-router.patch('/logout', authenticatePropertyDealer, logout) //to logout a property dealer
 router.patch('/forgotPassword', forgotPassword) //in case the property dealer forgets password
 router.patch('/updatePassword', updatePassword) //to update a new password for property dealer
 router.post('/confirmPasswordVerificationToken', confirmPasswordVerificationToken) //to confirm the OTP send by the user for password updation

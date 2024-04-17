@@ -15,10 +15,8 @@ const propertyDealerPageData = async (req, res, next) => {
 
         let customerId
         let customersOwnReview
-        let reviewsFromOtherCustomers = []
-        console.log(authHeader)
 
-        if (authHeader && authHeader.startsWith('Bearer') ) {
+        if (authHeader && authHeader.startsWith('Bearer')) {
 
             const token = authHeader.split(' ')[1]
             const payload = jwt.verify(token, process.env.JWT_SECRET)
@@ -26,26 +24,24 @@ const propertyDealerPageData = async (req, res, next) => {
             customerId = customer._id
 
             const customersOwnReviewObject = await PropertyDealer.findOne(
-                { _id: dealerId, 'reviewsFromCustomer.customerId': { $eq: customerId } }
-            ).select('reviewsFromCustomer');
+                {
+                    _id: dealerId,
+                    "reviewsFromCustomer": { $elemMatch: { customerId: customerId } }
+                },
+                { "reviewsFromCustomer.$": 1 }
+            )
+
             if (customersOwnReviewObject && customersOwnReviewObject.reviewsFromCustomer && customersOwnReviewObject.reviewsFromCustomer.length) {
                 customersOwnReview = customersOwnReviewObject.reviewsFromCustomer[0]
             }
 
-            const reviewsFromOtherCustomersArray = await PropertyDealer.find(
-                { _id: dealerId, 'reviewsFromCustomer.customerId': { $ne: customerId } }
-            ).select('reviewsFromCustomer').sort({ 'reviewsFromCustomer.date': -1 });
-            if (reviewsFromOtherCustomersArray && reviewsFromOtherCustomersArray.length && reviewsFromOtherCustomersArray[0].reviewsFromCustomer && reviewsFromOtherCustomersArray[0].reviewsFromCustomer.length) {
-                reviewsFromOtherCustomers = reviewsFromOtherCustomersArray[0].reviewsFromCustomer
-            }
-
         } else {
             customersOwnReview = null
-            const reviewsFromOtherCustomersArray = await PropertyDealer.find(
+            const reviewsFromCustomersArray = await PropertyDealer.find(
                 { _id: dealerId }
             ).select('reviewsFromCustomer').sort({ 'reviewsFromCustomer.date': -1 });
-            if (reviewsFromOtherCustomersArray && reviewsFromOtherCustomersArray.length && reviewsFromOtherCustomersArray[0].reviewsFromCustomer && reviewsFromOtherCustomersArray[0].reviewsFromCustomer.length) {
-                reviewsFromOtherCustomers = reviewsFromOtherCustomersArray[0].reviewsFromCustomer
+            if (reviewsFromCustomersArray && reviewsFromCustomersArray.length && reviewsFromCustomersArray[0].reviewsFromCustomer && reviewsFromCustomersArray[0].reviewsFromCustomer.length) {
+                reviewsFromOtherCustomers = reviewsFromCustomersArray[0].reviewsFromCustomer
             }
         }
 
@@ -101,7 +97,7 @@ const propertyDealerPageData = async (req, res, next) => {
             numberOfProperties,
             averageCustomerRatings,
             customersOwnReview,
-            reviewsFromOtherCustomers
+            reviewsFromCustomers: propertyDealer.reviewsFromCustomer
         })
     } catch (error) {
         console.log(error)

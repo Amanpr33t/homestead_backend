@@ -5,9 +5,7 @@ require('express-async-errors')
 const authenticateCustomer = require('../middleware/authenticateCustomer')
 
 const {
-    signIn,
-    logout,
-    signUp
+    signIn
 } = require('../controllers/customer/signIn')
 
 const {
@@ -56,8 +54,6 @@ const {
 } = require('../controllers/customer/editCustomerDetails')
 
 router.post('/signIn', signIn) //to sign in a property dealer
-router.post('/signUp', signUp) //to sign in a property dealer
-router.patch('/logout', authenticateCustomer, logout) //to logout a property dealer
 router.patch('/forgotPassword', forgotPassword) //in case the property dealer forgets password
 router.patch('/updatePassword', updatePassword) //to update a new password for property dealer
 router.post('/confirmPasswordVerificationToken', confirmPasswordVerificationToken) //to confirm the OTP send by the user for password updation

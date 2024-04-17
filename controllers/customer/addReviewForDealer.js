@@ -14,7 +14,6 @@ const addReviewForDealer = async (req, res, next) => {
         const operation = req.query.operation
 
         let customersOwnReview = null
-        let reviewsFromOtherCustomers = []
 
         if (operation === 'add') {
             const reviewFromCustomerExists = await PropertyDealer.countDocuments({
@@ -46,7 +45,6 @@ const addReviewForDealer = async (req, res, next) => {
             )
 
             customersOwnReview = reviewToBeAdded
-            reviewsFromOtherCustomers = req.customer.reviewsFromCustomer
 
         } else if (operation === 'edit') {
             await PropertyDealer.findOneAndUpdate(
@@ -61,17 +59,15 @@ const addReviewForDealer = async (req, res, next) => {
             )
 
             const customersOwnReviewObject = await PropertyDealer.findOne(
-                { _id: dealerId, 'reviewsFromCustomer.customerId': { $eq: req.customer._id } }
-            ).select('reviewsFromCustomer');
+                {
+                    _id: dealerId,
+                    "reviewsFromCustomer": { $elemMatch: { customerId: req.customer._id } }
+                },
+                { "reviewsFromCustomer.$": 1 }
+            )
+
             if (customersOwnReviewObject && customersOwnReviewObject.reviewsFromCustomer && customersOwnReviewObject.reviewsFromCustomer.length) {
                 customersOwnReview = customersOwnReviewObject.reviewsFromCustomer[0]
-            }
-
-            const reviewsFromOtherCustomersArray = await PropertyDealer.find(
-                { _id: dealerId, 'reviewsFromCustomer.customerId': { $ne: req.customer._id } }
-            ).select('reviewsFromCustomer').sort({ 'reviewsFromCustomer.date': -1 });
-            if (reviewsFromOtherCustomersArray && reviewsFromOtherCustomersArray.length && reviewsFromOtherCustomersArray[0].reviewsFromCustomer && reviewsFromOtherCustomersArray[0].reviewsFromCustomer.length) {
-                reviewsFromOtherCustomers = reviewsFromOtherCustomersArray[0].reviewsFromCustomer
             }
 
         } else {
@@ -92,11 +88,12 @@ const addReviewForDealer = async (req, res, next) => {
         return res.status(StatusCodes.OK).json({
             status: 'ok',
             customersOwnReview,
-            reviewsFromOtherCustomers,
+            reviewsFromCustomers: propertyDealer.reviewsFromCustomer,
             averageCustomerRatings
         })
 
     } catch (error) {
+        console.log(error)
         next(error)
     }
 }

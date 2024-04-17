@@ -1,11 +1,11 @@
 require('express-async-errors')
 const { StatusCodes } = require('http-status-codes')
-const Customer = require('../../models/customer')
+const FieldAgent = require('../../models/fieldAgent')
 const sendEmail = require('../../utils/sendEmail')
 const CustomAPIError = require('../../errors/custom-error')
 
-//This function is used to send OTP to the registered email of the customer.
-const sendVerificationCodeForVerification = async (req, res, next) => {
+//This function is used to send OTP to the registered email of the dealer.
+const sendVerificationCodeForFieldAgentVerification = async (req, res, next) => {
     try {
         const { email, contactNumber } = req.body
 
@@ -15,9 +15,9 @@ const sendVerificationCodeForVerification = async (req, res, next) => {
 
         let doesUserExist
         if (email) {
-            doesUserExist = await Customer.countDocuments({ email: req.body.email })
+            doesUserExist = await FieldAgent.countDocuments({ email: req.body.email })
         } else if (contactNumber) {
-            doesUserExist = await Customer.countDocuments({ contactNumber: req.body.contactNumber })
+            doesUserExist = await FieldAgent.countDocuments({ contactNumber: req.body.contactNumber })
         }
 
         if (!doesUserExist) {
@@ -48,8 +48,8 @@ const sendVerificationCodeForVerification = async (req, res, next) => {
 
         //const otpForVerificationExpirationDate = new Date(Date.now() + tenMinutes) //This variable is used to set the expiration date of the OTP
 
-        //The query below is used to update the otpForVerification and otpForVerificationExpirationDate fields in the customers document
-        await Customer.findOneAndUpdate({ email },
+        //The query below is used to update the otpForVerification and otpForVerificationExpirationDate fields in the dealers document
+        await FieldAgent.findOneAndUpdate({ email },
             {
                 otpForVerification,
                 //otpForVerificationExpirationDate
@@ -67,13 +67,12 @@ const sendVerificationCodeForVerification = async (req, res, next) => {
 }
 
 //This function is used to confirm the OTP sent by the user
-const confirmVerificationCodeForCustomer = async (req, res, next) => {
+const confirmVerificationCodeForFieldAgentVerification = async (req, res, next) => {
     try {
         const {
             email,
             contactNumber,
-            otp,
-            password
+            otp
         } = req.body
 
         //Out of email, contactNumber and uniqueId only 1 should be received. This if statement throws an error if more than 1 items are available
@@ -81,25 +80,25 @@ const confirmVerificationCodeForCustomer = async (req, res, next) => {
             throw new CustomAPIError('Insufficient data', StatusCodes.BAD_REQUEST)
         }
 
-        let customer //This variable will store the customers data fetched from database
+        let dealer //This variable will store the dealers data fetched from database
 
         //The if statements run depending upon the availability of email, uniqueId and contactNumber
         if (email) {
-            customer = await Customer.findOne({ email })
+            dealer = await FieldAgent.findOne({ email })
         } else if (contactNumber) {
-            customer = await Customer.findOne({ contactNumber })
+            dealer = await FieldAgent.findOne({ contactNumber })
         }
 
-        if (!customer) {
-            throw new CustomAPIError('Customer with this email or contact number does not exist', StatusCodes.NOT_FOUND)
+        if (!dealer) {
+            throw new CustomAPIError('FieldAgent with this email or contact number does not exist', StatusCodes.NOT_FOUND)
         }
 
-        if (customer.otpForVerification !== otp) {
+        if (dealer.otpForVerification !== otp) {
             res.status(StatusCodes.OK).json({ status: 'incorrect_token', msg: 'Access denied' })
             return
         }
 
-        const authToken = await customer.createJWT()
+        const authToken = await dealer.createJWT()
 
         let identifier
         if (email) {
@@ -108,8 +107,8 @@ const confirmVerificationCodeForCustomer = async (req, res, next) => {
             identifier = { contactNumber }
         }
 
-        //The code below is used to update the customer document in the database once the OTP has been successfully verified
-        await Customer.findOneAndUpdate(identifier,
+        //The code below is used to update the dealer document in the database once the OTP has been successfully verified
+        await FieldAgent.findOneAndUpdate(identifier,
             {
                 otpForVerification: null,
                 //otpForVerificationExpirationDate: null
@@ -128,6 +127,6 @@ const confirmVerificationCodeForCustomer = async (req, res, next) => {
 }
 
 module.exports = {
-    sendVerificationCodeForVerification,
-    confirmVerificationCodeForCustomer
+    sendVerificationCodeForFieldAgentVerification,
+    confirmVerificationCodeForFieldAgentVerification
 }

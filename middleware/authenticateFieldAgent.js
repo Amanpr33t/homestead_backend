@@ -24,12 +24,12 @@ const authenticateFieldAgent = async (req, res, next) => {
         if (!fieldAgent) {
             return res.status(StatusCodes.OK).json({ status: 'invalid_authentication' })
         }
-        if (fieldAgent.authTokenExpiration < new Date()) {
+        /*if (fieldAgent.authTokenExpiration < new Date()) {
             await FieldAgent.findOneAndUpdate({ _id: payload.fieldAgentId },
                 { authTokenExpiration: null },
                 { new: true, runValidators: true })
             return res.status(StatusCodes.OK).json({ status: 'invalid_authentication' })
-        }
+        }*/
         req.fieldAgent = fieldAgent
         next()
     } catch (error) {

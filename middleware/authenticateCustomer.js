@@ -25,12 +25,12 @@ const authenticateCustomer = async (req, res, next) => {
         if (!customer) {
             return res.status(StatusCodes.OK).json({ status: 'invalid_authentication' })
         }
-        if (customer.authTokenExpiration < new Date()) {
+        /*if (customer.authTokenExpiration < new Date()) {
             await Customer.findOneAndUpdate({ _id: payload.dealerId },
                 { authTokenExpiration: null },
                 { new: true, runValidators: true })
             return res.status(StatusCodes.OK).json({ status: 'invalid_authentication' })
-        }
+        }*/
         req.customer = customer
         next()
     } catch (error) {

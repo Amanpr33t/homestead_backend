@@ -37,40 +37,6 @@ const signIn = async (req, res, next) => {
     }
 }
 
-const logout = async (req, res, next) => {
-    try {
-        await PropertyEvaluator.findOneAndUpdate({ _id: req.propertyEvaluator.propertyEvaluatorId },
-            { authTokenExpiration: null },
-            { new: true, runValidators: true })
-        return res.status(StatusCodes.OK).json({ status: 'ok', msg: 'Successfully logged out' })
-    } catch (error) {
-        next(error)
-    }
-}
-
-//to be deleted
-const signup = async (req, res, next) => {
-    try {
-
-        const { email, password } = req.body
-        if (!email || !password) {
-            return res.status(StatusCodes.BAD_REQUEST).json({ status: 'noEmailPassword', msg: 'Please enter email and password' })
-        }
-        const emailExists = await PropertyEvaluator.findOne({ email })
-        if (emailExists) {
-            return res.status(StatusCodes.BAD_REQUEST).json({ status: 'emailExists', msg: 'Email already exists' })
-        }
-        const propertyEvaluator = await PropertyEvaluator.create(req.body)
-        const authToken = await propertyEvaluator.createJWT()
-        return res.status(StatusCodes.CREATED).json({ status: 'ok', msg: 'Account has been created', authToken })
-
-    } catch (error) {
-        next(error)
-    }
-}
-
 module.exports = {
-    signIn,
-    logout,
-    signup
+    signIn
 }

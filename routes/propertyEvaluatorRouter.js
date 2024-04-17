@@ -4,9 +4,7 @@ require('express-async-errors')
 const authenticatePropertyEvaluator = require('../middleware/authenticatePropertyEvaluator')
 
 const {
-    signIn,
-    logout,
-    signup
+    signIn
 } = require('../controllers/property-evaluator/signIn')
 
 const {
@@ -32,11 +30,14 @@ const {
 const {
     propertiesPendingToBeReevaluated,
     numberOfPropertiesPendingToBeReevaluated
-}=require('../controllers/property-evaluator/fetchPropertiesPendingToBeReevaluated')
+} = require('../controllers/property-evaluator/fetchPropertiesPendingToBeReevaluated')
+
+const {
+    sendVerificationCodeForPropertyEvaluatorVerification,
+    confirmVerificationCodeForPropertyEvaluatorVerification
+} = require('../controllers/property-evaluator/sendVerificationCodeForLogin')
 
 router.post('/signIn', signIn) //to sign in an evaluator
-router.patch('/logout', authenticatePropertyEvaluator, logout) //to logout an evaluator
-router.post('/signUp', signup)
 router.patch('/forgotPassword', forgotPassword) //to generate an OTP and send to evaluator in case the evaluator forgets password
 router.patch('/updatePassword', updatePassword) //to update the password
 router.post('/confirmPasswordVerificationToken', confirmPasswordVerificationToken) //to confirm the OTP sent by the evaluator
@@ -51,5 +52,9 @@ router.get('/propertiesPendingToBeReevaluated', authenticatePropertyEvaluator, p
 router.get('/numberOfPropertiesPendingToBeReevaluated', authenticatePropertyEvaluator, numberOfPropertiesPendingToBeReevaluated) //fetches number of properties pending to be evaluated
 
 router.post('/evaluateProperty', authenticatePropertyEvaluator, evaluateProperty) //evaluate property
+
+router.post('/sendOtpForVerification', sendVerificationCodeForPropertyEvaluatorVerification)
+
+router.post('/confirmVerificationCode', confirmVerificationCodeForPropertyEvaluatorVerification)
 
 module.exports = router

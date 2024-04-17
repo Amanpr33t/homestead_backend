@@ -25,12 +25,12 @@ const authenticatePropertyEvaluator = async (req, res, next) => {
         if (!propertyEvaluator) {
             return res.status(StatusCodes.OK).json({ status: 'invalid_authentication' })
         }
-        if (propertyEvaluator.authTokenExpiration < new Date()) {
+        /*if (propertyEvaluator.authTokenExpiration < new Date()) {
             await PropertyEvaluator.findOneAndUpdate({ _id: payload.propertyEvaluatorId },
                 { authTokenExpiration: null },
                 { new: true, runValidators: true })
             return res.status(StatusCodes.OK).json({ status: 'invalid_authentication' })
-        }
+        }*/
         req.propertyEvaluator = propertyEvaluator
         next()
     } catch (error) {

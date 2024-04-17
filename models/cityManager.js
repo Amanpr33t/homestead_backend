@@ -18,10 +18,10 @@ const CityManagerSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please provide password']
     },
-    authTokenExpiration: {
+    /*authTokenExpiration: {
         type: Date,
         default: null
-    },
+    },*/
     passwordVerificationToken: {
         type: String,
         default: null
@@ -41,6 +41,10 @@ const CityManagerSchema = new mongoose.Schema({
     state: {
         type: String,
         trim: true
+    },
+    otpForVerification: {
+        type: String,
+        default: null
     }
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 

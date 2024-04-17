@@ -24,12 +24,12 @@ const authenticateCityManager = async (req, res, next) => {
         if (!cityManager) {
             return res.status(StatusCodes.OK).json({ status: 'invalid_authentication' })
         }
-        if (cityManager.authTokenExpiration < new Date()) {
+        /*if (cityManager.authTokenExpiration < new Date()) {
             await CityManager.findOneAndUpdate({ _id: payload.cityManagerId },
                 { authTokenExpiration: null },
                 { new: true, runValidators: true })
             return res.status(StatusCodes.OK).json({ status: 'invalid_authentication' })
-        }
+        }*/
         req.cityManager = cityManager
         next()
     } catch (error) {

@@ -4,10 +4,13 @@ require('express-async-errors')
 const authenticateCityManager = require('../middleware/authenticateCityManager')
 
 const {
-    signIn,
-    logout,
-    signup
+    signIn
 } = require('../controllers/city-manager/signIn')
+
+const {
+    sendVerificationCodeForCityManagerVerification,
+    confirmVerificationCodeForCityManagerVerification
+} = require('../controllers/city-manager/sendVerificationCodeForLogin')
 
 const {
     forgotPassword,
@@ -23,8 +26,6 @@ const { propertiesPendingForApproval } = require('../controllers/city-manager/pr
 const { approveProperty } = require('../controllers/city-manager/approveProperty')
 
 router.post('/signIn', signIn) //to sign in an city manager
-router.patch('/logout', authenticateCityManager, logout) //to logout an city manager
-router.post('/signUp', signup)
 router.patch('/forgotPassword', forgotPassword) //to generate an OTP and send to city manager in case the city manager forgets password
 router.patch('/updatePassword', updatePassword) //to update the password
 router.post('/confirmPasswordVerificationToken', confirmPasswordVerificationToken) //to confirm the OTP sent by the city manager
@@ -34,5 +35,9 @@ router.get('/numberOfPropertiesPendingForApproval', authenticateCityManager, num
 router.get('/propertiesPendingForApproval', authenticateCityManager, propertiesPendingForApproval)
 
 router.patch('/approveProperty', authenticateCityManager, approveProperty)
+
+router.post('/sendOtpForVerification', sendVerificationCodeForCityManagerVerification)
+
+router.post('/confirmVerificationCode', confirmVerificationCodeForCityManagerVerification)
 
 module.exports = router

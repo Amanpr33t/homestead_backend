@@ -45,7 +45,7 @@ const CustomerSchema = new mongoose.Schema({
     otpForVerification: {
         type: String,
         default: null
-    },
+    }
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 
 

@@ -9,10 +9,10 @@ const updateSeenStatusOfCustomerRequest = async (req, res, next) => {
     try {
         const { customerId, propertyId } = req.query
         const { requestSeen } = req.body
-        console.log(customerId, propertyId, requestSeen)
 
         let customerRequests
         let updatedCustomerRequests = []
+
         if (requestSeen === false) {
             req.propertyDealer.requestsFromCustomer && req.propertyDealer.requestsFromCustomer.length > 0 && req.propertyDealer.requestsFromCustomer.forEach(request => {
                 if (request.propertyId === propertyId && request.customerId === customerId && request.requestSeen === false) {
@@ -50,6 +50,7 @@ const updateSeenStatusOfCustomerRequest = async (req, res, next) => {
         }
 
         const customerOfRequest = await Customer.findOne({ _id: customerId }).select('email contactNumber name')
+        console.log(customerOfRequest)
 
         const property = await Property.findOne({ _id: propertyId })
 

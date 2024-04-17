@@ -3,75 +3,74 @@ const { StatusCodes } = require('http-status-codes')
 const CityManager = require('../../models/cityManager')
 const CustomAPIError = require('../../errors/custom-error')
 
-//The function is used to sign in a property evaluator
 const signIn = async (req, res, next) => {
     try {
-        const { email, password } = req.body
-        if (!email || !password) {
-            throw new CustomAPIError('Please enter email and password ', StatusCodes.NO_CONTENT)
-        }
-        if (password.length > 10 || password.length < 6) {
-            throw new CustomAPIError('Please enter email and password ', StatusCodes.BAD_REQUEST)
+        const {
+            email,
+            contactNumber,
+            otp,
+            password
+        } = req.body
+
+        console.log(req.body)
+
+        if ((password && otp) || (!otp && !password)) {
+            throw new CustomAPIError('Insufficient data', StatusCodes.BAD_REQUEST)
         }
 
-        const cityManager = await CityManager.findOne({ email })
+        if ((email && contactNumber) || (!email && !contactNumber)) {
+            throw new CustomAPIError('Insufficient data', StatusCodes.BAD_REQUEST)
+        }
+
+        let identifier
+        if (email) {
+            identifier = { email }
+        } else if (contactNumber) {
+            identifier = { contactNumber }
+        }
+
+        let cityManager
+        if (email) {
+            cityManager = await CityManager.findOne(identifier)
+        } else {
+            cityManager = await CityManager.findOne(identifier)
+        }
+
         if (!cityManager) {
-            return res.status(StatusCodes.OK).json({ status: 'not_found', msg: 'Enter valid credentials' })
+            throw new CustomAPIError('No user found ', StatusCodes.BAD_REQUEST)
         }
 
-        const isPasswordCorrect = cityManager && await cityManager.comparePassword(password)
-        if (!isPasswordCorrect) {
-            return res.status(StatusCodes.OK).json({ status: 'incorrect_password', msg: 'Enter valid credentials' })
+        if (password) {
+            const isPasswordCorrect = cityManager && await cityManager.comparePassword(password)
+            if (!isPasswordCorrect) {
+                res.status(StatusCodes.OK).json({ status: 'incorrect_password', msg: 'Enter valid credentials' })
+                return
+            }
+        } else if (otp) {
+            if (cityManager.otpForVerification !== otp) {
+                res.status(StatusCodes.OK).json({ status: 'incorrect_token', msg: 'Access denied' })
+                return
+            }
+
+            await CityManager.findOneAndUpdate(identifier,
+                {
+                    otpForVerification: null
+                },
+                { new: true, runValidators: true })
         }
 
         const authToken = await cityManager.createJWT()
-        const oneDay = 1000 * 60 * 60 * 24
-
-        await CityManager.findOneAndUpdate({ email },
-            { authTokenExpiration: Date.now() + oneDay },
-            { new: true, runValidators: true })
-        return res.status(StatusCodes.OK).json({ status: 'ok', authToken })
-
-    } catch (error) {
-        next(error)
-    }
-}
-
-const logout = async (req, res, next) => {
-    try {
-        await CityManager.findOneAndUpdate({ _id: req.cityManager.cityManagerId },
-            { authTokenExpiration: null },
-            { new: true, runValidators: true })
-        return res.status(StatusCodes.OK).json({ status: 'ok', msg: 'Successfully logged out' })
-    } catch (error) {
-        next(error)
-    }
-}
-
-//to be deleted
-const signup = async (req, res, next) => {
-    try {
-
-        const { email, password } = req.body
-        if (!email || !password) {
-            return res.status(StatusCodes.BAD_REQUEST).json({ status: 'noEmailPassword', msg: 'Please enter email and password' })
-        }
-        const emailExists = await CityManager.findOne({ email })
-        if (emailExists) {
-            return res.status(StatusCodes.BAD_REQUEST).json({ status: 'emailExists', msg: 'Email already exists' })
-        }
-        const cityManager = await CityManager.create(req.body)
-        const authToken = await cityManager.createJWT()
-        return res.status(StatusCodes.CREATED).json({ status: 'ok', msg: 'Account has been created', authToken })
-
+        return res.status(StatusCodes.OK).json({
+            status: 'ok',
+            authToken
+        })
     } catch (error) {
         console.log(error)
         next(error)
     }
 }
 
+
 module.exports = {
-    signIn,
-    logout,
-    signup
+    signIn
 }

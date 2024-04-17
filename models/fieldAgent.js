@@ -59,10 +59,10 @@ const FieldAgentSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please provide password']
     },
-    authTokenExpiration: {
+    /*authTokenExpiration: {
         type: Date,
         default: null
-    },
+    },*/
     passwordVerificationToken: {
         type: String,
         default: null
@@ -82,6 +82,10 @@ const FieldAgentSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
+    },
+    otpForVerification: {
+        type: String,
+        default: null
     },
     requestsToAddProperty: [RequestToAddPropertySchema]
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })

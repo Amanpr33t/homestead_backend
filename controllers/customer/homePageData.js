@@ -163,12 +163,32 @@ const homePageData = async (req, res, next) => {
 
 const fetchProperties = async (req, res, next) => {
     try {
-        const { skip, filters } = req.body
+        const { skip, filters, sort } = req.body
         if (!filters) {
             throw new CustomAPIError('filters data not provided', 204)
         }
 
-        const pageSize = 1
+        let sortObject = { 'isApprovedByCityManager.date': -1 }
+
+        if (sort === 'lowToHigh') {
+            sortObject = {
+                price: 1
+            }
+        } else if (sort === 'highToLow') {
+            sortObject = {
+                price: -1
+            }
+        } else if (sort === 'oldToNew') {
+            sortObject = {
+                'isApprovedByCityManager.date': 1
+            }
+        } else if (sort === 'newToOld') {
+            sortObject = {
+                'isApprovedByCityManager.date': -1
+            }
+        }
+
+        const pageSize = 5
 
         let queryBody = {
             isLive: true,
@@ -255,7 +275,7 @@ const fetchProperties = async (req, res, next) => {
 
         let properties = await Property.find(queryBody)
             .select('_id price fairValueOfProperty propertyType location propertyImagesUrl isApprovedByCityManager.date price title addedByPropertyDealer')
-            .sort({ 'isApprovedByCityManager.date': -1 })
+            .sort(sortObject)
             .skip(skip || 0)
             .limit(pageSize)
 
